@@ -8,7 +8,7 @@ export const theme = {
       200: '#bfdbfe',
       300: '#93c5fd',
       400: '#60a5fa',
-      500: '#3b82f6',
+      500: '#4169E3',  // Main primary color from Figma
       600: '#2563eb',
       700: '#1d4ed8',
       800: '#1e40af',
@@ -17,16 +17,17 @@ export const theme = {
     
     // Neutral colors
     gray: {
+      25: '#FFFFFF',   // White from Figma
       50: '#f9fafb',
       100: '#f3f4f6',
-      200: '#e5e7eb',
+      200: '#F4F3F0',  // Secondary button background from Figma
       300: '#d1d5db',
       400: '#9ca3af',
       500: '#6b7280',
       600: '#4b5563',
       700: '#374151',
       800: '#1f2937',
-      900: '#111827',
+      900: '#302F2D',  // Dark text color from Figma
     },
     
     // Semantic colors
@@ -44,7 +45,7 @@ export const theme = {
     
     error: {
       50: '#fef2f2',
-      500: '#ef4444',
+      500: '#E83046',  // Danger color from Figma
       600: '#dc2626',
     },
     
@@ -81,6 +82,11 @@ export const theme = {
     '3xl': '3rem',   // 48px
     '4xl': '4rem',   // 64px
     '5xl': '6rem',   // 96px
+  },
+  
+  fonts: {
+    onest: '"Onest", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   
   fontSize: {

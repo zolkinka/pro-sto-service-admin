@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
 
 // Замените YourComponent на имя вашего компонента
 // import { YourComponent } from './YourComponent';

@@ -1,4 +1,7 @@
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
+import { AppButton } from '@/components/ui/AppButton';
 
 const DashboardContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -23,6 +26,17 @@ const Dashboard = () => {
       <Content>
         <p>Добро пожаловать в админскую панель сервиса бронирования автоуслуг!</p>
         <p>Здесь будет основной функционал администрирования.</p>
+        
+        <div style={{ marginTop: '24px' }}>
+          <p>Демонстрация компонентов UI:</p>
+          <div style={{ marginTop: '16px', display: 'flex', gap: '16px' }}>
+            <Link to={ROUTES.BUTTON_SHOWCASE}>
+              <AppButton variant="primary">
+                Посмотреть кнопки AppButton
+              </AppButton>
+            </Link>
+          </div>
+        </div>
       </Content>
     </DashboardContainer>
   );

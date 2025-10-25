@@ -32,18 +32,38 @@ export const theme = {
     
     // Semantic colors
     success: {
+      25: '#DEF7E7',   // Success background from Figma
       50: '#ecfdf5',
+      400: '#0AB878',  // Success color from Figma
       500: '#10b981',
       600: '#059669',
     },
     
+    green: {
+      25: '#DEF7E7',   // Success background from Figma
+      400: '#0AB878',  // Success color from Figma
+    },
+    
     warning: {
       50: '#fffbeb',
-      500: '#f59e0b',
+      500: '#CC8D18',  // Warning color from Figma
       600: '#d97706',
     },
     
+    yellow: {
+      500: '#CC8D18',  // Warning color from Figma
+    },
+    
+    info: {
+      500: '#4169E3',  // Info color from Figma
+    },
+    
+    blue: {
+      500: '#4169E3',  // Info color from Figma
+    },
+    
     error: {
+      25: '#FBDFE2',   // Error background from Figma
       50: '#fef2f2',
       300: '#E83046',  // Error text from Figma
       400: '#D8182E',  // Error border from Figma

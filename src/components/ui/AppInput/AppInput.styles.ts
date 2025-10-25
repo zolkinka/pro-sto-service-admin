@@ -89,6 +89,11 @@ export const StyledInput = styled.input<StyledInputProps>`
     color: ${({ theme }) => theme.colors.gray[500]};
   }
 
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
   &:disabled {
     cursor: not-allowed;
     color: ${({ theme }) => theme.colors.gray[400]};

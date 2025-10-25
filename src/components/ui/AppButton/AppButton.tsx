@@ -35,16 +35,16 @@ const IconContainer = styled.span`
 const getVariantStyles = (variant: string, theme: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
   const variants = {
     primary: css`
-      background-color: ${theme.colors.primary[500]};
+      background-color: ${theme.colors.gray[900]};
       color: ${theme.colors.gray[25]};
       border: none;
       
       &:hover:not(:disabled) {
-        background-color: #3557D4;
+        background-color: #2A2925;
       }
       
       &:active:not(:disabled) {
-        background-color: #2A47B8;
+        background-color: #1F1E1B;
       }
     `,
     

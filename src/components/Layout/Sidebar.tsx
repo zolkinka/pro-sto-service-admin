@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import { Link, useLocation } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
 
 const SidebarContainer = styled.aside<{ isOpen: boolean }>`
   width: 250px;
@@ -45,7 +47,7 @@ const MenuItem = styled.li`
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
-const MenuLink = styled.div`
+const MenuLink = styled(Link)`
   display: flex;
   align-items: center;
   padding: ${({ theme }) => theme.spacing.md};
@@ -54,6 +56,7 @@ const MenuLink = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.md};
   cursor: pointer;
   transition: all ${({ theme }) => theme.transition.fast};
+  text-decoration: none;
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.primary[50]};
@@ -78,33 +81,38 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isOpen = false }: SidebarProps) => {
+  const location = useLocation();
+  
   return (
     <SidebarContainer isOpen={isOpen}>
       <SidebarContent>
         <SidebarTitle>Навигация</SidebarTitle>
         <MenuList>
           <MenuItem>
-            <MenuLink className="active">
+            <MenuLink 
+              to={ROUTES.DASHBOARD}
+              className={location.pathname === ROUTES.DASHBOARD ? "active" : ""}
+            >
               📊 Панель управления
             </MenuLink>
           </MenuItem>
           <MenuItem>
-            <MenuLink>
-              👥 Пользователи
+            <MenuLink to="#">
+              �👥 Пользователи
             </MenuLink>
           </MenuItem>
           <MenuItem>
-            <MenuLink>
+            <MenuLink to="#">
               📋 Заказы
             </MenuLink>
           </MenuItem>
           <MenuItem>
-            <MenuLink>
+            <MenuLink to="#">
               🏪 Сервисы
             </MenuLink>
           </MenuItem>
           <MenuItem>
-            <MenuLink>
+            <MenuLink to="#">
               ⚙️ Настройки
             </MenuLink>
           </MenuItem>

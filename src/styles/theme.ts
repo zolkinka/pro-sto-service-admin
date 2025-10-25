@@ -19,14 +19,14 @@ export const theme = {
     gray: {
       25: '#FFFFFF',   // White from Figma
       50: '#f9fafb',
-      100: '#f3f4f6',
+      100: '#F9F8F5',  // Default background from Figma
       200: '#F4F3F0',  // Secondary button background from Figma
       300: '#d1d5db',
-      400: '#9ca3af',
-      500: '#6b7280',
-      600: '#4b5563',
+      400: '#DFDFDF',  // Disabled text from Figma
+      500: '#B2B1AE',  // Placeholder text from Figma
+      600: '#888684',  // Error placeholder text from Figma
       700: '#374151',
-      800: '#1f2937',
+      800: '#53514F',  // Label text from Figma
       900: '#302F2D',  // Dark text color from Figma
     },
     
@@ -45,8 +45,15 @@ export const theme = {
     
     error: {
       50: '#fef2f2',
+      300: '#E83046',  // Error text from Figma
+      400: '#D8182E',  // Error border from Figma
       500: '#E83046',  // Danger color from Figma
       600: '#dc2626',
+    },
+    
+    red: {
+      300: '#E83046',  // Error text from Figma 
+      400: '#D8182E',  // Error border from Figma
     },
     
     // Background colors

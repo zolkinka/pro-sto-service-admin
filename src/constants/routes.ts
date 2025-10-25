@@ -1,6 +1,5 @@
 export const ROUTES = {
   DASHBOARD: '/',
-  BUTTON_SHOWCASE: '/buttons',
   NOT_FOUND: '/404',
 } as const;
 

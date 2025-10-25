@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "generate:api-client": "npx @hey-api/openapi-ts -i http://localhost:5201/docs-json -o ./services/api-client  -c legacy/axios"
   },
   "dependencies": {
     "axios": "^1.12.2",

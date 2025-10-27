@@ -1,4 +1,7 @@
 import styled from 'styled-components';
+import { useLocation } from 'react-router-dom';
+import { AppNavigation } from './AppNavigation';
+import type { TabId } from './AppNavigation';
 
 const HeaderContainer = styled.header`
   background-color: ${({ theme }) => theme.colors.background.primary};
@@ -15,33 +18,13 @@ const HeaderContent = styled.div`
   justify-content: space-between;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
 `;
 
 const Logo = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xl};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const Navigation = styled.nav`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.lg};
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    display: none;
-  }
-`;
-
-const NavItem = styled.div`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-weight: ${({ theme }) => theme.fontWeight.medium};
-  cursor: pointer;
-  transition: color ${({ theme }) => theme.transition.fast};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary[600]};
-  }
 `;
 
 const UserSection = styled.div`
@@ -64,17 +47,22 @@ const UserAvatar = styled.div`
 `;
 
 const Header = () => {
+  const location = useLocation();
+
+  const getActiveTab = (): TabId => {
+    if (location.pathname.includes('/services')) return 'services';
+    if (location.pathname.includes('/orders')) return 'orders';
+    if (location.pathname.includes('/analytics')) return 'analytics';
+    if (location.pathname.includes('/schedule')) return 'schedule';
+    return 'services';
+  };
+
   return (
     <HeaderContainer>
       <HeaderContent>
         <Logo>Pro-STO Admin</Logo>
         
-        <Navigation>
-          <NavItem>Панель управления</NavItem>
-          <NavItem>Пользователи</NavItem>
-          <NavItem>Заказы</NavItem>
-          <NavItem>Настройки</NavItem>
-        </Navigation>
+        <AppNavigation activeTab={getActiveTab()} />
 
         <UserSection>
           <UserAvatar>A</UserAvatar>

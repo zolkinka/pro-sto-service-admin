@@ -3,7 +3,16 @@ import { observer } from 'mobx-react-lite';
 import { ROUTES } from '@/constants/routes';
 import { authStore } from '@/stores/AuthStore';
 import { MainLayout } from '@/components/Layout';
-import { Dashboard, NotFound, AuthPhonePage, AuthCodePage } from '@/pages';
+import { 
+  Dashboard, 
+  NotFound, 
+  AuthPhonePage, 
+  AuthCodePage,
+  ServicesPage,
+  OrdersPage,
+  AnalyticsPage,
+  SchedulePage
+} from '@/pages';
 
 /**
  * PrivateRoute - защищенный маршрут, доступный только авторизованным пользователям
@@ -31,6 +40,42 @@ const AppRouter = observer(() => {
         element={
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.SERVICES}
+        element={
+          <PrivateRoute>
+            <ServicesPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.ORDERS}
+        element={
+          <PrivateRoute>
+            <OrdersPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.ANALYTICS}
+        element={
+          <PrivateRoute>
+            <AnalyticsPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.SCHEDULE}
+        element={
+          <PrivateRoute>
+            <SchedulePage />
           </PrivateRoute>
         }
       />

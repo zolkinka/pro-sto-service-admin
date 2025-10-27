@@ -1,6 +1,8 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import AppHeader from '../../Layout/AppHeader';
+import type { TabId } from '../../Layout/AppNavigation/AppNavigation';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,10 +23,23 @@ const MainContent = styled.main`
   align-items: center;
 `;
 
+// Маппинг путей на активные табы
+const pathToTabMap: Record<string, TabId> = {
+  '/services': 'services',
+  '/orders': 'orders',
+  '/analytics': 'analytics',
+  '/schedule': 'schedule',
+};
+
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  const location = useLocation();
+  
+  // Определяем активный таб по текущему пути
+  const activeTab = pathToTabMap[location.pathname] || 'services';
+  
   return (
     <LayoutContainer>
-      <AppHeader />
+      <AppHeader activeTab={activeTab} />
       <MainContent>
         {children}
       </MainContent>

@@ -7,3 +7,4 @@ export * from './AppRadio';
 export * from './AppLogo';
 export * from './AppSwitch';
 export * from './AppCheckbox';
+export * from './AppTag';

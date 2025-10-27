@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { ToastProvider } from './ToastProvider';
 import { useToast } from './useToast';
 import AppButton from '../AppButton/AppButton';
-import type { ToastType, ToastPosition } from './AppToast.types';
+import type { ToastType } from './AppToast.types';
 
 const meta: Meta<typeof ToastProvider> = {
   title: 'UI/AppToast',
@@ -209,49 +209,6 @@ const MultipleToastsDemo: React.FC = () => {
       >
         Закрыть все
       </AppButton>
-    </div>
-  );
-};
-
-// Компонент для демонстрации разных позиций
-const PositionDemo: React.FC = () => {
-  const positions: ToastPosition[] = ['top-right', 'top-left', 'bottom-right', 'bottom-left'];
-  const [currentPosition, setCurrentPosition] = useState<ToastPosition>('top-right');
-  const { showToast } = useToast();
-
-  return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <p style={{ marginBottom: '10px' }}>Выберите позицию:</p>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          {positions.map(pos => (
-            <AppButton
-              key={pos}
-              variant={currentPosition === pos ? 'primary' : 'secondary'}
-              onClick={() => setCurrentPosition(pos)}
-            >
-              {pos}
-            </AppButton>
-          ))}
-        </div>
-      </div>
-
-      <AppButton
-        onClick={() => {
-          showToast({
-            type: 'info',
-            title: `Позиция: ${currentPosition}`,
-            message: 'Уведомление появилось в выбранной позиции',
-          });
-        }}
-      >
-        Показать уведомление
-      </AppButton>
-
-      <p style={{ marginTop: '10px', fontSize: '12px', color: '#888' }}>
-        Примечание: Позиция настраивается в ToastProvider. Для демонстрации разных позиций 
-        нужно перемонтировать Provider с новой позицией.
-      </p>
     </div>
   );
 };

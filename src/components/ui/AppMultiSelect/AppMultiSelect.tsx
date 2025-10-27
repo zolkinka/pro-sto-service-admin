@@ -1,7 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { AppBaseDropdown, type AppBaseDropdownProps } from '../AppBaseDropdown';
-import { AppChip } from '../AppChip';
-import { AppFieldContainer, type AppFieldContainerProps } from '../AppFieldContainer';
 import './AppMultiSelect.css';
 
 export interface OptionType {
@@ -22,7 +20,6 @@ export interface AppMultiSelectProps {
   toggle?: ReactNode;
   dropdown?: ReactNode;
   option?: ReactNode;
-  fieldContainerProps?: Partial<AppFieldContainerProps>;
   baseDropdownProps?: Partial<AppBaseDropdownProps>;
 }
 
@@ -39,7 +36,6 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
   toggle,
   dropdown,
   option,
-  fieldContainerProps = {},
   baseDropdownProps = {},
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -129,23 +125,19 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
     if (toggle) return toggle;
 
     return (
-      <AppFieldContainer
-        {...fieldContainerProps}
-        label={label}
-        filled={value.length > 0 || searchQuery.length > 0}
-        required={required}
-        errorMessage={error}
-        errored={!!error}
-      >
+      <div className="app-multi-select__field-container">
+        {label && (
+          <label className="app-multi-select__label">
+            {label}
+            {required && <span className="app-multi-select__required">*</span>}
+          </label>
+        )}
         <div className="app-multi-select__input-container" onClick={handleToggleClick}>
           {/* Выбранные элементы в виде chips */}
           <div className="app-multi-select__chips">
             {value.map((selectedOption) => (
-              <AppChip
+              <div
                 key={selectedOption.value}
-                label={selectedOption.label}
-                color="primary"
-                variant="filled"
                 className="app-multi-select__chip"
               >
                 {selectedOption.label}
@@ -158,7 +150,7 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
                 >
                   ×
                 </span>
-              </AppChip>
+              </div>
             ))}
           </div>
 
@@ -201,7 +193,8 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
             ▼
           </div>
         </div>
-      </AppFieldContainer>
+        {error && <div className="app-multi-select__error">{error}</div>}
+      </div>
     );
   };
 

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
+import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
 
 /**
  * Hello World
@@ -619,6 +619,130 @@ export const serviceCenterToggleFavorite = (data: ServiceCenterToggleFavoriteDat
 };
 
 /**
+ * Получить все настройки времени работы
+ * Получить регулярное расписание и специальные даты для сервисного центра
+ * @param data The data for the request.
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.type Фильтр по типу расписания
+ * @param data.month Фильтр по месяцу для специальных дат (формат YYYY-MM)
+ * @returns OperatingHoursListResponseDto Список настроек времени работы
+ * @throws ApiError
+ */
+export const operatingHoursGetAll = (data: OperatingHoursGetAllData): CancelablePromise<OperatingHoursGetAllResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/service-centers/{service_center_uuid}/operating-hours',
+        path: {
+            service_center_uuid: data.serviceCenterUuid
+        },
+        query: {
+            type: data.type,
+            month: data.month
+        },
+        errors: {
+            404: 'Сервисный центр не найден'
+        }
+    });
+};
+
+/**
+ * Обновить регулярное расписание
+ * Обновить расписание работы на все дни недели
+ * @param data The data for the request.
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.requestBody
+ * @returns OperatingHoursResponseDto Регулярное расписание обновлено
+ * @throws ApiError
+ */
+export const operatingHoursUpdateRegular = (data: OperatingHoursUpdateRegularData): CancelablePromise<OperatingHoursUpdateRegularResponse> => {
+    return __request(OpenAPI, {
+        method: 'PUT',
+        url: '/api/admin/service-centers/{service_center_uuid}/operating-hours/regular',
+        path: {
+            service_center_uuid: data.serviceCenterUuid
+        },
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            404: 'Сервисный центр не найден'
+        }
+    });
+};
+
+/**
+ * Добавить специальную дату
+ * Добавить праздник, выходной или сокращенный день
+ * @param data The data for the request.
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.requestBody
+ * @returns OperatingHoursResponseDto Специальная дата добавлена
+ * @throws ApiError
+ */
+export const operatingHoursCreateSpecial = (data: OperatingHoursCreateSpecialData): CancelablePromise<OperatingHoursCreateSpecialResponse> => {
+    return __request(OpenAPI, {
+        method: 'POST',
+        url: '/api/admin/service-centers/{service_center_uuid}/operating-hours/special',
+        path: {
+            service_center_uuid: data.serviceCenterUuid
+        },
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            404: 'Сервисный центр не найден'
+        }
+    });
+};
+
+/**
+ * Обновить конкретную запись
+ * Обновить существующую настройку времени работы
+ * @param data The data for the request.
+ * @param data.uuid UUID записи времени работы
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.requestBody
+ * @returns OperatingHoursResponseDto Запись обновлена
+ * @throws ApiError
+ */
+export const operatingHoursUpdate = (data: OperatingHoursUpdateData): CancelablePromise<OperatingHoursUpdateResponse> => {
+    return __request(OpenAPI, {
+        method: 'PATCH',
+        url: '/api/admin/service-centers/{service_center_uuid}/operating-hours/{uuid}',
+        path: {
+            uuid: data.uuid,
+            service_center_uuid: data.serviceCenterUuid
+        },
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            404: 'Запись не найдена'
+        }
+    });
+};
+
+/**
+ * Удалить специальную дату
+ * Удалить настройку времени работы
+ * @param data The data for the request.
+ * @param data.uuid UUID записи времени работы
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @returns void Запись удалена
+ * @throws ApiError
+ */
+export const operatingHoursDelete = (data: OperatingHoursDeleteData): CancelablePromise<OperatingHoursDeleteResponse> => {
+    return __request(OpenAPI, {
+        method: 'DELETE',
+        url: '/api/admin/service-centers/{service_center_uuid}/operating-hours/{uuid}',
+        path: {
+            uuid: data.uuid,
+            service_center_uuid: data.serviceCenterUuid
+        },
+        errors: {
+            404: 'Запись не найдена'
+        }
+    });
+};
+
+/**
  * Создать бронирование
  * Создает новое бронирование услуги в сервисном центре для указанного автомобиля клиента
  * @param data The data for the request.
@@ -865,7 +989,7 @@ export const paymentsControllerHandleWebhook = (): CancelablePromise<PaymentsCon
 
 /**
  * Получить список всех услуг
- * Возвращает список услуг с возможностью фильтрации по различным параметрам
+ * Возвращает список услуг с возможностью фильтрации по различным параметрам. Услуги фильтруются по проекту текущего пользователя.
  * @param data The data for the request.
  * @param data.businessType Тип бизнеса (мойка или шиномонтаж)
  * @param data.serviceType Тип услуги (основная или дополнительная)

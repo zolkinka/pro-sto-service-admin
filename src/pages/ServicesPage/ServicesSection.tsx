@@ -18,7 +18,7 @@ interface ServicesSectionProps {
   services: ServiceDto[];
   activeCategory: 'car_wash' | 'tire_service';
   onCategoryChange?: (category: 'car_wash' | 'tire_service') => void;
-  onAddService: () => void;
+  onAddService: (serviceType: 'main' | 'additional') => void;
   onEditService: (uuid: string) => void;
   onDeleteService: (uuid: string) => void;
 }
@@ -53,7 +53,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         {/* Кнопка добавления услуги */}
         <AddServiceButton>
           <AddServiceText>Добавить услугу</AddServiceText>
-          <AddButton onClick={onAddService}>
+          <AddButton onClick={() => onAddService(serviceType)}>
             <svg
               width="20"
               height="20"

@@ -37,6 +37,10 @@ export type AdminUserDto = {
     name: string;
     phone: string;
     role: RoleResponseDto;
+    /**
+     * UUID сервисного центра, к которому привязан пользователь
+     */
+    service_center_uuid: string;
 };
 
 export type AuthResponseDto = {
@@ -577,6 +581,44 @@ export namespace CreateServicePriceDto {
     }
 }
 
+export type CreateSpecialDateDto = {
+    /**
+     * Специальная дата (праздник, выходной, сокращенный день)
+     */
+    specific_date: string;
+    /**
+     * Время открытия (формат HH:mm)
+     */
+    open_time?: string;
+    /**
+     * Время закрытия (формат HH:mm)
+     */
+    close_time?: string;
+    /**
+     * Флаг выходного дня
+     */
+    is_closed: boolean;
+    /**
+     * Часовой пояс
+     */
+    timezone?: string;
+};
+
+export type DayScheduleDto = {
+    /**
+     * Время открытия (формат HH:mm)
+     */
+    open_time?: string;
+    /**
+     * Время закрытия (формат HH:mm)
+     */
+    close_time?: string;
+    /**
+     * Флаг выходного дня
+     */
+    is_closed: boolean;
+};
+
 export type DetailedBookingResponseDto = {
     /**
      * Уникальный идентификатор бронирования
@@ -823,6 +865,79 @@ export type LogoutResponseDto = {
      */
     message: string;
 };
+
+export type OperatingHoursListResponseDto = {
+    /**
+     * Регулярное расписание (по дням недели)
+     */
+    regular: Array<OperatingHoursResponseDto>;
+    /**
+     * Специальные даты (праздники, выходные)
+     */
+    special: Array<OperatingHoursResponseDto>;
+};
+
+export type OperatingHoursResponseDto = {
+    /**
+     * UUID записи
+     */
+    uuid: string;
+    /**
+     * UUID сервисного центра
+     */
+    service_center_uuid: string;
+    /**
+     * День недели (для регулярного расписания)
+     */
+    day_of_week?: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday') | null;
+    /**
+     * Специальная дата (для праздников/выходных)
+     */
+    specific_date?: (string) | null;
+    /**
+     * Время открытия (формат HH:mm)
+     */
+    open_time?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Время закрытия (формат HH:mm)
+     */
+    close_time?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Флаг выходного дня
+     */
+    is_closed: boolean;
+    /**
+     * Часовой пояс
+     */
+    timezone: string;
+    /**
+     * Дата создания
+     */
+    created_at: string;
+    /**
+     * Дата обновления
+     */
+    updated_at: string;
+};
+
+export namespace OperatingHoursResponseDto {
+    /**
+     * День недели (для регулярного расписания)
+     */
+    export enum day_of_week {
+        MONDAY = 'monday',
+        TUESDAY = 'tuesday',
+        WEDNESDAY = 'wednesday',
+        THURSDAY = 'thursday',
+        FRIDAY = 'friday',
+        SATURDAY = 'saturday',
+        SUNDAY = 'sunday'
+    }
+}
 
 export type PaymentResponseDto = {
     /**
@@ -1224,6 +1339,64 @@ export type UpdateClientProfileDto = {
     };
 };
 
+export type UpdateOperatingHoursDto = {
+    /**
+     * Специальная дата (праздник, выходной, сокращенный день)
+     */
+    specific_date?: string;
+    /**
+     * Время открытия (формат HH:mm)
+     */
+    open_time?: string;
+    /**
+     * Время закрытия (формат HH:mm)
+     */
+    close_time?: string;
+    /**
+     * Флаг выходного дня
+     */
+    is_closed?: boolean;
+    /**
+     * Часовой пояс
+     */
+    timezone?: string;
+};
+
+export type UpdateRegularScheduleDto = {
+    /**
+     * Расписание на понедельник
+     */
+    monday: (DayScheduleDto);
+    /**
+     * Расписание на вторник
+     */
+    tuesday: (DayScheduleDto);
+    /**
+     * Расписание на среду
+     */
+    wednesday: (DayScheduleDto);
+    /**
+     * Расписание на четверг
+     */
+    thursday: (DayScheduleDto);
+    /**
+     * Расписание на пятницу
+     */
+    friday: (DayScheduleDto);
+    /**
+     * Расписание на субботу
+     */
+    saturday: (DayScheduleDto);
+    /**
+     * Расписание на воскресенье
+     */
+    sunday: (DayScheduleDto);
+    /**
+     * Часовой пояс сервисного центра
+     */
+    timezone: string;
+};
+
 export type UpdateRoleDto = {
     [key: string]: unknown;
 };
@@ -1570,6 +1743,70 @@ export type ServiceCenterToggleFavoriteResponse = ({
      */
     isFavorite?: boolean;
 });
+
+export type OperatingHoursGetAllData = {
+    /**
+     * Фильтр по месяцу для специальных дат (формат YYYY-MM)
+     */
+    month?: string;
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+    /**
+     * Фильтр по типу расписания
+     */
+    type?: 'regular' | 'special';
+};
+
+export type OperatingHoursGetAllResponse = (OperatingHoursListResponseDto);
+
+export type OperatingHoursUpdateRegularData = {
+    requestBody: UpdateRegularScheduleDto;
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+};
+
+export type OperatingHoursUpdateRegularResponse = (Array<OperatingHoursResponseDto>);
+
+export type OperatingHoursCreateSpecialData = {
+    requestBody: CreateSpecialDateDto;
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+};
+
+export type OperatingHoursCreateSpecialResponse = (OperatingHoursResponseDto);
+
+export type OperatingHoursUpdateData = {
+    requestBody: UpdateOperatingHoursDto;
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+    /**
+     * UUID записи времени работы
+     */
+    uuid: string;
+};
+
+export type OperatingHoursUpdateResponse = (OperatingHoursResponseDto);
+
+export type OperatingHoursDeleteData = {
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+    /**
+     * UUID записи времени работы
+     */
+    uuid: string;
+};
+
+export type OperatingHoursDeleteResponse = (void);
 
 export type BookingCreateData = {
     requestBody: CreateBookingDto;

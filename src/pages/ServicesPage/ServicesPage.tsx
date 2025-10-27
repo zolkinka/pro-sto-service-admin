@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { servicesStore } from '@/stores';
+import type { ServiceDto } from '../../../services/api-client';
 import ServicesSection from './ServicesSection';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
+import ServiceModal from './ServiceModal';
 import { PageContainer, MainContainer } from './ServicesPage.styles';
 
 const ServicesPage = observer(() => {
@@ -13,24 +15,45 @@ const ServicesPage = observer(() => {
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Состояние для модала создания/редактирования услуги
+  const [serviceModalOpen, setServiceModalOpen] = useState(false);
+  const [serviceModalMode, setServiceModalMode] = useState<'create' | 'edit'>('create');
+  const [serviceToEdit, setServiceToEdit] = useState<ServiceDto | undefined>(undefined);
+  const [serviceModalType, setServiceModalType] = useState<'main' | 'additional'>('main');
+
   // Загрузка услуг при монтировании компонента
   useEffect(() => {
     servicesStore.fetchServices();
   }, []);
 
-  // Обработчик добавления услуги (пока заглушка)
-  const handleAddService = () => {
-    console.log('Добавление услуги - функционал будет реализован в отдельной задаче');
+  // Обработчик добавления услуги
+  const handleAddService = (serviceType: 'main' | 'additional') => {
+    setServiceModalMode('create');
+    setServiceModalType(serviceType);
+    setServiceToEdit(undefined);
+    setServiceModalOpen(true);
   };
 
-  // Обработчик редактирования услуги (пока заглушка)
+  // Обработчик редактирования услуги
   const handleEditService = (uuid: string) => {
-    console.log('Редактирование услуги:', uuid, '- функционал будет реализован в отдельной задаче');
+    const service = servicesStore.services.find((s: ServiceDto) => s.uuid === uuid);
+    if (service) {
+      setServiceModalMode('edit');
+      setServiceModalType(service.service_type);
+      setServiceToEdit(service);
+      setServiceModalOpen(true);
+    }
+  };
+
+  // Обработчик закрытия модала редактирования
+  const handleCloseServiceModal = () => {
+    setServiceModalOpen(false);
+    setServiceToEdit(undefined);
   };
 
   // Обработчик открытия модального окна удаления
   const handleDeleteService = (uuid: string) => {
-    const service = servicesStore.services.find((s) => s.uuid === uuid);
+    const service = servicesStore.services.find((s: ServiceDto) => s.uuid === uuid);
     if (service) {
       setServiceToDelete({ uuid: service.uuid, name: service.name });
       setDeleteModalOpen(true);
@@ -114,6 +137,15 @@ const ServicesPage = observer(() => {
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
           isDeleting={isDeleting}
+        />
+
+        {/* Модальное окно создания/редактирования услуги */}
+        <ServiceModal
+          isOpen={serviceModalOpen}
+          onClose={handleCloseServiceModal}
+          mode={serviceModalMode}
+          service={serviceToEdit}
+          serviceType={serviceModalType}
         />
       </MainContainer>
     </PageContainer>

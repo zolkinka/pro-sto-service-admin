@@ -108,6 +108,17 @@ export const StyledInput = styled.input<StyledInputProps>`
       color: ${({ theme }) => theme.colors.gray[400]};
     }
   }
+
+  /* Убираем стрелки для input type="number" */
+  &[type='number'] {
+    -moz-appearance: textfield;
+    
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
 `;
 
 // Контейнер для иконки

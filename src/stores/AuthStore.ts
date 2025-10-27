@@ -3,6 +3,7 @@ import {
   adminAuthSendCode,
   adminAuthLogin,
   authRefresh,
+  OpenAPI,
 } from '../../services/api-client';
 import type { AdminUserDto } from '../../services/api-client';
 import { toastStore } from './ToastStore';
@@ -46,6 +47,9 @@ export class AuthStore {
           this.isAuthenticated = true;
         });
 
+        // Устанавливаем токен в OpenAPI для всех запросов
+        OpenAPI.TOKEN = accessToken;
+        
         this.setupTokenRefresh();
       } catch (error) {
         console.error('Ошибка при парсинге данных пользователя:', error);
@@ -103,6 +107,9 @@ export class AuthStore {
       localStorage.setItem('refreshToken', response.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.user));
 
+      // Устанавливаем токен в OpenAPI для всех запросов
+      OpenAPI.TOKEN = response.accessToken;
+
       this.setupTokenRefresh();
     } catch (error) {
       runInAction(() => {
@@ -128,6 +135,9 @@ export class AuthStore {
         this.accessToken = response.accessToken;
         localStorage.setItem('accessToken', response.accessToken);
       });
+
+      // Обновляем токен в OpenAPI
+      OpenAPI.TOKEN = response.accessToken;
 
       this.setupTokenRefresh();
     } catch (error) {
@@ -171,6 +181,9 @@ export class AuthStore {
       this.refreshToken = null;
       this.user = null;
     });
+
+    // Очищаем токен в OpenAPI
+    OpenAPI.TOKEN = undefined;
 
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');

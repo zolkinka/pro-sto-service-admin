@@ -1,35 +1,125 @@
-import styled from 'styled-components';
+import { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { servicesStore } from '@/stores';
+import ServicesSection from './ServicesSection';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
+import { PageContainer, MainContainer } from './ServicesPage.styles';
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  padding: ${({ theme }) => theme.spacing.xl};
-`;
+const ServicesPage = observer(() => {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<{
+    uuid: string;
+    name: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-const Title = styled.h1`
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-size: ${({ theme }) => theme.fontSize['3xl']};
-  font-weight: ${({ theme }) => theme.fontWeight.semibold};
-  color: ${({ theme }) => theme.colors.gray[900]};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-`;
+  // Загрузка услуг при монтировании компонента
+  useEffect(() => {
+    servicesStore.fetchServices();
+  }, []);
 
-const Description = styled.p`
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-size: ${({ theme }) => theme.fontSize.base};
-  color: ${({ theme }) => theme.colors.gray[600]};
-`;
+  // Обработчик добавления услуги (пока заглушка)
+  const handleAddService = () => {
+    console.log('Добавление услуги - функционал будет реализован в отдельной задаче');
+  };
 
-const ServicesPage = () => {
+  // Обработчик редактирования услуги (пока заглушка)
+  const handleEditService = (uuid: string) => {
+    console.log('Редактирование услуги:', uuid, '- функционал будет реализован в отдельной задаче');
+  };
+
+  // Обработчик открытия модального окна удаления
+  const handleDeleteService = (uuid: string) => {
+    const service = servicesStore.services.find((s) => s.uuid === uuid);
+    if (service) {
+      setServiceToDelete({ uuid: service.uuid, name: service.name });
+      setDeleteModalOpen(true);
+    }
+  };
+
+  // Обработчик подтверждения удаления
+  const handleConfirmDelete = async () => {
+    if (!serviceToDelete) return;
+
+    setIsDeleting(true);
+    const success = await servicesStore.deleteService(serviceToDelete.uuid);
+    setIsDeleting(false);
+
+    if (success) {
+      setDeleteModalOpen(false);
+      setServiceToDelete(null);
+    }
+  };
+
+  // Обработчик отмены удаления
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+    setServiceToDelete(null);
+  };
+
+  // Обработчик изменения категории
+  const handleCategoryChange = (category: 'car_wash' | 'tire_service') => {
+    servicesStore.setActiveCategory(category);
+  };
+
+  if (servicesStore.isLoading) {
+    return (
+      <PageContainer>
+        <MainContainer>
+          <div
+            style={{
+              padding: '40px',
+              textAlign: 'center',
+              color: '#888684',
+              fontFamily: 'Onest, sans-serif',
+            }}
+          >
+            Загрузка услуг...
+          </div>
+        </MainContainer>
+      </PageContainer>
+    );
+  }
+
   return (
-    <Container>
-      <Title>Услуги</Title>
-      <Description>Здесь будет страница управления услугами</Description>
-    </Container>
+    <PageContainer>
+      <MainContainer>
+        {/* Секция основных услуг */}
+        <ServicesSection
+          title="Услуги"
+          serviceType="main"
+          services={servicesStore.mainServices}
+          activeCategory={servicesStore.activeCategory}
+          onCategoryChange={handleCategoryChange}
+          onAddService={handleAddService}
+          onEditService={handleEditService}
+          onDeleteService={handleDeleteService}
+        />
+
+        {/* Секция дополнительных услуг */}
+        <ServicesSection
+          title="Дополнительные услуги"
+          serviceType="additional"
+          services={servicesStore.additionalServices}
+          activeCategory={servicesStore.activeCategory}
+          onAddService={handleAddService}
+          onEditService={handleEditService}
+          onDeleteService={handleDeleteService}
+        />
+
+        {/* Модальное окно подтверждения удаления */}
+        <ConfirmDeleteModal
+          isOpen={deleteModalOpen}
+          serviceName={serviceToDelete?.name || ''}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isDeleting={isDeleting}
+        />
+      </MainContainer>
+    </PageContainer>
   );
-};
+});
+
+ServicesPage.displayName = 'ServicesPage';
 
 export default ServicesPage;

@@ -1,8 +1,10 @@
 export * from './RootStore';
 export * from './AuthStore';
 export * from './ToastStore';
+export * from './ServicesStore';
 export { rootStore } from './RootStore';
 export { authStore } from './AuthStore';
 export { toastStore } from './ToastStore';
+export { servicesStore } from './ServicesStore';
 export { StoreProvider } from './StoreContext';
 export { StoreContext } from './context';

@@ -39,6 +39,7 @@ const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
   // Настройка маски через useInputMask
   useInputMask(actualInputRef, {
     mask: '+{7} (000) 000-00-00',
+    value: value || defaultValue,
     onComplete: (value) => {
       const cleanPhone = extractPhoneDigits(value);
       onPhoneComplete?.(cleanPhone);

@@ -1,12 +1,30 @@
-import { MainLayout } from '@/components/Layout';
+import { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { ToastProvider, useToast } from '@/components/ui/AppToast';
+import { toastStore } from '@/stores/ToastStore';
 import AppRouter from '@/router';
 
-function App() {
-  return (
-    <MainLayout>
-      <AppRouter />
-    </MainLayout>
-  );
-}
+// Компонент для инициализации ToastStore
+const ToastInitializer = observer(() => {
+  const { showToast } = useToast();
 
-export default App
+  useEffect(() => {
+    // Инициализируем ToastStore с функцией showToast из React Context
+    toastStore.initialize(showToast);
+  }, [showToast]);
+
+  return null;
+});
+
+const App = observer(() => {
+  return (
+    <ToastProvider position="top-right" maxToasts={3}>
+      <ToastInitializer />
+      <AppRouter />
+    </ToastProvider>
+  );
+});
+
+App.displayName = 'App';
+
+export default App;

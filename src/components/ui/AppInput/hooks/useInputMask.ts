@@ -3,6 +3,7 @@ import IMask, { type InputMask } from 'imask';
 
 interface UseInputMaskOptions {
   mask: string | RegExp | any;
+  value?: string;
   onAccept?: (value: string, maskRef: InputMask<any>) => void;
   onComplete?: (value: string, maskRef: InputMask<any>) => void;
 }
@@ -12,7 +13,16 @@ export const useInputMask = (
   options: UseInputMaskOptions
 ) => {
   const maskRef = useRef<InputMask<any> | null>(null);
+  const onAcceptRef = useRef(options.onAccept);
+  const onCompleteRef = useRef(options.onComplete);
 
+  // Обновляем рефы колбэков
+  useEffect(() => {
+    onAcceptRef.current = options.onAccept;
+    onCompleteRef.current = options.onComplete;
+  });
+
+  // Инициализация маски (только один раз)
   useEffect(() => {
     if (!inputRef.current) return;
 
@@ -21,26 +31,29 @@ export const useInputMask = (
       lazy: false,
     });
 
-    if (options.onAccept) {
-      maskRef.current.on('accept', () => {
-        if (maskRef.current) {
-          options.onAccept?.(maskRef.current.value, maskRef.current);
-        }
-      });
-    }
+    maskRef.current.on('accept', () => {
+      if (maskRef.current) {
+        onAcceptRef.current?.(maskRef.current.value, maskRef.current);
+      }
+    });
 
-    if (options.onComplete) {
-      maskRef.current.on('complete', () => {
-        if (maskRef.current) {
-          options.onComplete?.(maskRef.current.value, maskRef.current);
-        }
-      });
-    }
+    maskRef.current.on('complete', () => {
+      if (maskRef.current) {
+        onCompleteRef.current?.(maskRef.current.value, maskRef.current);
+      }
+    });
 
     return () => {
       maskRef.current?.destroy();
     };
-  }, [options.mask]);
+  }, [inputRef, options.mask]);
+
+  // Синхронизация внешнего value с маской
+  useEffect(() => {
+    if (maskRef.current && options.value !== undefined) {
+      maskRef.current.value = options.value;
+    }
+  }, [options.value]);
 
   return maskRef;
 };

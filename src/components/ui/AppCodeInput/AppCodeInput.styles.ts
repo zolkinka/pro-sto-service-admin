@@ -31,11 +31,13 @@ export const CodeFieldsContainer = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
+  width: 100%;
 `;
 
 // Одно поле для цифры
 export const CodeField = styled.input<CodeFieldProps>`
-  width: 52px;
+  flex: 1;
+  min-width: 52px;
   height: 52px;
   border: 1px solid;
   border-radius: 16px;

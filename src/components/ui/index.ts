@@ -5,3 +5,4 @@ export * from './AppCodeInput';
 export * from './AppToast';
 export * from './AppRadio';
 export * from './AppLogo';
+export * from './AppSwitch';

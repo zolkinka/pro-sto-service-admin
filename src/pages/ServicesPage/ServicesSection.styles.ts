@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const SectionContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 `;
 
 export const SectionHeader = styled.div`
@@ -24,6 +24,7 @@ export const Title = styled.p`
   font-size: 15px;
   line-height: 1.2;
   color: #302f2d;
+  margin: 0;
 `;
 
 export const CategoryTabs = styled.div`
@@ -58,6 +59,7 @@ export const AddServiceButton = styled.div`
   display: flex;
   gap: 12px;
   align-items: center;
+  height: 40px;
 `;
 
 export const AddServiceText = styled.p`
@@ -66,6 +68,7 @@ export const AddServiceText = styled.p`
   font-size: 15px;
   line-height: 1.2;
   color: #302f2d;
+  margin: 0;
 `;
 
 export const AddButton = styled.button`

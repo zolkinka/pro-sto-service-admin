@@ -18,7 +18,7 @@ export const TableRow = styled.div`
 
 export const TableCell = styled.div<{ width: number; $isHeader?: boolean }>`
   width: ${(props) => props.width}px;
-  padding: ${(props) => (props.$isHeader ? '12px 12px 12px 0' : '16px 12px 16px 0')};
+  padding: ${(props) => (props.$isHeader ? '12px 12px 12px 0' : '12px 12px 12px 0')};
   display: flex;
   align-items: center;
   border-bottom: ${(props) => (props.$isHeader ? 'none' : '1px solid #f9f8f5')};

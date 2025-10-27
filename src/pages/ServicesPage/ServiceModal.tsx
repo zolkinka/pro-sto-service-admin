@@ -76,6 +76,21 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Блокируем скролл страницы когда модальное окно открыто
+  useEffect(() => {
+    if (isOpen) {
+      // Сохраняем текущее значение overflow
+      const originalOverflow = document.body.style.overflow;
+      // Блокируем скролл
+      document.body.style.overflow = 'hidden';
+      
+      // Восстанавливаем скролл при закрытии
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   // Инициализация данных формы при открытии модала
   useEffect(() => {
     if (isOpen) {

@@ -1,0 +1,4 @@
+/* Override AppBaseDropdown wrapper border-radius for AppHeaderMenu */
+.base-dropdown_content:has(.app-header-menu-dropdown) {
+  border-radius: 22px;
+}

@@ -1,215 +1,179 @@
-import React, { useState, useCallback, useMemo, type ReactNode } from 'react';
-import { AppBaseDropdown, type AppBaseDropdownProps } from '../AppBaseDropdown';
-import { AppBaseInput, type AppBaseInputProps } from '../AppBaseInput';
-import './AppSingleSelect.css';
+import React, { useState, useCallback, useMemo } from 'react';
+import { AppBaseDropdown } from '../AppBaseDropdown';
+import { AppInput } from '../AppInput';
+import type { AppSingleSelectProps, SelectOption } from './AppSingleSelect.types';
+import { ChevronDownIcon } from './ChevronDownIcon';
+import {
+  SelectWrapper,
+  InputContainer,
+  InputWrapper,
+  ClearButton,
+  ArrowIconWrapper,
+  DropdownContent,
+  OptionsContainer,
+  SearchInput,
+  Option,
+  OptionCheck,
+  NoOptions,
+} from './AppSingleSelect.styles';
 
-export interface OptionType {
-  label: string;
-  value: string;
-}
-
-export interface AppSingleSelectProps {
-  value?: OptionType;
-  label?: string;
-  disabled?: boolean;
-  error?: string;
-  focused?: boolean;
-  required?: boolean;
-  placeholder?: string;
-  clearable?: boolean;
-  options: OptionType[];
-  onChange?(value: OptionType | undefined): void;
-  toggle?: ReactNode;
-  dropdown?: ReactNode;
-  option?: ReactNode;
-  toggleProps?: Partial<AppBaseInputProps>;
-  baseDropdownProps?: Partial<AppBaseDropdownProps>;
-}
-
+/**
+ * AppSingleSelect - Компонент для выбора одного значения из списка
+ * 
+ * @example
+ * ```tsx
+ * const options = [
+ *   { label: 'Москва', value: 'moscow' },
+ *   { label: 'Санкт-Петербург', value: 'spb' },
+ * ];
+ * 
+ * <AppSingleSelect
+ *   label="Выберите город"
+ *   options={options}
+ *   value={selectedCity}
+ *   onChange={setSelectedCity}
+ *   clearable
+ * />
+ * ```
+ */
 export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
   value,
   label,
   disabled = false,
   error,
-  focused = false,
   required = false,
-  placeholder,
+  placeholder = 'Выберите...',
+  searchPlaceholder = 'Поиск...',
   clearable = false,
   options = [],
   onChange,
   toggle,
   dropdown,
   option,
-  toggleProps = {},
   baseDropdownProps = {},
+  className,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [internalFocused, setInternalFocused] = useState(focused);
 
   // Фильтрация опций по поисковому запросу
   const filteredOptions = useMemo(() => {
     if (!searchQuery.trim()) return options;
-    return options.filter(option =>
-      option.label.toLowerCase().includes(searchQuery.toLowerCase())
+    return options.filter(opt =>
+      opt.label.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [options, searchQuery]);
 
-  // Определяем значение для input
-  const inputValue = useMemo(() => {
-    if (internalFocused) {
-      return searchQuery;
-    }
-    return value?.label || '';
-  }, [internalFocused, searchQuery, value]);
-
-  // Определяем, заполнено ли поле
-  const isFilled = useMemo(() => {
-    return !!value || searchQuery.length > 0;
-  }, [value, searchQuery]);
-
-  const handleToggleClick = useCallback(() => {
-    if (disabled) return;
-    if (!isOpen) {
-      setIsOpen(true);
-      setInternalFocused(true);
-    }
-  }, [disabled, isOpen]);
-
-  const handleInputClick = useCallback(() => {
-    if (disabled) return;
-    if (!isOpen) {
-      setIsOpen(true);
-      setInternalFocused(true);
-    } else {
-      // Если dropdown уже открыт, переводим в режим поиска
-      setInternalFocused(true);
-    }
-  }, [disabled, isOpen]);
-
-  const handleInputFocus = useCallback(() => {
-    setInternalFocused(true);
-    toggleProps?.onFocus?.();
-  }, [toggleProps]);
-
-  const handleInputBlur = useCallback(() => {
-    // Проверяем, не кликнули ли мы на опцию внутри dropdown
-    setTimeout(() => {
-      setInternalFocused(false);
-      setIsOpen(false);
-      setSearchQuery('');
-      toggleProps?.onBlur?.();
-    }, 150);
-  }, [toggleProps]);
-
-  const handleInputChange = useCallback((newValue: string | number) => {
-    if (internalFocused) {
-      setSearchQuery(String(newValue));
-    }
-    toggleProps?.onChange?.(newValue);
-  }, [internalFocused, toggleProps]);
-
-  const handleOptionSelect = useCallback((selectedOption: OptionType) => {
+  // Обработчик выбора опции
+  const handleSelect = useCallback((selectedOption: SelectOption) => {
     onChange?.(selectedOption);
     setIsOpen(false);
-    setInternalFocused(false);
     setSearchQuery('');
   }, [onChange]);
 
-  const handleClear = useCallback(() => {
-    if (clearable && !disabled) {
-      onChange?.(undefined);
-      setSearchQuery('');
-    }
-  }, [clearable, disabled, onChange]);
+  // Обработчик очистки значения
+  const handleClear = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange?.(null);
+  }, [onChange]);
 
+  // Обработчик клика по input
+  const handleInputClick = useCallback(() => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+    }
+  }, [disabled, isOpen]);
+
+  // Обработчик закрытия dropdown
   const handleDropdownClose = useCallback(() => {
     setIsOpen(false);
-    setInternalFocused(false);
     setSearchQuery('');
   }, []);
 
-  // Рендер toggle
+  // Рендер toggle (кастомный или дефолтный)
   const renderToggle = () => {
     if (toggle) return toggle;
 
     return (
-      <div className="app-single-select__toggle">
-        <div onClick={handleInputClick}>
-          <AppBaseInput
-            {...toggleProps}
-            value={inputValue}
+      <InputContainer $errored={!!error} $isOpen={isOpen}>
+        <InputWrapper onClick={handleInputClick}>
+          <AppInput
+            value={value?.label || ''}
             label={label}
+            placeholder={placeholder}
             disabled={disabled}
             error={error}
             required={required}
-            placeholder={placeholder}
-            onChange={handleInputChange}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-            // Передаем состояние заполненности и фокуса в AppBaseInput
-            filled={isFilled}
-            focused={internalFocused}
+            readOnly
+            roundedBottom={!isOpen}
           />
-        </div>
-        {clearable && value && !disabled && (
-          <button
-            className="app-single-select__clear-button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClear();
-            }}
-            type="button"
-          >
-            ×
-          </button>
-        )}
-        <div 
-          className={`app-single-select__arrow ${isOpen ? 'app-single-select__arrow--open' : ''}`}
-          onClick={handleToggleClick}
-        >
-          ▼
-        </div>
-      </div>
+          {clearable && value && !disabled && (
+            <ClearButton onClick={handleClear} type="button" aria-label="Очистить">
+              ×
+            </ClearButton>
+          )}
+          <ArrowIconWrapper $isOpen={isOpen} aria-hidden="true">
+            <ChevronDownIcon color="#B2B1AE" size={20} />
+          </ArrowIconWrapper>
+        </InputWrapper>
+      </InputContainer>
     );
   };
 
-  // Рендер dropdown
+  // Рендер dropdown (кастомный или дефолтный)
   const renderDropdown = () => {
     if (dropdown) return dropdown;
 
     return (
-      <div className="app-single-select__dropdown">
-        {filteredOptions.length === 0 ? (
-          <div className="app-single-select__no-options">
-            Нет доступных опций
-          </div>
-        ) : (
-          filteredOptions.map((optionItem) => (
-            <div
-              key={optionItem.value}
-              className={`app-single-select__option ${
-                value?.value === optionItem.value ? 'app-single-select__option--selected' : ''
-              }`}
-              onClick={() => handleOptionSelect(optionItem)}
-            >
-              {option || optionItem.label}
-            </div>
-          ))
+      <DropdownContent role="listbox">
+        {/* Поиск показывается только для списков > 10 элементов */}
+        {options.length > 10 && (
+          <SearchInput
+            type="text"
+            placeholder={searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Поиск по опциям"
+          />
         )}
-      </div>
+        <OptionsContainer>
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((optionItem) => (
+              <Option
+                key={optionItem.value}
+                $selected={value?.value === optionItem.value}
+                onClick={() => handleSelect(optionItem)}
+                role="option"
+                aria-selected={value?.value === optionItem.value}
+              >
+                {option || optionItem.label}
+                {value?.value === optionItem.value && (
+                  <OptionCheck aria-hidden="true">✓</OptionCheck>
+                )}
+              </Option>
+            ))
+          ) : (
+            <NoOptions role="status">Ничего не найдено</NoOptions>
+          )}
+        </OptionsContainer>
+      </DropdownContent>
     );
   };
 
   return (
-    <div className={`app-single-select ${disabled ? 'app-single-select--disabled' : ''}`}>
+    <SelectWrapper $disabled={disabled} className={className}>
       <AppBaseDropdown
         {...baseDropdownProps}
         opened={isOpen}
         onClose={handleDropdownClose}
         toggle={renderToggle()}
         dropdown={renderDropdown()}
+        maxDropdownHeight={280}
+        noRestrictHeigth={true}
       />
-    </div>
+    </SelectWrapper>
   );
 };
+
+AppSingleSelect.displayName = 'AppSingleSelect';

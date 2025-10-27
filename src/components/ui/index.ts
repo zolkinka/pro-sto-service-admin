@@ -9,3 +9,4 @@ export * from './AppSwitch';
 export * from './AppCheckbox';
 export * from './AppTag';
 export * from './AppTable';
+export * from './AppSingleSelect';

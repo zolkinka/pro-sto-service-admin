@@ -36,6 +36,7 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
   // Визуальные настройки
   size = 'L',
   background = 'default',
+  roundedBottom = true,
   
   // Иконки
   iconLeft,
@@ -129,6 +130,7 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
         $error={hasError}
         $isFocused={isFocused}
         $disabled={disabled}
+        $roundedBottom={roundedBottom}
         data-disabled={disabled}
       >
         {/* Left Icon */}

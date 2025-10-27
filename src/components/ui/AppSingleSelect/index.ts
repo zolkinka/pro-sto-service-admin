@@ -1,1 +1,2 @@
-export { AppSingleSelect, type AppSingleSelectProps, type OptionType } from './AppSingleSelect';
+export { AppSingleSelect } from './AppSingleSelect';
+export type { AppSingleSelectProps, SelectOption } from './AppSingleSelect.types';

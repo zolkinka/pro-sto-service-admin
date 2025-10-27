@@ -19,6 +19,7 @@ export interface AppInputProps {
   // Визуальные настройки
   size?: 'M' | 'L';
   background?: 'muted' | 'default';
+  roundedBottom?: boolean; // Управление нижними углами
   
   // Иконки
   iconLeft?: React.ReactNode;
@@ -58,6 +59,7 @@ export interface InputContainerProps {
   $error?: boolean;
   $isFocused?: boolean;
   $disabled?: boolean;
+  $roundedBottom?: boolean;
 }
 
 export interface StyledInputProps {

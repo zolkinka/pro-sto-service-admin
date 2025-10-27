@@ -46,7 +46,13 @@ export const InputContainer = styled.div<InputContainerProps>`
   gap: 8px;
   padding: 12px;
   border: 1px solid;
-  border-radius: ${({ $size }) => ($size === 'M' ? '12px' : '16px')};
+  border-radius: ${({ $size, $roundedBottom }) => {
+    const radius = $size === 'M' ? '12px' : '16px';
+    if ($roundedBottom === false) {
+      return `${radius} ${radius} 0 0`;
+    }
+    return radius;
+  }};
   height: ${({ $size }) => ($size === 'M' ? '40px' : '52px')};
   background: ${({ $background, theme }) =>
     $background === 'muted' ? theme.colors.gray[25] : theme.colors.gray[100]};

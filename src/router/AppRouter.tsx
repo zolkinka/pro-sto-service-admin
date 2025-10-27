@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { ROUTES } from '@/constants/routes';
 import { authStore } from '@/stores/AuthStore';
-import { MainLayout } from '@/components/Layout';
+import AppLayout from '@/components/Layout/AppLayout';
 import { 
   Dashboard, 
   NotFound, 
@@ -17,14 +17,14 @@ import {
 /**
  * PrivateRoute - защищенный маршрут, доступный только авторизованным пользователям
  * Если пользователь не авторизован - редирект на страницу входа
- * Оборачивает содержимое в MainLayout с Header и Sidebar
+ * Оборачивает содержимое в AppLayout с фиксированным Header
  */
 const PrivateRoute = observer(({ children }: { children: React.ReactNode }) => {
   if (!authStore.isAuthenticated) {
     return <Navigate to={ROUTES.AUTH_PHONE} replace />;
   }
 
-  return <MainLayout>{children}</MainLayout>;
+  return <AppLayout>{children}</AppLayout>;
 });
 
 const AppRouter = observer(() => {

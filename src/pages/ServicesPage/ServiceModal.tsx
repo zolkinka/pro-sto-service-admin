@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import type { ServiceDto } from '../../../services/api-client';
 import { servicesStore, authStore, toastStore } from '@/stores';
 import AppInput from '@/components/ui/AppInput';
+import AppNumberInput from '@/components/ui/AppNumberInput';
 
 import {
   ModalOverlay,
@@ -87,11 +88,12 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
           minivan: '',
         };
 
-        // Извлекаем цены из servicePrices
+        // Извлекаем цены из servicePrices (округляем до целых рублей)
         service.servicePrices?.forEach((sp) => {
           const paramValue = sp.parameter_value as keyof typeof priceMap;
           if (paramValue && sp.price !== undefined) {
-            priceMap[paramValue] = sp.price.toString();
+            // Используем Math.round для округления до целых рублей
+            priceMap[paramValue] = Math.round(sp.price).toString();
           }
         });
 
@@ -140,14 +142,12 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
   };
 
   const handlePriceChange = (carClass: keyof FormData['prices'], value: string) => {
-    // Разрешаем только целые числа (убираем дробную часть)
-    const sanitizedValue = value.replace(/[.,].*$/, '').replace(/[^\d]/g, '');
-    
+    // AppNumberInput уже фильтрует ввод, оставляя только целые числа
     setFormData((prev) => ({
       ...prev,
       prices: {
         ...prev.prices,
-        [carClass]: sanitizedValue,
+        [carClass]: value,
       },
     }));
     // Очищаем ошибку при изменении поля
@@ -175,10 +175,10 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
       newErrors.duration_minutes = 'Должно быть больше 0';
     }
 
-    // Валидация цен
+    // Валидация цен (используем parseInt для целых рублей)
     const carClasses: Array<keyof FormData['prices']> = ['sedan', 'crossover', 'suv', 'minivan'];
     carClasses.forEach((carClass) => {
-      const price = parseFloat(formData.prices[carClass]);
+      const price = parseInt(formData.prices[carClass]);
       if (!formData.prices[carClass].trim()) {
         newErrors[carClass] = 'Обязательное поле';
       } else if (isNaN(price) || price < 0) {
@@ -207,30 +207,30 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
     setIsSubmitting(true);
 
     try {
-      // Формируем массив цен
+      // Формируем массив цен (используем parseInt для целых рублей)
       const servicePrices = [
         {
           parameter_type: 'simple_car_class' as const,
           parameter_value: 'sedan',
-          price: parseFloat(formData.prices.sedan),
+          price: parseInt(formData.prices.sedan),
           is_active: true,
         },
         {
           parameter_type: 'simple_car_class' as const,
           parameter_value: 'crossover',
-          price: parseFloat(formData.prices.crossover),
+          price: parseInt(formData.prices.crossover),
           is_active: true,
         },
         {
           parameter_type: 'simple_car_class' as const,
           parameter_value: 'suv',
-          price: parseFloat(formData.prices.suv),
+          price: parseInt(formData.prices.suv),
           is_active: true,
         },
         {
           parameter_type: 'simple_car_class' as const,
           parameter_value: 'minivan',
-          price: parseFloat(formData.prices.minivan),
+          price: parseInt(formData.prices.minivan),
           is_active: true,
         },
       ];
@@ -326,14 +326,15 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
               </TextAreaWrapper>
 
               {/* Продолжительность */}
-              <AppInput
+              <AppNumberInput
                 label="Продолжительность"
-                placeholder="40 мин"
+                placeholder="40"
                 value={formData.duration_minutes}
                 onChange={(value) => handleInputChange('duration_minutes', value)}
                 error={errors.duration_minutes}
                 disabled={isSubmitting}
-                inputProps={{ type: 'number', min: '1' }}
+                min={1}
+                suffix="мин"
               />
             </InputsContainer>
           </Section>
@@ -345,25 +346,27 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
               {/* Первая строка: Легковой и Кроссовер */}
               <PriceRow>
                 <PriceInputWrapper>
-                  <AppInput
+                  <AppNumberInput
                     label="Легковой"
-                    placeholder="600₽"
+                    placeholder="600"
                     value={formData.prices.sedan}
                     onChange={(value) => handlePriceChange('sedan', value)}
                     error={errors.sedan}
                     disabled={isSubmitting}
-                    inputProps={{ type: 'number', min: '0', step: '1' }}
+                    min={0}
+                    suffix="₽"
                   />
                 </PriceInputWrapper>
                 <PriceInputWrapper>
-                  <AppInput
+                  <AppNumberInput
                     label="Кроссовер"
-                    placeholder="600₽"
+                    placeholder="600"
                     value={formData.prices.crossover}
                     onChange={(value) => handlePriceChange('crossover', value)}
                     error={errors.crossover}
                     disabled={isSubmitting}
-                    inputProps={{ type: 'number', min: '0', step: '1' }}
+                    min={0}
+                    suffix="₽"
                   />
                 </PriceInputWrapper>
               </PriceRow>
@@ -371,25 +374,27 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
               {/* Вторая строка: Внедорожник и Минивен */}
               <PriceRow>
                 <PriceInputWrapper>
-                  <AppInput
+                  <AppNumberInput
                     label="Внедорожник"
-                    placeholder="600₽"
+                    placeholder="600"
                     value={formData.prices.suv}
                     onChange={(value) => handlePriceChange('suv', value)}
                     error={errors.suv}
                     disabled={isSubmitting}
-                    inputProps={{ type: 'number', min: '0', step: '1' }}
+                    min={0}
+                    suffix="₽"
                   />
                 </PriceInputWrapper>
                 <PriceInputWrapper>
-                  <AppInput
+                  <AppNumberInput
                     label="Минивен"
-                    placeholder="600₽"
+                    placeholder="600"
                     value={formData.prices.minivan}
                     onChange={(value) => handlePriceChange('minivan', value)}
                     error={errors.minivan}
                     disabled={isSubmitting}
-                    inputProps={{ type: 'number', min: '0', step: '1' }}
+                    min={0}
+                    suffix="₽"
                   />
                 </PriceInputWrapper>
               </PriceRow>

@@ -7,6 +7,7 @@ import {
   InputContainer,
   StyledInput,
   IconContainer,
+  SuffixText,
   ErrorText,
 } from './AppInput.styles';
 import {
@@ -41,6 +42,9 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
   // Иконки
   iconLeft,
   iconRight,
+  
+  // Суффикс
+  suffix,
   
   // Обработчики
   onChange,
@@ -161,6 +165,13 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
           data-filled={isFilled}
           {...inputProps}
         />
+        
+        {/* Suffix */}
+        {suffix && (
+          <SuffixText>
+            {suffix}
+          </SuffixText>
+        )}
         
         {/* Right Icon */}
         {iconRight && (

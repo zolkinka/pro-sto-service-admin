@@ -81,6 +81,7 @@ export const InputContainer = styled.div<InputContainerProps>`
 // Сам input
 export const StyledInput = styled.input<StyledInputProps>`
   flex: 1;
+  min-width: 0; /* Позволяет input сжиматься когда есть suffix */
   border: none;
   outline: none;
   background: transparent;
@@ -133,6 +134,19 @@ export const IconContainer = styled.span`
     display: block;
     color: ${({ theme }) => theme.colors.gray[600]};
   }
+`;
+
+// Суффикс (постфикс) - текст справа от input
+export const SuffixText = styled.span`
+  display: inline-flex;
+  align-items: center;
+  font-family: ${({ theme }) => theme.fonts.onest};
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: ${({ theme }) => theme.colors.gray[600]};
+  white-space: nowrap;
+  user-select: none;
 `;
 
 // Текст ошибки

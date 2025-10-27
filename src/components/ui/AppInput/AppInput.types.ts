@@ -25,6 +25,9 @@ export interface AppInputProps {
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
   
+  // Суффикс (постфикс) - текст справа от input (например, "₽", "мин")
+  suffix?: string;
+  
   // Обработчики
   onChange?: (value: string, event: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;

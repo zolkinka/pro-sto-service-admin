@@ -8,6 +8,53 @@ export type AdminAuthResponseDto = {
     user: AdminUserDto;
 };
 
+export type AdminBookingCarDto = {
+    uuid: string;
+    make: string;
+    model: string;
+    license_plate: string;
+    class: string;
+};
+
+export type AdminBookingClientDto = {
+    uuid: string;
+    name: string;
+    phone: string;
+};
+
+export type AdminBookingListResponseDto = {
+    data: Array<AdminBookingResponseDto>;
+    total: number;
+    limit: number;
+    offset: number;
+};
+
+export type AdminBookingResponseDto = {
+    uuid: string;
+    client_uuid: string;
+    car_uuid: string;
+    service_center_uuid: string;
+    service_uuid: string;
+    start_time: string;
+    end_time: string;
+    status: string;
+    total_cost: number;
+    payment_status: string;
+    payment_method: {
+        [key: string]: unknown;
+    } | null;
+    client: AdminBookingClientDto;
+    car: AdminBookingCarDto;
+    service: AdminBookingServiceDto;
+    additionalServices?: Array<AdminBookingServiceDto>;
+};
+
+export type AdminBookingServiceDto = {
+    uuid: string;
+    name: string;
+    duration_minutes: number;
+};
+
 export type AdminLoginDto = {
     /**
      * Номер телефона в формате +79991234567
@@ -1295,6 +1342,59 @@ export type SetPhoneDto = {
     code: string;
 };
 
+export type UpdateAdminBookingDto = {
+    /**
+     * Новое время начала услуги (ISO 8601)
+     */
+    start_time?: string;
+    /**
+     * UUID новой основной услуги
+     */
+    service_uuid?: string;
+    /**
+     * Массив UUID дополнительных услуг
+     */
+    additionalServiceUuids?: Array<unknown[]>;
+    /**
+     * Комментарий клиента к бронированию
+     */
+    client_comment?: string;
+};
+
+export type UpdateBookingStatusDto = {
+    /**
+     * Новый статус бронирования
+     */
+    status: 'pending_confirmation' | 'confirmed' | 'completed' | 'cancelled';
+};
+
+export namespace UpdateBookingStatusDto {
+    /**
+     * Новый статус бронирования
+     */
+    export enum status {
+        PENDING_CONFIRMATION = 'pending_confirmation',
+        CONFIRMED = 'confirmed',
+        COMPLETED = 'completed',
+        CANCELLED = 'cancelled'
+    }
+}
+
+export type UpdateBookingStatusResponseDto = {
+    /**
+     * UUID бронирования
+     */
+    uuid: string;
+    /**
+     * Новый статус бронирования
+     */
+    status: string;
+    /**
+     * Дата и время последнего обновления (ISO 8601)
+     */
+    updated_at: string;
+};
+
 export type UpdateCarDto = {
     /**
      * Марка автомобиля
@@ -1510,6 +1610,43 @@ export type UserResponseDto = {
         [key: string]: unknown;
     };
 };
+
+export type WebhookPayloadDto = {
+    /**
+     * UUID платежа
+     */
+    payment_uuid: string;
+    /**
+     * UUID бронирования
+     */
+    booking_uuid: string;
+    /**
+     * Статус платежа
+     */
+    status: 'success' | 'failed';
+    /**
+     * Сумма платежа
+     */
+    amount: number;
+    /**
+     * Метод оплаты
+     */
+    payment_method: string;
+    /**
+     * ID транзакции
+     */
+    transaction_id?: string;
+};
+
+export namespace WebhookPayloadDto {
+    /**
+     * Статус платежа
+     */
+    export enum status {
+        SUCCESS = 'success',
+        FAILED = 'failed'
+    }
+}
 
 export type AppGetHelloResponse = (unknown);
 
@@ -1845,6 +1982,64 @@ export type BookingCancelData = {
 
 export type BookingCancelResponse = (BookingResponseDto);
 
+export type AdminBookingsGetListData = {
+    /**
+     * Начало диапазона дат (ISO 8601)
+     */
+    dateFrom: string;
+    /**
+     * Конец диапазона дат (ISO 8601)
+     */
+    dateTo: string;
+    /**
+     * Количество записей (default: 100)
+     */
+    limit?: number;
+    /**
+     * Смещение для пагинации (default: 0)
+     */
+    offset?: number;
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+    /**
+     * Массив статусов для фильтрации: pending_confirmation, confirmed, completed, cancelled
+     */
+    status?: Array<unknown[]>;
+};
+
+export type AdminBookingsGetListResponse = (AdminBookingListResponseDto);
+
+export type AdminBookingsGetOneData = {
+    /**
+     * UUID бронирования
+     */
+    uuid: string;
+};
+
+export type AdminBookingsGetOneResponse = (DetailedBookingResponseDto);
+
+export type AdminBookingsUpdateData = {
+    requestBody: UpdateAdminBookingDto;
+    /**
+     * UUID бронирования
+     */
+    uuid: string;
+};
+
+export type AdminBookingsUpdateResponse = (DetailedBookingResponseDto);
+
+export type AdminBookingsUpdateStatusData = {
+    requestBody: UpdateBookingStatusDto;
+    /**
+     * UUID бронирования
+     */
+    uuid: string;
+};
+
+export type AdminBookingsUpdateStatusResponse = (UpdateBookingStatusResponseDto);
+
 export type CarsControllerGetMakesData = {
     /**
      * Количество элементов на странице
@@ -1939,6 +2134,10 @@ export type PaymentsControllerUpdatePaymentStatusData = {
 };
 
 export type PaymentsControllerUpdatePaymentStatusResponse = (PaymentResponseDto);
+
+export type PaymentsControllerHandleWebhookData = {
+    requestBody: WebhookPayloadDto;
+};
 
 export type PaymentsControllerHandleWebhookResponse = (unknown);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { bookingGetOne } from '../../../services/api-client';
+import { bookingGetOne, OpenAPI } from '../../../services/api-client';
 import type { DetailedBookingResponseDto } from '../../../services/api-client/types.gen';
 import { AppButton } from '@/components/ui/AppButton';
 import type { 
@@ -30,7 +30,8 @@ import './PaymentMockPage.css';
  * Встраивается в iframe мобильного приложения
  */
 const PaymentMockPage = () => {
-  const { bookingUuid } = useParams<{ bookingUuid: string }>();
+  const { bookingUuid } = useParams<{ bookingUuid: string; }>();
+  // const { bookingUuid } = use<{ bookingUuid: string; }>();
   
   const [status, setStatus] = useState<PaymentPageStatus>('loading');
   const [booking, setBooking] = useState<DetailedBookingResponseDto | null>(null);
@@ -52,7 +53,8 @@ const PaymentMockPage = () => {
   const loadBookingData = useCallback(async () => {
     try {
       setStatus('loading');
-      
+      // OpenAPI.TOKEN = accessToken;
+
       const response = await bookingGetOne({ uuid: bookingUuid! });
       
       // Проверяем статус оплаты

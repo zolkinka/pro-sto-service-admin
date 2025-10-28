@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
+import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, AdminBookingsGetListData, AdminBookingsGetListResponse, AdminBookingsGetOneData, AdminBookingsGetOneResponse, AdminBookingsUpdateData, AdminBookingsUpdateResponse, AdminBookingsUpdateStatusData, AdminBookingsUpdateStatusResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookData, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
 
 /**
  * Hello World
@@ -55,7 +55,7 @@ export const authLogin = (data: AuthLoginData): CancelablePromise<AuthLoginRespo
 
 /**
  * Выход из системы
- * Выход из системы. Удаляет HTTP-only cookie и добавляет ток��н в blacklist.
+ * Выход из системы. Удаляет HTTP-only cookie и добавляет токен в blacklist.
  * @returns LogoutResponseDto Успешный выход из системы
  * @throws ApiError
  */
@@ -837,6 +837,123 @@ export const bookingCancel = (data: BookingCancelData): CancelablePromise<Bookin
 };
 
 /**
+ * Получить список бронирований для админ-панели
+ * Возвращает список бронирований сервисного центра с фильтрацией по датам и статусам. Требуется аутентификация админа и доступ к указанному сервисному центру через projectUuid.
+ * @param data The data for the request.
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.dateFrom Начало диапазона дат (ISO 8601)
+ * @param data.dateTo Конец диапазона дат (ISO 8601)
+ * @param data.status Массив статусов для фильтрации: pending_confirmation, confirmed, completed, cancelled
+ * @param data.limit Количество записей (default: 100)
+ * @param data.offset Смещение для пагинации (default: 0)
+ * @returns AdminBookingListResponseDto Список бронирований успешно получен
+ * @throws ApiError
+ */
+export const adminBookingsGetList = (data: AdminBookingsGetListData): CancelablePromise<AdminBookingsGetListResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/bookings',
+        query: {
+            service_center_uuid: data.serviceCenterUuid,
+            date_from: data.dateFrom,
+            date_to: data.dateTo,
+            status: data.status,
+            limit: data.limit,
+            offset: data.offset
+        },
+        errors: {
+            400: 'Некорректные параметры запроса',
+            401: 'Не авторизован',
+            403: 'Нет доступа к указанному сервисному центру',
+            404: 'Сервисный центр не найден'
+        }
+    });
+};
+
+/**
+ * Получить детальную информацию о бронировании
+ * Возвращает подробную информацию о конкретном бронировании. Требуется аутентификация админа и доступ к сервисному центру через projectUuid.
+ * @param data The data for the request.
+ * @param data.uuid UUID бронирования
+ * @returns DetailedBookingResponseDto Детальная информация о бронировании получена
+ * @throws ApiError
+ */
+export const adminBookingsGetOne = (data: AdminBookingsGetOneData): CancelablePromise<AdminBookingsGetOneResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/bookings/{uuid}',
+        path: {
+            uuid: data.uuid
+        },
+        errors: {
+            401: 'Не авторизован',
+            403: 'Нет доступа к этому бронированию',
+            404: 'Бронирование не найдено'
+        }
+    });
+};
+
+/**
+ * Редактировать бронирование
+ * Позволяет админу изменять параметры бронирования: время начала, услугу, дополнительные услуги и комментарий. При изменении времени или услуги пересчитывается end_time и проверяется доступность слота.
+ * @param data The data for the request.
+ * @param data.uuid UUID бронирования
+ * @param data.requestBody
+ * @returns DetailedBookingResponseDto Бронирование успешно обновлено
+ * @throws ApiError
+ */
+export const adminBookingsUpdate = (data: AdminBookingsUpdateData): CancelablePromise<AdminBookingsUpdateResponse> => {
+    return __request(OpenAPI, {
+        method: 'PATCH',
+        url: '/api/admin/bookings/{uuid}',
+        path: {
+            uuid: data.uuid
+        },
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Невалидные данные, слот занят или нельзя редактировать в текущем статусе',
+            401: 'Не авторизован',
+            403: 'Нет доступа к этому бронированию',
+            404: 'Бронирование не найдено',
+            409: 'Временной слот занят'
+        }
+    });
+};
+
+/**
+ * Изменить статус бронирования
+ * Позволяет изменить статус бронирования с соблюдением правил переходов:
+ * - pending_confirmation → confirmed, cancelled
+ * - confirmed → completed, cancelled
+ * - completed и cancelled — финальные статусы (нельзя изменить)
+ *
+ * При переходе в статус 'cancelled' для оплаченных бронирований автоматически устанавливается payment_status='refund_pending'.
+ * @param data The data for the request.
+ * @param data.uuid UUID бронирования
+ * @param data.requestBody
+ * @returns UpdateBookingStatusResponseDto Статус успешно изменен
+ * @throws ApiError
+ */
+export const adminBookingsUpdateStatus = (data: AdminBookingsUpdateStatusData): CancelablePromise<AdminBookingsUpdateStatusResponse> => {
+    return __request(OpenAPI, {
+        method: 'PATCH',
+        url: '/api/admin/bookings/{uuid}/status',
+        path: {
+            uuid: data.uuid
+        },
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Невалидный переход статуса (например, попытка изменить финальный статус или недопустимый переход)',
+            401: 'Не авторизован',
+            403: 'Нет доступа к этому бронированию',
+            404: 'Бронирование не найдено'
+        }
+    });
+};
+
+/**
  * Получить список марок автомобилей
  * Возвращает пагинированный список всех марок автомобилей
  * @param data The data for the request.
@@ -976,14 +1093,22 @@ export const paymentsControllerUpdatePaymentStatus = (data: PaymentsControllerUp
 };
 
 /**
- * Webhook для получения уведомлений от Точка Банка
+ * Webhook для получения уведомлений от платежной системы
+ * @param data The data for the request.
+ * @param data.requestBody
  * @returns unknown Webhook обработан
  * @throws ApiError
  */
-export const paymentsControllerHandleWebhook = (): CancelablePromise<PaymentsControllerHandleWebhookResponse> => {
+export const paymentsControllerHandleWebhook = (data: PaymentsControllerHandleWebhookData): CancelablePromise<PaymentsControllerHandleWebhookResponse> => {
     return __request(OpenAPI, {
         method: 'POST',
-        url: '/api/payments/webhook'
+        url: '/api/payments/webhook',
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Некорректные данные',
+            404: 'Платеж не найден'
+        }
     });
 };
 

@@ -1,0 +1,136 @@
+/* AppTable Component */
+
+/* Wrapper для всего компонента таблицы */
+.app-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Основная таблица */
+.app-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-family: var(--font-onest);
+  background: white;
+}
+
+/* Заголовок таблицы (thead) */
+.app-table__head {
+  background: white;
+}
+
+/* Ячейка заголовка таблицы */
+.app-table__header-cell {
+  height: 43px;
+  min-height: 43px;
+  padding: 12px 12px 12px 0;
+  text-align: left;
+  vertical-align: middle;
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-600);
+}
+
+.app-table__header-cell:first-child {
+  padding-left: 0;
+}
+
+.app-table__header-cell_align_center {
+  text-align: center;
+}
+
+.app-table__header-cell_align_right {
+  text-align: right;
+}
+
+/* Тело таблицы */
+.app-table__body {
+  background: white;
+}
+
+/* Строка таблицы */
+.app-table__row {
+  background: white;
+}
+
+.app-table__row_clickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.app-table__row_clickable:hover {
+  background: rgba(249, 248, 245, 0.5);
+}
+
+/* Ячейка данных таблицы */
+.app-table__cell {
+  height: 49px;
+  min-height: 43px;
+  padding: 16px 12px 16px 0;
+  text-align: left;
+  vertical-align: middle;
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.app-table__cell:first-child {
+  padding-left: 0;
+}
+
+.app-table__cell_align_center {
+  text-align: center;
+}
+
+.app-table__cell_align_right {
+  text-align: right;
+}
+
+.app-table__cell_variant_secondary {
+  color: var(--color-gray-700);
+}
+
+/* Строка для пустой таблицы */
+.app-table__row_empty .app-table__cell {
+  text-align: center;
+  font-style: italic;
+  opacity: 0.7;
+  color: var(--color-gray-500);
+}
+
+/* Контейнер для кнопок действий (edit, delete) */
+.app-table__actions {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+/* Кнопка действия (edit, delete) */
+.app-table__action-button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-gray-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.app-table__action-button:hover {
+  color: var(--color-gray-900);
+}
+
+.app-table__action-button svg {
+  width: 24px;
+  height: 24px;
+}

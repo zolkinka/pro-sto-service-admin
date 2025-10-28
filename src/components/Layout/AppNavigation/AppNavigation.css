@@ -1,0 +1,43 @@
+/* AppNavigation Component */
+
+.app-navigation {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.app-navigation__tab {
+  padding: 8px 16px;
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  border-radius: 16px;
+  border: 1px solid var(--color-beige-100);
+  background: var(--color-beige-100);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.app-navigation__tab:hover {
+  background: #FFFFFF;
+}
+
+.app-navigation__tab:active {
+  transform: scale(0.98);
+}
+
+.app-navigation__tab_active {
+  border-color: var(--color-gray-900);
+  background: var(--color-gray-900);
+  color: #FFFFFF;
+}
+
+.app-navigation__tab_active:hover {
+  background: var(--color-gray-900);
+}

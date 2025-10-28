@@ -1,15 +1,7 @@
 import React from 'react';
-import {
-  TableWrapper,
-  StyledTable,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-  EmptyRow,
-} from './AppTable.styles';
+import classNames from 'classnames';
 import type { AppTableProps, AppTableColumn } from './AppTable.types';
+import './AppTable.css';
 
 // --- Helper функции ---
 
@@ -66,10 +58,10 @@ export const AppTable = <RowType extends Record<string, unknown>>(
   } = props;
 
   return (
-    <TableWrapper style={style} className={className}>
-      <StyledTable role="table">
+    <div style={style} className={classNames('app-table', className)}>
+      <table className="app-table__table" role="table">
         {/* Заголовок таблицы */}
-        <TableHeader>
+        <thead className="app-table__head">
           <tr>
             {columns.map((col, ci) => {
               const widthStyle: React.CSSProperties =
@@ -77,29 +69,36 @@ export const AppTable = <RowType extends Record<string, unknown>>(
                   ? { width: typeof col.width === 'number' ? `${col.width}px` : col.width }
                   : {};
 
+              const headerClassName = classNames(
+                'app-table__header-cell',
+                {
+                  [`app-table__header-cell_align_${col.align}`]: col.align,
+                },
+                col.headerClassName
+              );
+
               return (
-                <TableHeaderCell
+                <th
                   key={ci}
-                  $align={col.align}
-                  className={col.headerClassName}
+                  className={headerClassName}
                   style={widthStyle}
                   scope="col"
                   role="columnheader"
                 >
                   {col.renderHeader ? col.renderHeader() : col.label}
-                </TableHeaderCell>
+                </th>
               );
             })}
           </tr>
-        </TableHeader>
+        </thead>
 
         {/* Тело таблицы */}
-        <TableBody>
+        <tbody className="app-table__body">
           {/* Показываем placeholder если нет данных */}
           {rows.length === 0 && (
-            <EmptyRow>
-              <td colSpan={columns.length}>{emptyPlaceholder}</td>
-            </EmptyRow>
+            <tr className="app-table__row app-table__row_empty">
+              <td className="app-table__cell" colSpan={columns.length}>{emptyPlaceholder}</td>
+            </tr>
           )}
 
           {/* Отрисовка строк данных */}
@@ -107,10 +106,14 @@ export const AppTable = <RowType extends Record<string, unknown>>(
             const key = getRowKey ? getRowKey(row, ri) : (ri as React.Key);
             const handleClick = onRowClick ? () => onRowClick(row, ri) : undefined;
 
+            const rowClassName = classNames('app-table__row', {
+              'app-table__row_clickable': !!onRowClick,
+            });
+
             return (
-              <TableRow
+              <tr
                 key={key}
-                $clickable={!!onRowClick}
+                className={rowClassName}
                 role="row"
                 onClick={handleClick}
               >
@@ -131,24 +134,31 @@ export const AppTable = <RowType extends Record<string, unknown>>(
                     content = '';
                   }
 
+                  const cellClassName = classNames(
+                    'app-table__cell',
+                    {
+                      [`app-table__cell_align_${col.align}`]: col.align,
+                      [`app-table__cell_variant_${col.variant}`]: col.variant,
+                    },
+                    col.className
+                  );
+
                   return (
-                    <TableCell
+                    <td
                       key={ci}
-                      $align={col.align}
-                      $variant={col.variant}
-                      className={col.className}
+                      className={cellClassName}
                       role="cell"
                     >
                       {content}
-                    </TableCell>
+                    </td>
                   );
                 })}
-              </TableRow>
+              </tr>
             );
           })}
-        </TableBody>
-      </StyledTable>
-    </TableWrapper>
+        </tbody>
+      </table>
+    </div>
   );
 };
 

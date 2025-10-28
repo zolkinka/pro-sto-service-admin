@@ -1,21 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import classNames from 'classnames';
 import { AppBaseDropdown } from '../AppBaseDropdown';
 import { AppInput } from '../AppInput';
 import type { AppSingleSelectProps, SelectOption } from './AppSingleSelect.types';
 import { ChevronDownIcon } from './ChevronDownIcon';
-import {
-  SelectWrapper,
-  InputContainer,
-  InputWrapper,
-  ClearButton,
-  ArrowIconWrapper,
-  DropdownContent,
-  OptionsContainer,
-  SearchInput,
-  Option,
-  OptionCheck,
-  NoOptions,
-} from './AppSingleSelect.styles';
+import './AppSingleSelect.css';
 
 /**
  * AppSingleSelect - Компонент для выбора одного значения из списка
@@ -94,9 +83,13 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
   const renderToggle = () => {
     if (toggle) return toggle;
 
+    const arrowClassName = classNames('app-single-select__arrow', {
+      'app-single-select__arrow_open': isOpen,
+    });
+
     return (
-      <InputContainer $errored={!!error} $isOpen={isOpen}>
-        <InputWrapper onClick={handleInputClick}>
+      <div className="app-single-select__input-container">
+        <div className="app-single-select__input-wrapper" onClick={handleInputClick}>
           <AppInput
             value={value?.label || ''}
             label={label}
@@ -108,15 +101,20 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
             roundedBottom={!isOpen}
           />
           {clearable && value && !disabled && (
-            <ClearButton onClick={handleClear} type="button" aria-label="Очистить">
+            <button
+              className="app-single-select__clear-button"
+              onClick={handleClear}
+              type="button"
+              aria-label="Очистить"
+            >
               ×
-            </ClearButton>
+            </button>
           )}
-          <ArrowIconWrapper $isOpen={isOpen} aria-hidden="true">
+          <div className={arrowClassName} aria-hidden="true">
             <ChevronDownIcon color="#B2B1AE" size={20} />
-          </ArrowIconWrapper>
-        </InputWrapper>
-      </InputContainer>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -125,44 +123,59 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
     if (dropdown) return dropdown;
 
     return (
-      <DropdownContent role="listbox">
+      <div className="app-single-select__dropdown" role="listbox">
         {/* Поиск показывается только для списков > 10 элементов */}
         {options.length > 10 && (
-          <SearchInput
+          <input
             type="text"
+            className="app-single-select__search"
             placeholder={searchPlaceholder}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onClick={(e) => e.stopPropagation()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
             aria-label="Поиск по опциям"
           />
         )}
-        <OptionsContainer>
+        <div className="app-single-select__options-container">
           {filteredOptions.length > 0 ? (
-            filteredOptions.map((optionItem) => (
-              <Option
-                key={optionItem.value}
-                $selected={value?.value === optionItem.value}
-                onClick={() => handleSelect(optionItem)}
-                role="option"
-                aria-selected={value?.value === optionItem.value}
-              >
-                {option || optionItem.label}
-                {value?.value === optionItem.value && (
-                  <OptionCheck aria-hidden="true">✓</OptionCheck>
-                )}
-              </Option>
-            ))
+            filteredOptions.map((optionItem) => {
+              const optionClassName = classNames('app-single-select__option', {
+                'app-single-select__option_selected': value?.value === optionItem.value,
+              });
+
+              return (
+                <div
+                  key={optionItem.value}
+                  className={optionClassName}
+                  onClick={() => handleSelect(optionItem)}
+                  role="option"
+                  aria-selected={value?.value === optionItem.value}
+                >
+                  {option || optionItem.label}
+                  {value?.value === optionItem.value && (
+                    <div className="app-single-select__option-check" aria-hidden="true">
+                      ✓
+                    </div>
+                  )}
+                </div>
+              );
+            })
           ) : (
-            <NoOptions role="status">Ничего не найдено</NoOptions>
+            <div className="app-single-select__no-options" role="status">
+              Ничего не найдено
+            </div>
           )}
-        </OptionsContainer>
-      </DropdownContent>
+        </div>
+      </div>
     );
   };
 
+  const wrapperClassName = classNames('app-single-select', {
+    'app-single-select_disabled': disabled,
+  }, className);
+
   return (
-    <SelectWrapper $disabled={disabled} className={className}>
+    <div className={wrapperClassName}>
       <AppBaseDropdown
         {...baseDropdownProps}
         opened={isOpen}
@@ -172,7 +185,7 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
         maxDropdownHeight={280}
         noRestrictHeigth={true}
       />
-    </SelectWrapper>
+    </div>
   );
 };
 

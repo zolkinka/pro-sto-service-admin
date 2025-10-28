@@ -1,0 +1,197 @@
+/* AppInput component styles with BEM methodology */
+/* Block: app-input */
+
+.app-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.app-input_disabled {
+  opacity: 0.6;
+}
+
+/* Element: label */
+.app-input__label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-800);
+}
+
+.app-input__label_error {
+  color: var(--color-red-300);
+}
+
+/* Element: required indicator */
+.app-input__required {
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-red-400);
+}
+
+.app-input__required_error {
+  color: var(--color-red-300);
+}
+
+/* Element: input container */
+.app-input__container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid;
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+  transition: all 0.2s ease;
+}
+
+.app-input__container_size_M {
+  height: 40px;
+  border-radius: 12px;
+}
+
+.app-input__container_size_L {
+  height: 52px;
+  border-radius: 16px;
+}
+
+.app-input__container_rounded-bottom_false.app-input__container_size_M {
+  border-radius: 12px 12px 0 0;
+}
+
+.app-input__container_rounded-bottom_false.app-input__container_size_L {
+  border-radius: 16px 16px 0 0;
+}
+
+.app-input__container_background_muted {
+  background: var(--color-gray-25);
+}
+
+.app-input__container_error {
+  border-color: var(--color-red-400);
+}
+
+.app-input__container_focused {
+  border-color: var(--color-primary-500);
+}
+
+.app-input__container_error.app-input__container_focused {
+  border-color: var(--color-red-400);
+}
+
+.app-input__container:hover:not(.app-input__container_disabled) {
+  border-color: var(--color-gray-600);
+}
+
+.app-input__container_error:hover:not(.app-input__container_disabled) {
+  border-color: var(--color-red-400);
+}
+
+.app-input__container_focused:hover:not(.app-input__container_disabled) {
+  border-color: var(--color-primary-500);
+}
+
+.app-input__container:focus-within {
+  border-color: var(--color-primary-500);
+  outline: none;
+}
+
+.app-input__container_error:focus-within {
+  border-color: var(--color-red-400);
+}
+
+/* Element: input field */
+.app-input__field {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-onest);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+}
+
+.app-input__field_size_M {
+  font-size: 14px;
+}
+
+.app-input__field_size_L {
+  font-size: 15px;
+}
+
+.app-input__field::placeholder {
+  color: var(--color-gray-500);
+}
+
+.app-input__field:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.app-input__field:disabled {
+  cursor: not-allowed;
+  color: var(--color-gray-400);
+}
+
+.app-input__field:disabled::placeholder {
+  color: var(--color-gray-400);
+}
+
+/* Hide number input arrows */
+.app-input__field[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.app-input__field[type='number']::-webkit-outer-spin-button,
+.app-input__field[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Element: icon */
+.app-input__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-input__icon svg,
+.app-input__icon img {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: var(--color-gray-600);
+}
+
+/* Element: suffix */
+.app-input__suffix {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-onest);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-600);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Element: error text */
+.app-input__error {
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-red-300);
+}

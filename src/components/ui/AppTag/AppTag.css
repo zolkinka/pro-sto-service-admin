@@ -1,0 +1,112 @@
+/* AppTag component styles with BEM methodology */
+/* Block: app-tag */
+
+.app-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-family: var(--font-onest);
+  font-weight: 400;
+  line-height: 1.2;
+  transition: all 0.2s ease;
+}
+
+/* Size modifiers */
+.app-tag_size_M {
+  height: 22px;
+  padding: 0 8px;
+  font-size: 14px;
+  border-radius: 10px;
+  gap: 4px;
+}
+
+.app-tag_size_S {
+  height: 18px;
+  padding: 0 6px;
+  font-size: 12px;
+  border-radius: 8px;
+  gap: 4px;
+}
+
+/* Color modifiers */
+.app-tag_color_default {
+  background-color: #F9F8F5;
+  color: #73716F;
+}
+
+.app-tag_color_blue {
+  background-color: #EEF0FC;
+  color: #4169E3;
+}
+
+.app-tag_color_red {
+  background-color: #FBDFE2;
+  color: #D8182E;
+}
+
+.app-tag_color_yellow {
+  background-color: #F9ECD2;
+  color: #CC8D18;
+}
+
+.app-tag_color_green {
+  background-color: #DEF7E7;
+  color: #0AB878;
+}
+
+/* Closing animation */
+.app-tag_closing {
+  animation: fadeOut 0.2s ease forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Element: text */
+.app-tag__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Element: close button */
+.app-tag__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+  outline: none;
+}
+
+.app-tag__close:hover {
+  opacity: 0.7;
+}
+
+.app-tag__close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+.app-tag__close svg {
+  width: 100%;
+  height: 100%;
+}

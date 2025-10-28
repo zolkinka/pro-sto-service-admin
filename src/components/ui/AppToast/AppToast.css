@@ -1,0 +1,203 @@
+/* AppToast Component */
+
+/* Базовый контейнер toast */
+.app-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  min-width: 320px;
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-onest);
+}
+
+/* Типы toast */
+.app-toast_type_success {
+  background-color: var(--color-green-25);
+  color: var(--color-green-400);
+  border-left: 4px solid var(--color-green-400);
+}
+
+.app-toast_type_error {
+  background-color: var(--color-error-25);
+  color: var(--color-error-300);
+  border-left: 4px solid var(--color-error-300);
+}
+
+.app-toast_type_info {
+  background-color: #EEF2FE;
+  color: var(--color-blue-500);
+  border-left: 4px solid var(--color-blue-500);
+}
+
+.app-toast_type_warning {
+  background-color: #FEF5E7;
+  color: var(--color-yellow-500);
+  border-left: 4px solid var(--color-yellow-500);
+}
+
+/* Анимации входа */
+.app-toast_position_top-right,
+.app-toast_position_bottom-right {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.app-toast_position_top-left,
+.app-toast_position_bottom-left {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* Анимации выхода */
+.app-toast_exiting.app-toast_position_top-right,
+.app-toast_exiting.app-toast_position_bottom-right {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+
+.app-toast_exiting.app-toast_position_top-left,
+.app-toast_exiting.app-toast_position_bottom-left {
+  animation: slideOutLeft 0.3s ease-in forwards;
+}
+
+/* Иконка */
+.app-toast__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+/* Контент */
+.app-toast__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.app-toast__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+.app-toast__message {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.2;
+  word-wrap: break-word;
+  opacity: 0.9;
+}
+
+/* Кнопка закрытия */
+.app-toast__close {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: currentColor;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  margin-top: 2px;
+}
+
+.app-toast__close:hover {
+  opacity: 1;
+}
+
+.app-toast__close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Progress bar */
+.app-toast__progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: currentColor;
+  opacity: 0.3;
+  animation: progressAnimation linear forwards;
+}
+
+.app-toast__progress_paused {
+  animation-play-state: paused;
+}
+
+/* Анимации */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes progressAnimation {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .app-toast {
+    min-width: 280px;
+    max-width: calc(100vw - 32px);
+  }
+}

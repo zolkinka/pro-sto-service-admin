@@ -1,0 +1,23 @@
+/* AppLogo Component */
+
+.app-logo {
+  width: 167px;
+  height: 43px;
+  cursor: pointer;
+  display: inline-flex;
+  transition: opacity 0.2s ease;
+}
+
+.app-logo:hover {
+  opacity: 0.8;
+}
+
+.app-logo:active {
+  opacity: 0.6;
+}
+
+.app-logo__image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

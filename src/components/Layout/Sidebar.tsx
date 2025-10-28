@@ -1,6 +1,7 @@
-import styled from 'styled-components';
+import classNames from 'classnames';
 import { Link, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
+import './Sidebar.css';
 
 const SidebarContainer = styled.aside<{ isOpen: boolean }>`
   width: 250px;

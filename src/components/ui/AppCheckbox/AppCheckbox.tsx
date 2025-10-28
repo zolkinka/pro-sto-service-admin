@@ -1,215 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled, { css } from 'styled-components';
-import type { AppCheckboxProps, StyledCheckboxProps } from './AppCheckbox.types';
-
-/**
- * Контейнер для чекбокса с лейблом
- */
-const CheckboxWrapper = styled.label<{ $disabled: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
-  user-select: none;
-  position: relative;
-  vertical-align: top;
-  line-height: 0;
-`;
-
-/**
- * Скрытый нативный input
- */
-const HiddenInput = styled.input`
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-`;
-
-/**
- * Кастомный визуальный чекбокс
- */
-const CustomCheckbox = styled.span<StyledCheckboxProps>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  position: relative;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  
-  /* Размеры */
-  ${({ $size }) => $size === 'S' && css`
-    width: 20px;
-    height: 20px;
-  `}
-  
-  ${({ $size }) => $size === 'M' && css`
-    width: 24px;
-    height: 24px;
-  `}
-  
-  /* Primary - не выбрано - Default */
-  ${({ $variant, $checked, $indeterminate, $disabled, theme }) => 
-    $variant === 'primary' && !$checked && !$indeterminate && !$disabled && css`
-      border: 1.5px solid ${theme.colors.gray[200]};
-      background-color: ${theme.colors.gray[25]};
-      
-      ${CheckboxWrapper}:hover & {
-        border-color: ${theme.colors.gray[900]};
-        box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.05);
-      }
-      
-      ${CheckboxWrapper}:active & {
-        box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.1);
-      }
-    `}
-  
-  /* Primary - выбрано - Default */
-  ${({ $variant, $checked, $indeterminate, $disabled, theme }) => 
-    $variant === 'primary' && ($checked || $indeterminate) && !$disabled && css`
-      border: 1.5px solid ${theme.colors.gray[900]};
-      background-color: ${theme.colors.gray[900]};
-      
-      ${CheckboxWrapper}:hover & {
-        background-color: #1F1E1B;
-        border-color: #1F1E1B;
-        box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.05);
-      }
-      
-      ${CheckboxWrapper}:active & {
-        box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.1);
-      }
-    `}
-  
-  /* Primary - Disabled */
-  ${({ $variant, $checked, $indeterminate, $disabled, theme }) => 
-    $variant === 'primary' && $disabled && css`
-      border: 1.5px solid ${($checked || $indeterminate) ? theme.colors.gray[200] : theme.colors.gray[200]};
-      background-color: ${($checked || $indeterminate) ? theme.colors.gray[200] : 'transparent'};
-      opacity: 0.6;
-    `}
-  
-  /* Secondary - не выбрано - Default */
-  ${({ $variant, $checked, $indeterminate, $disabled }) => 
-    $variant === 'secondary' && !$checked && !$indeterminate && !$disabled && css`
-      border: 1.5px solid #FFFFFF;
-      background-color: transparent;
-      
-      ${CheckboxWrapper}:hover & {
-        border-color: #FFFFFF;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-      }
-      
-      ${CheckboxWrapper}:active & {
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-      }
-    `}
-  
-  /* Secondary - выбрано - Default */
-  ${({ $variant, $checked, $indeterminate, $disabled }) => 
-    $variant === 'secondary' && ($checked || $indeterminate) && !$disabled && css`
-      border: 1.5px solid #FFFFFF;
-      background-color: #FFFFFF;
-      
-      ${CheckboxWrapper}:hover & {
-        background-color: #F5F5F5;
-        border-color: #F5F5F5;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-      }
-      
-      ${CheckboxWrapper}:active & {
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-      }
-    `}
-  
-  /* Secondary - Disabled */
-  ${({ $variant, $checked, $indeterminate, $disabled, theme }) => 
-    $variant === 'secondary' && $disabled && css`
-      border: 1.5px solid ${($checked || $indeterminate) ? theme.colors.gray[100] : '#FFFFFF'};
-      background-color: ${($checked || $indeterminate) ? theme.colors.gray[100] : 'transparent'};
-      opacity: 0.6;
-    `}
-  
-  /* Focus indicator для accessibility */
-  ${HiddenInput}:focus-visible + & {
-    outline: 2px solid ${({ theme }) => theme.colors.primary[500]};
-    outline-offset: 2px;
-  }
-`;
-
-/**
- * SVG иконка галочки для checked состояния
- */
-const CheckIcon = styled.svg<{ $size: 'S' | 'M'; $variant: 'primary' | 'secondary'; $disabled: boolean }>`
-  width: ${({ $size }) => ($size === 'S' ? '12px' : '16px')};
-  height: ${({ $size }) => ($size === 'S' ? '12px' : '16px')};
-  fill: none;
-  stroke: ${({ $variant, $disabled, theme }) => {
-    if ($disabled) {
-      return $variant === 'primary' ? '#FFFFFF' : theme.colors.gray[200];
-    }
-    return $variant === 'primary' ? '#FFFFFF' : theme.colors.gray[900];
-  }};
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: all 0.15s ease;
-  
-  /* Анимация появления галочки */
-  opacity: 0;
-  transform: scale(0.5);
-  animation: checkmark-appear 0.15s ease forwards;
-  
-  @keyframes checkmark-appear {
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-`;
-
-/**
- * Линия для indeterminate состояния
- */
-const IndeterminateLine = styled.div<{ $size: 'S' | 'M'; $variant: 'primary' | 'secondary'; $disabled: boolean }>`
-  width: ${({ $size }) => ($size === 'S' ? '10px' : '12px')};
-  height: 2px;
-  border-radius: 1px;
-  background-color: ${({ $variant, $disabled, theme }) => {
-    if ($disabled) {
-      return $variant === 'primary' ? '#FFFFFF' : theme.colors.gray[200];
-    }
-    return $variant === 'primary' ? '#FFFFFF' : theme.colors.gray[900];
-  }};
-  transition: all 0.15s ease;
-  
-  /* Анимация появления линии */
-  opacity: 0;
-  transform: scale(0.5);
-  animation: line-appear 0.15s ease forwards;
-  
-  @keyframes line-appear {
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-`;
-
-/**
- * Текст лейбла
- */
-const LabelText = styled.span<{ $disabled: boolean }>`
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-size: 16px;
-  line-height: 1.2;
-  color: ${({ theme, $disabled }) => 
-    $disabled ? theme.colors.gray[400] : theme.colors.gray[900]};
-  transition: color 0.2s ease;
-  display: inline-block;
-`;
+import classNames from 'classnames';
+import type { AppCheckboxProps } from './AppCheckbox.types';
+import './AppCheckbox.css';
 
 /**
  * Компонент AppCheckbox
@@ -267,13 +59,49 @@ const AppCheckbox: React.FC<AppCheckboxProps> = ({
     }
   };
 
+  const wrapperClasses = classNames(
+    'app-checkbox',
+    {
+      'app-checkbox_disabled': disabled,
+    },
+    className
+  );
+
+  const boxClasses = classNames(
+    'app-checkbox__box',
+    `app-checkbox__box_size_${size}`,
+    `app-checkbox__box_variant_${variant}`,
+    {
+      'app-checkbox__box_checked': checked,
+      'app-checkbox__box_indeterminate': indeterminate,
+      'app-checkbox__box_disabled': disabled,
+    }
+  );
+
+  const iconClasses = classNames(
+    'app-checkbox__icon',
+    `app-checkbox__icon_size_${size}`,
+    `app-checkbox__icon_variant_${variant}`,
+    {
+      'app-checkbox__icon_disabled': disabled,
+    }
+  );
+
+  const labelClasses = classNames(
+    'app-checkbox__label',
+    `app-checkbox__label_size_${size}`,
+    `app-checkbox__label_variant_${variant}`,
+    {
+      'app-checkbox__label_disabled': disabled,
+    }
+  );
+
   return (
-    <CheckboxWrapper
-      $disabled={disabled}
-      className={className}
+    <label
+      className={wrapperClasses}
       data-testid={dataTestId}
     >
-      <HiddenInput
+      <input
         ref={inputRef}
         type="checkbox"
         checked={checked}
@@ -283,39 +111,33 @@ const AppCheckbox: React.FC<AppCheckboxProps> = ({
         aria-checked={indeterminate ? 'mixed' : checked}
         aria-disabled={disabled}
         role="checkbox"
+        className="app-checkbox__input"
       />
       
-      <CustomCheckbox
-        $size={size}
-        $variant={variant}
-        $checked={checked}
-        $indeterminate={indeterminate}
-        $disabled={disabled}
-      >
+      <span className={boxClasses}>
         {indeterminate ? (
-          <IndeterminateLine
-            $size={size}
-            $variant={variant}
-            $disabled={disabled}
-          />
+          <div className={iconClasses} style={{ 
+            width: size === 'S' ? '10px' : '12px',
+            height: '2px',
+            borderRadius: '1px',
+            backgroundColor: 'currentColor',
+          }} />
         ) : checked && (
-          <CheckIcon
-            $size={size}
-            $variant={variant}
-            $disabled={disabled}
+          <svg
+            className={iconClasses}
             viewBox="0 0 16 16"
           >
             <polyline points="3,8 6,11 13,4" />
-          </CheckIcon>
+          </svg>
         )}
-      </CustomCheckbox>
+      </span>
       
       {label && (
-        <LabelText $disabled={disabled}>
+        <span className={labelClasses}>
           {label}
-        </LabelText>
+        </span>
       )}
-    </CheckboxWrapper>
+    </label>
   );
 };
 

@@ -1,15 +1,6 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import classNames from 'classnames';
 import type { AppInputProps } from './AppInput.types';
-import {
-  InputWrapper,
-  StyledLabel,
-  RequiredIndicator,
-  InputContainer,
-  StyledInput,
-  IconContainer,
-  SuffixText,
-  ErrorText,
-} from './AppInput.styles';
 import {
   generateInputId,
   isFieldFilled,
@@ -17,6 +8,7 @@ import {
   shouldShowError,
   combineClassNames,
 } from './utils/inputHelpers';
+import './AppInput.css';
 
 const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
   // Основные пропсы
@@ -105,47 +97,76 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
     onChange?.(newValue, event);
   };
 
+  const wrapperClasses = classNames(
+    'app-input',
+    {
+      'app-input_disabled': disabled,
+    },
+    combineClassNames(className)
+  );
+
+  const containerClasses = classNames(
+    'app-input__container',
+    `app-input__container_size_${size}`,
+    `app-input__container_background_${background}`,
+    `app-input__container_rounded-bottom_${roundedBottom}`,
+    {
+      'app-input__container_error': hasError,
+      'app-input__container_focused': isFocused,
+      'app-input__container_disabled': disabled,
+    }
+  );
+
+  const labelClasses = classNames(
+    'app-input__label',
+    {
+      'app-input__label_error': hasError,
+    }
+  );
+
+  const requiredClasses = classNames(
+    'app-input__required',
+    {
+      'app-input__required_error': hasError,
+    }
+  );
+
+  const fieldClasses = classNames(
+    'app-input__field',
+    `app-input__field_size_${size}`
+  );
+
   return (
-    <InputWrapper 
-      className={combineClassNames(className)}
-      $disabled={disabled}
+    <div 
+      className={wrapperClasses}
       data-testid={dataTestId}
     >
       {/* Label */}
       {label && (
-        <StyledLabel 
+        <label 
           htmlFor={inputId}
-          $required={required}
-          $error={hasError}
+          className={labelClasses}
         >
           {label}
           {required && (
-            <RequiredIndicator $error={hasError}>
+            <span className={requiredClasses}>
               *
-            </RequiredIndicator>
+            </span>
           )}
-        </StyledLabel>
+        </label>
       )}
       
       {/* Input Container */}
-      <InputContainer
-        $size={size}
-        $background={background}
-        $error={hasError}
-        $isFocused={isFocused}
-        $disabled={disabled}
-        $roundedBottom={roundedBottom}
-        data-disabled={disabled}
-      >
+      <div className={containerClasses}>
         {/* Left Icon */}
         {iconLeft && (
-          <IconContainer>
+          <span className="app-input__icon">
             {iconLeft}
-          </IconContainer>
+          </span>
         )}
         
         {/* Input */}
-        <StyledInput
+        <input
           ref={inputRef}
           id={inputId}
           name={name}
@@ -155,8 +176,7 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
           readOnly={readOnly}
           autoComplete={autoComplete}
           autoFocus={autoFocus}
-          $size={size}
-          $disabled={disabled}
+          className={fieldClasses}
           onFocus={handleFocus}
           onBlur={handleBlur}
           onChange={handleChange}
@@ -168,26 +188,26 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
         
         {/* Suffix */}
         {suffix && (
-          <SuffixText>
+          <span className="app-input__suffix">
             {suffix}
-          </SuffixText>
+          </span>
         )}
         
         {/* Right Icon */}
         {iconRight && (
-          <IconContainer>
+          <span className="app-input__icon">
             {iconRight}
-          </IconContainer>
+          </span>
         )}
-      </InputContainer>
+      </div>
       
       {/* Error Text */}
       {hasError && errorMessage && (
-        <ErrorText id={errorId}>
+        <span className="app-input__error" id={errorId}>
           {errorMessage}
-        </ErrorText>
+        </span>
       )}
-    </InputWrapper>
+    </div>
   );
 });
 

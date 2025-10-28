@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import classNames from 'classnames';
+import './AppNavigation.css';
 
 export type TabId = 'services' | 'orders' | 'analytics' | 'schedule';
 
@@ -21,38 +22,6 @@ const tabs: Tab[] = [
   { id: 'schedule', label: 'Время работы', path: '/schedule' },
 ];
 
-const NavigationContainer = styled.nav`
-  position: absolute;
-  left: 50%;
-  top: 8px;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-`;
-
-const NavTab = styled.button<{ $active: boolean }>`
-  padding: 8px 16px;
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.2;
-  border-radius: 16px;
-  border: 1px solid ${props => props.$active ? '#302F2D' : '#F9F8F5'};
-  background: ${props => props.$active ? '#302F2D' : '#F9F8F5'};
-  color: ${props => props.$active ? '#FFFFFF' : '#53514F'};
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  
-  &:hover {
-    background: ${props => props.$active ? '#302F2D' : '#FFFFFF'};
-  }
-  
-  &:active {
-    transform: scale(0.98);
-  }
-`;
-
 const AppNavigation = ({ activeTab, onTabChange }: AppNavigationProps) => {
   const navigate = useNavigate();
   
@@ -62,17 +31,23 @@ const AppNavigation = ({ activeTab, onTabChange }: AppNavigationProps) => {
   };
   
   return (
-    <NavigationContainer>
-      {tabs.map((tab) => (
-        <NavTab 
-          key={tab.id}
-          $active={activeTab === tab.id}
-          onClick={() => handleTabClick(tab)}
-        >
-          {tab.label}
-        </NavTab>
-      ))}
-    </NavigationContainer>
+    <nav className="app-navigation">
+      {tabs.map((tab) => {
+        const tabClassName = classNames('app-navigation__tab', {
+          'app-navigation__tab_active': activeTab === tab.id,
+        });
+
+        return (
+          <button
+            key={tab.id}
+            className={tabClassName}
+            onClick={() => handleTabClick(tab)}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </nav>
   );
 };
 

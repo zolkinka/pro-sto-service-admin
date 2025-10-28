@@ -34,15 +34,3 @@ export interface ToastContextType {
   hideToast: (id: string) => void;
   hideAll: () => void;
 }
-
-export interface StyledToastProps {
-  $type: ToastType;
-  $isExiting: boolean;
-  $position: ToastPosition;
-}
-
-export interface StyledProgressBarProps {
-  $duration: number;
-  $isPaused: boolean;
-  $type: ToastType;
-}

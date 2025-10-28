@@ -1,0 +1,116 @@
+/* AppRadio component styles with BEM methodology */
+/* Block: app-radio */
+
+.app-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.app-radio_disabled {
+  cursor: not-allowed;
+}
+
+/* Element: hidden input */
+.app-radio__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Element: custom radio visual */
+.app-radio__circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  border: 1.5px solid;
+  background-color: transparent;
+}
+
+/* Size modifiers */
+.app-radio__circle_size_M {
+  width: 20px;
+  height: 20px;
+}
+
+.app-radio__circle_size_L {
+  width: 28px;
+  height: 28px;
+}
+
+/* Default state - unchecked */
+.app-radio__circle {
+  border-color: var(--color-gray-900);
+}
+
+.app-radio:hover .app-radio__circle:not(.app-radio__circle_disabled) {
+  border-color: var(--color-gray-900);
+  box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.1);
+}
+
+.app-radio:active .app-radio__circle:not(.app-radio__circle_disabled) {
+  box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.2);
+}
+
+/* Disabled state */
+.app-radio__circle_disabled {
+  border-color: var(--color-gray-400);
+  opacity: 0.6;
+}
+
+/* Focus indicator for accessibility */
+.app-radio__input:focus-visible + .app-radio__circle {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Element: indicator (inner circle) */
+.app-radio__indicator {
+  display: block;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  background-color: transparent;
+  transform: scale(0);
+}
+
+.app-radio__indicator_size_M {
+  width: 8px;
+  height: 8px;
+}
+
+.app-radio__indicator_size_L {
+  width: 12px;
+  height: 12px;
+}
+
+/* Checked state */
+.app-radio__indicator_checked {
+  background-color: var(--color-gray-900);
+  transform: scale(1);
+}
+
+.app-radio__indicator_checked.app-radio__indicator_disabled {
+  background-color: var(--color-gray-400);
+}
+
+/* Element: label text */
+.app-radio__label {
+  font-family: var(--font-onest);
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+  transition: color 0.2s ease;
+}
+
+.app-radio__label_disabled {
+  color: var(--color-gray-400);
+}

@@ -1,0 +1,172 @@
+/* AppButton component styles with BEM methodology */
+/* Block: app-button */
+
+.app-button {
+  /* Base styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: var(--font-onest);
+  font-weight: 400;
+  line-height: 1.2;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+/* Focus for accessibility */
+.app-button:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Size modifiers */
+.app-button_size_M {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.app-button_size_L {
+  height: 50px;
+  padding: 0 20px;
+  font-size: 16px;
+  gap: 10px;
+}
+
+/* Variant: primary */
+.app-button_variant_primary {
+  background-color: var(--color-gray-900);
+  color: var(--color-gray-25);
+  border: none;
+}
+
+.app-button_variant_primary:hover:not(:disabled) {
+  background-color: #2A2925;
+}
+
+.app-button_variant_primary:active:not(:disabled) {
+  background-color: #1F1E1B;
+}
+
+/* Variant: secondary */
+.app-button_variant_secondary {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-900);
+  border: none;
+}
+
+.app-button_variant_secondary:hover:not(:disabled) {
+  background-color: #E8E7E4;
+}
+
+.app-button_variant_secondary:active:not(:disabled) {
+  background-color: #DCDBD8;
+}
+
+/* Variant: danger */
+.app-button_variant_danger {
+  background-color: transparent;
+  color: var(--color-error-500);
+  border: none;
+}
+
+.app-button_variant_danger:hover:not(:disabled) {
+  background-color: rgba(232, 48, 70, 0.1);
+}
+
+.app-button_variant_danger:active:not(:disabled) {
+  background-color: rgba(232, 48, 70, 0.2);
+}
+
+/* Variant: invisible */
+.app-button_variant_invisible {
+  background-color: transparent;
+  color: var(--color-gray-900);
+  border: none;
+}
+
+.app-button_variant_invisible:hover:not(:disabled) {
+  background-color: rgba(48, 47, 45, 0.1);
+}
+
+.app-button_variant_invisible:active:not(:disabled) {
+  background-color: rgba(48, 47, 45, 0.2);
+}
+
+/* Variant: default */
+.app-button_variant_default {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-900);
+  border: 1px solid var(--color-gray-300);
+}
+
+.app-button_variant_default:hover:not(:disabled) {
+  background-color: #E8E7E4;
+  border-color: var(--color-gray-400);
+}
+
+.app-button_variant_default:active:not(:disabled) {
+  background-color: #DCDBD8;
+  border-color: var(--color-gray-400);
+}
+
+/* State: disabled */
+.app-button:disabled,
+.app-button_disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* State: loading */
+.app-button_loading {
+  cursor: wait;
+}
+
+/* Modifier: only icon */
+.app-button_only-icon.app-button_size_M {
+  width: 40px;
+  padding: 0;
+}
+
+.app-button_only-icon.app-button_size_L {
+  width: 50px;
+  padding: 0;
+}
+
+/* Elements */
+.app-button__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.app-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-button__icon svg,
+.app-button__icon img {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .app-button {
+    min-height: 44px;
+  }
+}

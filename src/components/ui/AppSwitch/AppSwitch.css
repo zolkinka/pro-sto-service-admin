@@ -1,0 +1,125 @@
+/* AppSwitch component styles with BEM methodology */
+/* Block: app-switch */
+
+.app-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.app-switch_disabled {
+  cursor: not-allowed;
+}
+
+/* Element: hidden input */
+.app-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Element: track (background) */
+.app-switch__track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+
+/* Size modifiers for track */
+.app-switch__track_size_L {
+  width: 44px;
+  height: 24px;
+  padding: 2px;
+  border-radius: 14px;
+}
+
+.app-switch__track_size_M {
+  width: 36px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 12px;
+}
+
+/* Track states - unchecked */
+.app-switch__track {
+  background-color: var(--color-gray-400);
+}
+
+.app-switch:hover .app-switch__track:not(.app-switch__track_disabled) {
+  background-color: #D0D0D0;
+}
+
+/* Track states - checked */
+.app-switch__track_checked {
+  background-color: var(--color-gray-900);
+}
+
+.app-switch:hover .app-switch__track_checked:not(.app-switch__track_disabled) {
+  background-color: #1F1E1B;
+}
+
+/* Track states - disabled */
+.app-switch__track_disabled {
+  background-color: var(--color-gray-100);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Focus indicator for accessibility */
+.app-switch__input:focus-visible ~ .app-switch__track {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Element: thumb (slider) */
+.app-switch__thumb {
+  background-color: var(--color-gray-25);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+/* Thumb sizes */
+.app-switch__thumb_size_L {
+  width: 20px;
+  height: 20px;
+}
+
+.app-switch__thumb_size_M {
+  width: 16px;
+  height: 16px;
+}
+
+/* Thumb position - checked */
+.app-switch__thumb_checked.app-switch__thumb_size_L {
+  transform: translateX(20px);
+}
+
+.app-switch__thumb_checked.app-switch__thumb_size_M {
+  transform: translateX(16px);
+}
+
+/* Thumb position - unchecked */
+.app-switch__thumb {
+  transform: translateX(0);
+}
+
+/* Element: label text */
+.app-switch__label {
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+}
+
+.app-switch__label_disabled {
+  color: var(--color-gray-400);
+}

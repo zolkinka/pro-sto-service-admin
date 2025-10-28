@@ -1,11 +1,15 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
 import { StoreProvider } from '@/stores/StoreContext';
-import { theme, GlobalStyles } from '@/styles';
 import { OpenAPI } from '../services/api-client';
 import App from './App';
+
+// Import global styles
+import '@/styles/variables.css';
+import '@/styles/reset.css';
+import '@/styles/global.css';
+import '@/styles/animations.css';
 
 // Настройка базового URL для API
 OpenAPI.BASE = 'http://localhost:5201';
@@ -19,12 +23,9 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <StoreProvider>
-      <ThemeProvider theme={theme}>
-        <GlobalStyles />
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </ThemeProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </StoreProvider>
   </StrictMode>,
 );

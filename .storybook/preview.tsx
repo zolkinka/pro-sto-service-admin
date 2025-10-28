@@ -1,16 +1,16 @@
 import type { Preview } from '@storybook/react-vite';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
-import { theme } from '../src/styles/theme';
-import { GlobalStyles } from '../src/styles/GlobalStyles';
+
+// Import global CSS styles
+import '../src/styles/variables.css';
+import '../src/styles/reset.css';
+import '../src/styles/global.css';
+import '../src/styles/animations.css';
 
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <ThemeProvider theme={theme}>
-        <GlobalStyles />
-        <Story />
-      </ThemeProvider>
+      <Story />
     ),
   ],
   parameters: {

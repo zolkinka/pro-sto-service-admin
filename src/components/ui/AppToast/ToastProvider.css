@@ -1,0 +1,44 @@
+/* Toast Container */
+
+.toast-container {
+  position: fixed;
+  z-index: var(--z-index-tooltip);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast-container > * {
+  pointer-events: auto;
+}
+
+/* Позиции */
+.toast-container_position_top-right {
+  top: 16px;
+  right: 16px;
+}
+
+.toast-container_position_top-left {
+  top: 16px;
+  left: 16px;
+}
+
+.toast-container_position_bottom-right {
+  bottom: 16px;
+  right: 16px;
+}
+
+.toast-container_position_bottom-left {
+  bottom: 16px;
+  left: 16px;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .toast-container {
+    left: 16px !important;
+    right: 16px !important;
+    max-width: calc(100vw - 32px);
+  }
+}

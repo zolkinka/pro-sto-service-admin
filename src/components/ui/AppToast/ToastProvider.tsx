@@ -1,59 +1,15 @@
 import React, { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import styled from 'styled-components';
+import classNames from 'classnames';
 import AppToast from './AppToast';
 import { ToastContext } from './ToastContext';
 import type { 
   ToastProviderProps, 
   ToastContextType, 
   ToastConfig, 
-  AppToastProps,
-  ToastPosition 
+  AppToastProps
 } from './AppToast.types';
-
-// Стили для контейнера toast'ов
-const getPositionStyles = (position: ToastPosition) => {
-  const positions = {
-    'top-right': `
-      top: 16px;
-      right: 16px;
-    `,
-    'top-left': `
-      top: 16px;
-      left: 16px;
-    `,
-    'bottom-right': `
-      bottom: 16px;
-      right: 16px;
-    `,
-    'bottom-left': `
-      bottom: 16px;
-      left: 16px;
-    `,
-  };
-  
-  return positions[position];
-};
-
-const ToastContainerStyled = styled.div<{ $position: ToastPosition }>`
-  position: fixed;
-  ${({ $position }) => getPositionStyles($position)}
-  z-index: ${({ theme }) => theme.zIndex.tooltip};
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  pointer-events: none;
-  
-  > * {
-    pointer-events: auto;
-  }
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    left: 16px;
-    right: 16px;
-    max-width: calc(100vw - 32px);
-  }
-`;
+import './ToastProvider.css';
 
 // Provider компонент
 export const ToastProvider: React.FC<ToastProviderProps> = ({
@@ -109,15 +65,20 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
     hideAll,
   };
 
+  const containerClassName = classNames(
+    'toast-container',
+    `toast-container_position_${position}`
+  );
+
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
       {createPortal(
-        <ToastContainerStyled $position={position}>
+        <div className={containerClassName}>
           {toasts.map(toast => (
             <AppToast key={toast.id} {...toast} />
           ))}
-        </ToastContainerStyled>,
+        </div>,
         document.body
       )}
     </ToastContext.Provider>

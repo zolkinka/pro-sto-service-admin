@@ -1,0 +1,215 @@
+/* AppCheckbox component styles with BEM methodology */
+/* Block: app-checkbox */
+
+.app-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  vertical-align: top;
+  line-height: 0;
+}
+
+.app-checkbox_disabled {
+  cursor: not-allowed;
+}
+
+/* Element: hidden input */
+.app-checkbox__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Element: custom checkbox visual */
+.app-checkbox__box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  border: 1.5px solid;
+}
+
+/* Size modifiers for box */
+.app-checkbox__box_size_S {
+  width: 20px;
+  height: 20px;
+}
+
+.app-checkbox__box_size_M {
+  width: 24px;
+  height: 24px;
+}
+
+/* Primary variant - unchecked - default */
+.app-checkbox__box_variant_primary {
+  border-color: var(--color-gray-200);
+  background-color: var(--color-gray-25);
+}
+
+.app-checkbox:hover .app-checkbox__box_variant_primary:not(.app-checkbox__box_disabled):not(.app-checkbox__box_checked):not(.app-checkbox__box_indeterminate) {
+  border-color: var(--color-gray-900);
+  box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.05);
+}
+
+.app-checkbox:active .app-checkbox__box_variant_primary:not(.app-checkbox__box_disabled):not(.app-checkbox__box_checked):not(.app-checkbox__box_indeterminate) {
+  box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.1);
+}
+
+/* Primary variant - checked/indeterminate - default */
+.app-checkbox__box_variant_primary.app-checkbox__box_checked,
+.app-checkbox__box_variant_primary.app-checkbox__box_indeterminate {
+  border-color: var(--color-gray-900);
+  background-color: var(--color-gray-900);
+}
+
+.app-checkbox:hover .app-checkbox__box_variant_primary.app-checkbox__box_checked:not(.app-checkbox__box_disabled),
+.app-checkbox:hover .app-checkbox__box_variant_primary.app-checkbox__box_indeterminate:not(.app-checkbox__box_disabled) {
+  background-color: #1F1E1B;
+  border-color: #1F1E1B;
+  box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.05);
+}
+
+.app-checkbox:active .app-checkbox__box_variant_primary.app-checkbox__box_checked:not(.app-checkbox__box_disabled),
+.app-checkbox:active .app-checkbox__box_variant_primary.app-checkbox__box_indeterminate:not(.app-checkbox__box_disabled) {
+  box-shadow: 0 0 0 2px rgba(48, 47, 45, 0.1);
+}
+
+/* Primary variant - disabled */
+.app-checkbox__box_variant_primary.app-checkbox__box_disabled {
+  border-color: var(--color-gray-200);
+  opacity: 0.6;
+}
+
+.app-checkbox__box_variant_primary.app-checkbox__box_disabled.app-checkbox__box_checked,
+.app-checkbox__box_variant_primary.app-checkbox__box_disabled.app-checkbox__box_indeterminate {
+  background-color: var(--color-gray-200);
+}
+
+/* Secondary variant - unchecked - default */
+.app-checkbox__box_variant_secondary {
+  border-color: #FFFFFF;
+  background-color: transparent;
+}
+
+.app-checkbox:hover .app-checkbox__box_variant_secondary:not(.app-checkbox__box_disabled):not(.app-checkbox__box_checked):not(.app-checkbox__box_indeterminate) {
+  border-color: #FFFFFF;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.app-checkbox:active .app-checkbox__box_variant_secondary:not(.app-checkbox__box_disabled):not(.app-checkbox__box_checked):not(.app-checkbox__box_indeterminate) {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Secondary variant - checked/indeterminate - default */
+.app-checkbox__box_variant_secondary.app-checkbox__box_checked,
+.app-checkbox__box_variant_secondary.app-checkbox__box_indeterminate {
+  border-color: #FFFFFF;
+  background-color: #FFFFFF;
+}
+
+.app-checkbox:hover .app-checkbox__box_variant_secondary.app-checkbox__box_checked:not(.app-checkbox__box_disabled),
+.app-checkbox:hover .app-checkbox__box_variant_secondary.app-checkbox__box_indeterminate:not(.app-checkbox__box_disabled) {
+  background-color: #F5F5F5;
+  border-color: #F5F5F5;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.app-checkbox:active .app-checkbox__box_variant_secondary.app-checkbox__box_checked:not(.app-checkbox__box_disabled),
+.app-checkbox:active .app-checkbox__box_variant_secondary.app-checkbox__box_indeterminate:not(.app-checkbox__box_disabled) {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Secondary variant - disabled */
+.app-checkbox__box_variant_secondary.app-checkbox__box_disabled {
+  border-color: #FFFFFF;
+  opacity: 0.6;
+}
+
+.app-checkbox__box_variant_secondary.app-checkbox__box_disabled.app-checkbox__box_checked,
+.app-checkbox__box_variant_secondary.app-checkbox__box_disabled.app-checkbox__box_indeterminate {
+  border-color: var(--color-gray-100);
+  background-color: var(--color-gray-100);
+}
+
+/* Focus indicator for accessibility */
+.app-checkbox__input:focus-visible + .app-checkbox__box {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Element: icon */
+.app-checkbox__icon {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.2s ease;
+}
+
+.app-checkbox__icon_size_S {
+  width: 12px;
+  height: 12px;
+}
+
+.app-checkbox__icon_size_M {
+  width: 16px;
+  height: 16px;
+}
+
+/* Icon colors based on variant */
+.app-checkbox__icon_variant_primary {
+  stroke: #FFFFFF;
+}
+
+.app-checkbox__icon_variant_secondary {
+  stroke: var(--color-gray-900);
+}
+
+.app-checkbox__icon_variant_primary.app-checkbox__icon_disabled {
+  stroke: #FFFFFF;
+}
+
+.app-checkbox__icon_variant_secondary.app-checkbox__icon_disabled {
+  stroke: var(--color-gray-200);
+}
+
+/* Element: label */
+.app-checkbox__label {
+  font-family: var(--font-onest);
+  font-weight: 400;
+  line-height: 1.2;
+  transition: color 0.2s ease;
+}
+
+.app-checkbox__label_size_S {
+  font-size: 14px;
+}
+
+.app-checkbox__label_size_M {
+  font-size: 15px;
+}
+
+/* Label colors based on variant */
+.app-checkbox__label_variant_primary {
+  color: var(--color-gray-900);
+}
+
+.app-checkbox__label_variant_secondary {
+  color: #FFFFFF;
+}
+
+.app-checkbox__label_variant_primary.app-checkbox__label_disabled {
+  color: var(--color-gray-400);
+}
+
+.app-checkbox__label_variant_secondary.app-checkbox__label_disabled {
+  color: rgba(255, 255, 255, 0.6);
+}

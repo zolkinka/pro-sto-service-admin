@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { bookingGetOne, OpenAPI } from '../../../services/api-client';
 import type { DetailedBookingResponseDto } from '../../../services/api-client/types.gen';
 import { AppButton } from '@/components/ui/AppButton';
@@ -31,7 +31,7 @@ import './PaymentMockPage.css';
  */
 const PaymentMockPage = () => {
   const { bookingUuid } = useParams<{ bookingUuid: string; }>();
-  // const { bookingUuid } = use<{ bookingUuid: string; }>();
+  const [searchParams] = useSearchParams();
   
   const [status, setStatus] = useState<PaymentPageStatus>('loading');
   const [booking, setBooking] = useState<DetailedBookingResponseDto | null>(null);
@@ -53,7 +53,13 @@ const PaymentMockPage = () => {
   const loadBookingData = useCallback(async () => {
     try {
       setStatus('loading');
-      // OpenAPI.TOKEN = accessToken;
+      
+      // Извлекаем accessToken из query параметров и регистрируем в API client
+      const accessToken = searchParams.get('accessToken');
+      if (accessToken) {
+        OpenAPI.TOKEN = accessToken;
+        console.log('Access token зарегистрирован из query параметров');
+      }
 
       const response = await bookingGetOne({ uuid: bookingUuid! });
       
@@ -71,7 +77,7 @@ const PaymentMockPage = () => {
       setStatus('not_found');
       setErrorMessage('Бронирование не найдено');
     }
-  }, [bookingUuid]);
+  }, [bookingUuid, searchParams]);
 
   /**
    * Загрузка данных о бронировании при монтировании

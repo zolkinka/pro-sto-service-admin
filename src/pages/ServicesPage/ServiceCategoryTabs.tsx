@@ -1,5 +1,6 @@
 import React from 'react';
-import { CategoryTabs, CategoryTab } from './ServicesSection.styles';
+import classNames from 'classnames';
+import './ServicesSection.css';
 
 interface ServiceCategoryTabsProps {
   activeCategory: 'car_wash' | 'tire_service';
@@ -11,20 +12,24 @@ const ServiceCategoryTabs: React.FC<ServiceCategoryTabsProps> = ({
   onCategoryChange,
 }) => {
   return (
-    <CategoryTabs>
-      <CategoryTab
-        $active={activeCategory === 'car_wash'}
+    <div className="category-tabs">
+      <button
+        className={classNames('category-tabs__tab', {
+          'category-tabs__tab_active': activeCategory === 'car_wash',
+        })}
         onClick={() => onCategoryChange('car_wash')}
       >
         Мойка
-      </CategoryTab>
-      <CategoryTab
-        $active={activeCategory === 'tire_service'}
+      </button>
+      <button
+        className={classNames('category-tabs__tab', {
+          'category-tabs__tab_active': activeCategory === 'tire_service',
+        })}
         onClick={() => onCategoryChange('tire_service')}
       >
         Шиномонтаж
-      </CategoryTab>
-    </CategoryTabs>
+      </button>
+    </div>
   );
 };
 

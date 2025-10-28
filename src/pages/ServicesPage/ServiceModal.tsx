@@ -4,26 +4,7 @@ import type { ServiceDto } from '../../../services/api-client';
 import { servicesStore, authStore, toastStore } from '@/stores';
 import AppInput from '@/components/ui/AppInput';
 import AppNumberInput from '@/components/ui/AppNumberInput';
-
-import {
-  ModalOverlay,
-  ModalContainer,
-  ModalHeader,
-  ModalTitle,
-  CloseButton,
-  ModalContent,
-  Section,
-  SectionTitle,
-  InputsContainer,
-  PricesGrid,
-  PriceRow,
-  PriceInputWrapper,
-  ModalFooter,
-  ModalButton,
-  TextArea,
-  TextAreaLabel,
-  TextAreaWrapper,
-} from './ServiceModal.styles';
+import './ServiceModal.css';
 
 interface ServiceModalProps {
   isOpen: boolean;
@@ -288,12 +269,12 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
   }
 
   return (
-    <ModalOverlay onClick={handleOverlayClick}>
-      <ModalContainer>
+    <div className="service-modal-overlay" onClick={handleOverlayClick}>
+      <div className="service-modal">
         {/* Заголовок */}
-        <ModalHeader>
-          <ModalTitle>Услуги</ModalTitle>
-          <CloseButton onClick={onClose}>
+        <div className="service-modal__header">
+          <h2 className="service-modal__title">Услуги</h2>
+          <button className="service-modal__close" onClick={onClose}>
             <svg
               width="24"
               height="24"
@@ -309,15 +290,15 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
                 strokeLinejoin="round"
               />
             </svg>
-          </CloseButton>
-        </ModalHeader>
+          </button>
+        </div>
 
         {/* Контент */}
-        <ModalContent>
+        <div className="service-modal__content">
           {/* Секция: Основное */}
-          <Section>
-            <SectionTitle>Основное</SectionTitle>
-            <InputsContainer>
+          <div className="service-modal__section">
+            <h3 className="service-modal__section-title">Основное</h3>
+            <div className="service-modal__inputs">
               {/* Название услуги */}
               <AppInput
                 label="Название услуги"
@@ -329,16 +310,17 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
               />
 
               {/* Описание */}
-              <TextAreaWrapper>
-                <TextAreaLabel>Описание</TextAreaLabel>
-                <TextArea
+              <div className="service-modal__textarea-wrapper">
+                <label className="service-modal__textarea-label">Описание</label>
+                <textarea
+                  className="service-modal__textarea"
                   placeholder="Быстрая мойка кузова и стекол"
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
                   disabled={isSubmitting}
                   rows={2}
                 />
-              </TextAreaWrapper>
+              </div>
 
               {/* Продолжительность */}
               <AppNumberInput
@@ -351,16 +333,16 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
                 min={1}
                 suffix="мин"
               />
-            </InputsContainer>
-          </Section>
+            </div>
+          </div>
 
           {/* Секция: Цены */}
-          <Section>
-            <SectionTitle>Цены</SectionTitle>
-            <PricesGrid>
+          <div className="service-modal__section">
+            <h3 className="service-modal__section-title">Цены</h3>
+            <div className="service-modal__prices-grid">
               {/* Первая строка: Легковой и Кроссовер */}
-              <PriceRow>
-                <PriceInputWrapper>
+              <div className="service-modal__price-row">
+                <div className="service-modal__price-input">
                   <AppNumberInput
                     label="Легковой"
                     placeholder="600"
@@ -371,8 +353,8 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
                     min={0}
                     suffix="₽"
                   />
-                </PriceInputWrapper>
-                <PriceInputWrapper>
+                </div>
+                <div className="service-modal__price-input">
                   <AppNumberInput
                     label="Кроссовер"
                     placeholder="600"
@@ -383,12 +365,12 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
                     min={0}
                     suffix="₽"
                   />
-                </PriceInputWrapper>
-              </PriceRow>
+                </div>
+              </div>
 
               {/* Вторая строка: Внедорожник и Минивен */}
-              <PriceRow>
-                <PriceInputWrapper>
+              <div className="service-modal__price-row">
+                <div className="service-modal__price-input">
                   <AppNumberInput
                     label="Внедорожник"
                     placeholder="600"
@@ -399,8 +381,8 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
                     min={0}
                     suffix="₽"
                   />
-                </PriceInputWrapper>
-                <PriceInputWrapper>
+                </div>
+                <div className="service-modal__price-input">
                   <AppNumberInput
                     label="Минивен"
                     placeholder="600"
@@ -411,27 +393,35 @@ const ServiceModal: React.FC<ServiceModalProps> = observer(({
                     min={0}
                     suffix="₽"
                   />
-                </PriceInputWrapper>
-              </PriceRow>
-            </PricesGrid>
-          </Section>
-        </ModalContent>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Футер с кнопками */}
-        <ModalFooter>
-          <ModalButton onClick={onClose} disabled={isSubmitting}>
+        <div className="service-modal__footer">
+          <button 
+            className="service-modal__button service-modal__button_secondary" 
+            onClick={onClose} 
+            disabled={isSubmitting}
+          >
             Отмена
-          </ModalButton>
-          <ModalButton $variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+          </button>
+          <button 
+            className="service-modal__button service-modal__button_primary" 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+          >
             {isSubmitting
               ? 'Сохранение...'
               : mode === 'create'
               ? 'Добавить'
               : 'Сохранить'}
-          </ModalButton>
-        </ModalFooter>
-      </ModalContainer>
-    </ModalOverlay>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 });
 

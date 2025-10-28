@@ -1,14 +1,13 @@
-import styled from 'styled-components';
-
-export const PageContainer = styled.div`
+/* ServicesPage */
+.services-page {
   background: #f9f8f5;
   min-height: 100vh;
-  padding: 12px 0 40px; // отступ сверху для fixed header
+  padding: 12px 0 40px;
   display: flex;
   justify-content: center;
-`;
+}
 
-export const MainContainer = styled.div`
+.services-page__container {
   width: 1064px;
   background: white;
   border-radius: 24px;
@@ -17,4 +16,4 @@ export const MainContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 24px;
-`;
+}

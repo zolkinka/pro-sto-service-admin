@@ -1,12 +1,6 @@
 import React from 'react';
 import type { ServiceDto } from '../../../services/api-client';
-import {
-  TableRow,
-  TableCell,
-  TableCellSecondary,
-  ActionsCell,
-  IconButton,
-} from './ServicesTable.styles';
+import './ServicesTable.css';
 
 interface ServiceTableRowProps {
   service: ServiceDto;
@@ -41,37 +35,45 @@ const ServiceTableRow: React.FC<ServiceTableRowProps> = ({
   const minivanPrice = getServicePrice(service, 'minivan');
 
   return (
-    <TableRow>
+    <div className="services-table__row">
       {/* Название */}
-      <TableCell width={155}>{service.name}</TableCell>
+      <div className="services-table__cell" style={{ width: 155 }}>
+        {service.name}
+      </div>
 
       {/* Описание */}
-      <TableCellSecondary width={265}>
+      <div className="services-table__cell services-table__cell_secondary" style={{ width: 265 }}>
         {service.description || '—'}
-      </TableCellSecondary>
+      </div>
 
       {/* Время */}
-      <TableCellSecondary width={90}>
+      <div className="services-table__cell services-table__cell_secondary" style={{ width: 90 }}>
         {service.duration_minutes} мин
-      </TableCellSecondary>
+      </div>
 
       {/* Легковой */}
-      <TableCell width={110}>{sedanPrice ? `${sedanPrice}₽` : '—'}</TableCell>
+      <div className="services-table__cell" style={{ width: 110 }}>
+        {sedanPrice ? `${sedanPrice}₽` : '—'}
+      </div>
 
       {/* Кроссовер */}
-      <TableCell width={110}>
+      <div className="services-table__cell" style={{ width: 110 }}>
         {crossoverPrice ? `${crossoverPrice}₽` : '—'}
-      </TableCell>
+      </div>
 
       {/* Внедорожник */}
-      <TableCell width={110}>{suvPrice ? `${suvPrice}₽` : '—'}</TableCell>
+      <div className="services-table__cell" style={{ width: 110 }}>
+        {suvPrice ? `${suvPrice}₽` : '—'}
+      </div>
 
       {/* Минивен */}
-      <TableCell width={110}>{minivanPrice ? `${minivanPrice}₽` : '—'}</TableCell>
+      <div className="services-table__cell" style={{ width: 110 }}>
+        {minivanPrice ? `${minivanPrice}₽` : '—'}
+      </div>
 
       {/* Действия */}
-      <ActionsCell width={64}>
-        <IconButton onClick={onEdit} title="Редактировать">
+      <div className="services-table__cell services-table__cell_actions" style={{ width: 64 }}>
+        <button className="services-table__icon-button" onClick={onEdit} title="Редактировать">
           <svg
             width="24"
             height="24"
@@ -92,9 +94,9 @@ const ServiceTableRow: React.FC<ServiceTableRowProps> = ({
               strokeLinejoin="round"
             />
           </svg>
-        </IconButton>
+        </button>
 
-        <IconButton onClick={onDelete} title="Удалить">
+        <button className="services-table__icon-button" onClick={onDelete} title="Удалить">
           <svg
             width="24"
             height="24"
@@ -115,9 +117,9 @@ const ServiceTableRow: React.FC<ServiceTableRowProps> = ({
               strokeLinejoin="round"
             />
           </svg>
-        </IconButton>
-      </ActionsCell>
-    </TableRow>
+        </button>
+      </div>
+    </div>
   );
 };
 

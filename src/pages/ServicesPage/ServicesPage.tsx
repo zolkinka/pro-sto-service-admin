@@ -5,7 +5,7 @@ import type { ServiceDto } from '../../../services/api-client';
 import ServicesSection from './ServicesSection';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
 import ServiceModal from './ServiceModal';
-import { PageContainer, MainContainer } from './ServicesPage.styles';
+import './ServicesPage.css';
 
 const ServicesPage = observer(() => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -87,26 +87,17 @@ const ServicesPage = observer(() => {
 
   if (servicesStore.isLoading) {
     return (
-      <PageContainer>
-        <MainContainer>
-          <div
-            style={{
-              padding: '40px',
-              textAlign: 'center',
-              color: '#888684',
-              fontFamily: 'Onest, sans-serif',
-            }}
-          >
-            Загрузка услуг...
-          </div>
-        </MainContainer>
-      </PageContainer>
+      <div className="services-page">
+        <div className="services-page__container">
+          Загрузка...
+        </div>
+      </div>
     );
   }
 
   return (
-    <PageContainer>
-      <MainContainer>
+    <div className="services-page">
+      <div className="services-page__container">
         {/* Секция основных услуг */}
         <ServicesSection
           title="Услуги"
@@ -147,8 +138,8 @@ const ServicesPage = observer(() => {
           service={serviceToEdit}
           serviceType={serviceModalType}
         />
-      </MainContainer>
-    </PageContainer>
+      </div>
+    </div>
   );
 });
 

@@ -1,11 +1,7 @@
 import React from 'react';
 import type { ServiceDto } from '../../../services/api-client';
 import ServiceTableRow from './ServiceTableRow';
-import {
-  TableContainer,
-  TableHeader,
-  TableCell,
-} from './ServicesTable.styles';
+import './ServicesTable.css';
 
 interface ServicesTableProps {
   services: ServiceDto[];
@@ -20,48 +16,41 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
 }) => {
   if (services.length === 0) {
     return (
-      <div
-        style={{
-          padding: '40px',
-          textAlign: 'center',
-          color: '#888684',
-          fontFamily: 'Onest, sans-serif',
-        }}
-      >
+      <div className="services-table__empty">
         Нет услуг в этой категории
       </div>
     );
   }
 
   return (
-    <TableContainer>
+    <div className="services-table">
       {/* Заголовок таблицы */}
-      <TableHeader>
-        <TableCell width={155} $isHeader>
+      <div className="services-table__row services-table__row_header">
+        <div className="services-table__cell services-table__cell_header" style={{ width: 155 }}>
           Название
-        </TableCell>
-        <TableCell width={265} $isHeader>
+        </div>
+        <div className="services-table__cell services-table__cell_header" style={{ width: 265 }}>
           Описание
-        </TableCell>
-        <TableCell width={90} $isHeader>
+        </div>
+        <div className="services-table__cell services-table__cell_header" style={{ width: 90 }}>
           Время
-        </TableCell>
-        <TableCell width={110} $isHeader>
+        </div>
+        <div className="services-table__cell services-table__cell_header" style={{ width: 110 }}>
           Легковой
-        </TableCell>
-        <TableCell width={110} $isHeader>
+        </div>
+        <div className="services-table__cell services-table__cell_header" style={{ width: 110 }}>
           Кроссовер
-        </TableCell>
-        <TableCell width={110} $isHeader>
+        </div>
+        <div className="services-table__cell services-table__cell_header" style={{ width: 110 }}>
           Внедорожник
-        </TableCell>
-        <TableCell width={110} $isHeader>
+        </div>
+        <div className="services-table__cell services-table__cell_header" style={{ width: 110 }}>
           Минивен
-        </TableCell>
-        <TableCell width={64} $isHeader>
+        </div>
+        <div className="services-table__cell services-table__cell_header" style={{ width: 64 }}>
           {/* Действия */}
-        </TableCell>
-      </TableHeader>
+        </div>
+      </div>
 
       {/* Строки с услугами */}
       {services.map((service) => (
@@ -72,7 +61,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
           onDelete={() => onDeleteService(service.uuid)}
         />
       ))}
-    </TableContainer>
+    </div>
   );
 };
 

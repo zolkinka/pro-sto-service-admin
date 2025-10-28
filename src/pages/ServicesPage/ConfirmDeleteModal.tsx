@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  ModalOverlay,
-  ModalContainer,
-  ModalTitle,
-  ModalMessage,
-  ModalActions,
-  ModalButton,
-} from './ConfirmDeleteModal.styles';
+import './ConfirmDeleteModal.css';
 
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -34,27 +27,31 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   };
 
   return (
-    <ModalOverlay onClick={handleOverlayClick}>
-      <ModalContainer>
-        <ModalTitle>Удалить услугу?</ModalTitle>
-        <ModalMessage>
+    <div className="confirm-delete-modal-overlay" onClick={handleOverlayClick}>
+      <div className="confirm-delete-modal">
+        <h2 className="confirm-delete-modal__title">Удалить услугу?</h2>
+        <p className="confirm-delete-modal__message">
           Вы действительно хотите удалить услугу "{serviceName}"? Это действие
           нельзя будет отменить.
-        </ModalMessage>
-        <ModalActions>
-          <ModalButton onClick={onCancel} disabled={isDeleting}>
+        </p>
+        <div className="confirm-delete-modal__actions">
+          <button 
+            className="confirm-delete-modal__button confirm-delete-modal__button_secondary"
+            onClick={onCancel} 
+            disabled={isDeleting}
+          >
             Отмена
-          </ModalButton>
-          <ModalButton
-            $variant="primary"
+          </button>
+          <button
+            className="confirm-delete-modal__button confirm-delete-modal__button_primary"
             onClick={onConfirm}
             disabled={isDeleting}
           >
             {isDeleting ? 'Удаление...' : 'Удалить'}
-          </ModalButton>
-        </ModalActions>
-      </ModalContainer>
-    </ModalOverlay>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

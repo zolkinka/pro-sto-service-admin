@@ -1,0 +1,66 @@
+/* ServicesTable */
+.services-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.services-table__header {
+  display: flex;
+  height: 43px;
+  min-height: 43px;
+}
+
+.services-table__row {
+  display: flex;
+  min-height: 49px;
+}
+
+.services-table__cell {
+  padding: 12px 12px 12px 0;
+  display: flex;
+  align-items: center;
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #302f2d;
+  border-bottom: 1px solid #f9f8f5;
+}
+
+.services-table__cell_header {
+  font-size: 12px;
+  color: #888684;
+  border-bottom: none;
+}
+
+.services-table__cell_secondary {
+  color: #73716f;
+}
+
+.services-table__cell_actions {
+  display: flex;
+  gap: 9px;
+  padding-right: 0;
+}
+
+.services-table__icon-button {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.services-table__icon-button svg {
+  width: 24px;
+  height: 24px;
+  stroke: #888684;
+}
+
+.services-table__icon-button:hover svg {
+  stroke: #302f2d;
+}

@@ -2,15 +2,7 @@ import React from 'react';
 import type { ServiceDto } from '../../../services/api-client';
 import ServicesTable from './ServicesTable';
 import ServiceCategoryTabs from './ServiceCategoryTabs';
-import {
-  SectionContainer,
-  SectionHeader,
-  SectionTitle,
-  Title,
-  AddServiceButton,
-  AddServiceText,
-  AddButton,
-} from './ServicesSection.styles';
+import './ServicesSection.css';
 
 interface ServicesSectionProps {
   title: string;
@@ -36,11 +28,11 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   const showTabs = serviceType === 'main' && onCategoryChange;
 
   return (
-    <SectionContainer>
+    <div className="services-section">
       {/* Заголовок секции */}
-      <SectionHeader>
-        <SectionTitle>
-          <Title>{title}</Title>
+      <div className="services-section__header">
+        <div className="services-section__title-wrapper">
+          <h2 className="services-section__title">{title}</h2>
           {/* Табы для переключения категорий (только для основных услуг) */}
           {showTabs && (
             <ServiceCategoryTabs
@@ -48,12 +40,15 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
               onCategoryChange={onCategoryChange}
             />
           )}
-        </SectionTitle>
+        </div>
 
         {/* Кнопка добавления услуги */}
-        <AddServiceButton>
-          <AddServiceText>Добавить услугу</AddServiceText>
-          <AddButton onClick={() => onAddService(serviceType)}>
+        <div className="services-section__add-button-wrapper">
+          <span className="services-section__add-text">Добавить услугу</span>
+          <button 
+            className="services-section__add-button"
+            onClick={() => onAddService(serviceType)}
+          >
             <svg
               width="20"
               height="20"
@@ -69,9 +64,9 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                 strokeLinejoin="round"
               />
             </svg>
-          </AddButton>
-        </AddServiceButton>
-      </SectionHeader>
+          </button>
+        </div>
+      </div>
 
       {/* Таблица с услугами */}
       <ServicesTable
@@ -79,7 +74,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         onEditService={onEditService}
         onDeleteService={onDeleteService}
       />
-    </SectionContainer>
+    </div>
   );
 };
 

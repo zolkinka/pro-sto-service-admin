@@ -1,0 +1,15 @@
+/* AppLayout */
+.app-layout {
+  background: #F9F8F5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout__content {
+  flex: 1;
+  padding-top: 129px; /* 48px top + 49px header + 32px spacing */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

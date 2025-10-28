@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { AppTable } from './AppTable';
 import { EditIcon, DeleteIcon } from './icons';
-import { ActionButtons, ActionButton } from './AppTable.styles';
+import { ActionButtons, ActionButton } from './AppTableActions';
 
 const meta: Meta<typeof AppTable> = {
   title: 'UI/AppTable',

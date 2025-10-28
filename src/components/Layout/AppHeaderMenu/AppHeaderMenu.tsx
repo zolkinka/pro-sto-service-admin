@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import AppBaseDropdown from '../../ui/AppBaseDropdown/AppBaseDropdown';
 import { TariffsIcon, SupportIcon, SettingsIcon, UserIcon } from '../../ui/icons';
 import './AppHeaderMenu.css';
@@ -54,22 +53,22 @@ const AppHeaderMenu: React.FC = () => {
       xDirection="right"
       yDirection="bottom"
       toggle={
-        <ProfileButton onClick={toggleDropdown} aria-label="Открыть меню профиля">
+        <button className="app-header-menu__profile-button" onClick={toggleDropdown} aria-label="Открыть меню профиля">
           <UserIcon />
-        </ProfileButton>
+        </button>
       }
       dropdown={
-        <MenuContainer className="app-header-menu-dropdown">
+        <div className="app-header-menu-dropdown">
           {menuItems.map((item, index) => (
             <React.Fragment key={item.id}>
-              <MenuItem onClick={() => handleItemClick(item)}>
-                <MenuIcon>{item.icon}</MenuIcon>
-                <MenuLabel>{item.label}</MenuLabel>
-              </MenuItem>
-              {index < menuItems.length - 1 && <MenuDivider />}
+              <button className="app-header-menu__item" onClick={() => handleItemClick(item)}>
+                <div className="app-header-menu__icon">{item.icon}</div>
+                <span className="app-header-menu__label">{item.label}</span>
+              </button>
+              {index < menuItems.length - 1 && <div className="app-header-menu__divider" />}
             </React.Fragment>
           ))}
-        </MenuContainer>
+        </div>
       }
     />
   );
@@ -78,78 +77,3 @@ const AppHeaderMenu: React.FC = () => {
 AppHeaderMenu.displayName = 'AppHeaderMenu';
 
 export default AppHeaderMenu;
-
-const ProfileButton = styled.button`
-  width: 49px;
-  height: 49px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  border: 1px solid #f4f3f0;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: #e8e7e4;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-`;
-
-const MenuContainer = styled.div`
-  background: #ffffff;
-  border-radius: 22px;
-  padding: 16px;
-  width: 197px;
-`;
-
-const MenuItem = styled.button`
-  width: 100%;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: transparent;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #f9f8f5;
-  }
-`;
-
-const MenuIcon = styled.div`
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-`;
-
-const MenuLabel = styled.span`
-  font-family: 'Onest', sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 1.2;
-  color: #302f2d;
-  white-space: nowrap;
-`;
-
-const MenuDivider = styled.div`
-  height: 1px;
-  background: #f4f3f0;
-  margin: 6px 0;
-`;

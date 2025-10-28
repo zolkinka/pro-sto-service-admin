@@ -1,80 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { authStore } from '@/stores/AuthStore';
 import { AppCodeInput } from '@/components/ui/AppCodeInput';
 import { AppButton } from '@/components/ui/AppButton';
 import AppLogo from '@/components/ui/AppLogo';
 import { ROUTES } from '@/constants/routes';
-
-const PageContainer = styled.div`
-  background: #F9F8F5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-`;
-
-const LogoWrapper = styled.div`
-  margin-top: 100px;
-`;
-
-const Title = styled.h1`
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-weight: ${({ theme }) => theme.fontWeight.medium};
-  font-size: 28px;
-  line-height: 1.2;
-  color: ${({ theme }) => theme.colors.gray[900]};
-  margin-top: 28px;
-  text-align: center;
-`;
-
-const FormCard = styled.div`
-  background: ${({ theme }) => theme.colors.gray[25]};
-  padding: 48px;
-  border-radius: 24px;
-  box-shadow: 0px 2px 4px 0px rgba(30, 27, 21, 0.05);
-  width: 412px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  margin-top: 55px;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    width: calc(100% - 32px);
-    padding: 32px 24px;
-  }
-`;
-
-const ResendButton = styled.button<{ $canResend: boolean }>`
-  background: transparent;
-  border: none;
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-size: ${({ theme }) => theme.fontSize.base};
-  font-weight: ${({ theme }) => theme.fontWeight.normal};
-  color: ${({ theme, $canResend }) => 
-    $canResend ? theme.colors.primary[500] : theme.colors.gray[500]};
-  cursor: ${({ $canResend }) => ($canResend ? 'pointer' : 'not-allowed')};
-  text-align: center;
-  padding: 0;
-  line-height: 1.2;
-  
-  &:hover {
-    opacity: ${({ $canResend }) => ($canResend ? '0.8' : '1')};
-  }
-  
-  transition: opacity 0.2s ease;
-`;
-
-const ButtonWrapper = styled.div`
-  width: 100%;
-  
-  button {
-    width: 100%;
-  }
-`;
+import './AuthCodePage.css';
 
 interface LocationState {
   phone?: string;
@@ -150,15 +82,17 @@ const AuthCodePage: React.FC = observer(() => {
     return null;
   }
 
+  const canResendActive = canResend && !authStore.isLoading;
+
   return (
-    <PageContainer>
-      <LogoWrapper>
+    <div className="auth-code">
+      <div className="auth-code__logo">
         <AppLogo />
-      </LogoWrapper>
+      </div>
 
-      <Title>Авторизация</Title>
+      <h1 className="auth-code__title">Авторизация</h1>
 
-      <FormCard>
+      <div className="auth-code__form">
         <AppCodeInput
           label="Введите код из СМС"
           length={4}
@@ -168,18 +102,18 @@ const AuthCodePage: React.FC = observer(() => {
           autoFocus
         />
 
-        <ResendButton
+        <button
+          className={`auth-code__resend ${canResendActive ? 'auth-code__resend_active' : 'auth-code__resend_disabled'}`}
           onClick={handleResend}
           disabled={!canResend || authStore.isLoading}
-          $canResend={canResend && !authStore.isLoading}
         >
           {canResend 
             ? 'Отправить повторно' 
             : `Отправить повторно через ${timer}с`
           }
-        </ResendButton>
+        </button>
 
-        <ButtonWrapper>
+        <div className="auth-code__button">
           <AppButton
             variant="primary"
             size="L"
@@ -189,9 +123,9 @@ const AuthCodePage: React.FC = observer(() => {
           >
             Далее
           </AppButton>
-        </ButtonWrapper>
-      </FormCard>
-    </PageContainer>
+        </div>
+      </div>
+    </div>
   );
 });
 

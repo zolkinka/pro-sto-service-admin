@@ -1,34 +1,11 @@
-import styled from 'styled-components';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  padding: ${({ theme }) => theme.spacing.xl};
-`;
-
-const Title = styled.h1`
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-size: ${({ theme }) => theme.fontSize['3xl']};
-  font-weight: ${({ theme }) => theme.fontWeight.semibold};
-  color: ${({ theme }) => theme.colors.gray[900]};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-`;
-
-const Description = styled.p`
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-size: ${({ theme }) => theme.fontSize.base};
-  color: ${({ theme }) => theme.colors.gray[600]};
-`;
+import './AnalyticsPage.css';
 
 const AnalyticsPage = () => {
   return (
-    <Container>
-      <Title>Аналитика</Title>
-      <Description>Здесь будет страница аналитики</Description>
-    </Container>
+    <div className="analytics-page">
+      <h1 className="analytics-page__title">Аналитика</h1>
+      <p className="analytics-page__description">Здесь будет страница аналитики</p>
+    </div>
   );
 };
 

@@ -1,0 +1,44 @@
+/* Header Component */
+
+.header {
+  background-color: var(--color-background-primary);
+  border-bottom: 1px solid var(--color-border-primary);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-sticky);
+}
+
+.header__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.header__logo {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-600);
+}
+
+.header__user-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.header__user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-full);
+  background-color: var(--color-primary-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-600);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}

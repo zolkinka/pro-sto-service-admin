@@ -1,61 +1,13 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import { authStore } from '@/stores/AuthStore';
 import AppPhoneInput from '@/components/ui/AppPhoneInput';
 import { AppButton } from '@/components/ui/AppButton';
 import AppLogo from '@/components/ui/AppLogo';
 import { ROUTES } from '@/constants/routes';
 import { extractPhoneDigits } from '@/components/ui/AppPhoneInput/utils/phoneHelpers';
-
-const PageContainer = styled.div`
-  background: #F9F8F5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-`;
-
-const LogoWrapper = styled.div`
-  margin-top: 100px;
-`;
-
-const Title = styled.h1`
-  font-family: ${({ theme }) => theme.fonts.onest};
-  font-weight: ${({ theme }) => theme.fontWeight.medium};
-  font-size: 28px;
-  line-height: 1.2;
-  color: ${({ theme }) => theme.colors.gray[900]};
-  margin-top: 28px;
-  text-align: center;
-`;
-
-const FormCard = styled.div`
-  background: ${({ theme }) => theme.colors.gray[25]};
-  padding: 48px;
-  border-radius: 24px;
-  box-shadow: 0px 2px 4px 0px rgba(30, 27, 21, 0.05);
-  width: 412px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  margin-top: 55px;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    width: calc(100% - 32px);
-    padding: 32px 24px;
-  }
-`;
-
-const ButtonWrapper = styled.div`
-  width: 100%;
-  
-  button {
-    width: 100%;
-  }
-`;
+import './AuthPhonePage.css';
 
 const AuthPhonePage: React.FC = observer(() => {
   const [phone, setPhone] = useState('+7');
@@ -95,14 +47,14 @@ const AuthPhonePage: React.FC = observer(() => {
   };
 
   return (
-    <PageContainer>
-      <LogoWrapper>
+    <div className="auth-phone">
+      <div className="auth-phone__logo">
         <AppLogo />
-      </LogoWrapper>
+      </div>
 
-      <Title>Авторизация</Title>
+      <h1 className="auth-phone__title">Авторизация</h1>
 
-      <FormCard>
+      <div className="auth-phone__form">
         <div onKeyPress={handleKeyPress}>
           <AppPhoneInput
             label="Номер телефона"
@@ -115,7 +67,7 @@ const AuthPhonePage: React.FC = observer(() => {
           />
         </div>
 
-        <ButtonWrapper>
+        <div className="auth-phone__button">
           <AppButton
             variant="primary"
             size="L"
@@ -125,9 +77,9 @@ const AuthPhonePage: React.FC = observer(() => {
           >
             Далее
           </AppButton>
-        </ButtonWrapper>
-      </FormCard>
-    </PageContainer>
+        </div>
+      </div>
+    </div>
   );
 });
 

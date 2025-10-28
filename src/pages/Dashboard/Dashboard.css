@@ -1,0 +1,16 @@
+/* Dashboard Page */
+.dashboard {
+  padding: var(--spacing-xl);
+}
+
+.dashboard__title {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xl);
+}
+
+.dashboard__content {
+  background: var(--color-background-secondary);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border-primary);
+}

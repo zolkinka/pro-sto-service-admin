@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { AppTag } from './index';
-import styled from 'styled-components';
 
 const meta: Meta<typeof AppTag> = {
   title: 'UI/AppTag',
@@ -61,27 +60,6 @@ const meta: Meta<typeof AppTag> = {
 export default meta;
 type Story = StoryObj<typeof AppTag>;
 
-// Контейнер для группировки тегов
-const TagGroup = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-`;
-
-const Section = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-`;
-
-const SectionTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-`;
-
 // Базовые примеры
 
 export const Default: Story = {
@@ -112,13 +90,13 @@ export const SizeM: Story = {
 
 export const AllColorsM: Story = {
   render: () => (
-    <TagGroup>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
       <AppTag size="M" color="default">Default</AppTag>
       <AppTag size="M" color="blue">Blue</AppTag>
       <AppTag size="M" color="red">Red</AppTag>
       <AppTag size="M" color="yellow">Yellow</AppTag>
       <AppTag size="M" color="green">Green</AppTag>
-    </TagGroup>
+    </div>
   ),
 };
 
@@ -126,13 +104,13 @@ export const AllColorsM: Story = {
 
 export const AllColorsS: Story = {
   render: () => (
-    <TagGroup>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
       <AppTag size="S" color="default">Default</AppTag>
       <AppTag size="S" color="blue">Blue</AppTag>
       <AppTag size="S" color="red">Red</AppTag>
       <AppTag size="S" color="yellow">Yellow</AppTag>
       <AppTag size="S" color="green">Green</AppTag>
-    </TagGroup>
+    </div>
   ),
 };
 
@@ -149,25 +127,25 @@ export const Closable: Story = {
 
 export const ClosableAllColors: Story = {
   render: () => (
-    <TagGroup>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
       <AppTag size="M" color="default" closable>Default</AppTag>
       <AppTag size="M" color="blue" closable>Blue</AppTag>
       <AppTag size="M" color="red" closable>Red</AppTag>
       <AppTag size="M" color="yellow" closable>Yellow</AppTag>
       <AppTag size="M" color="green" closable>Green</AppTag>
-    </TagGroup>
+    </div>
   ),
 };
 
 export const ClosableSmall: Story = {
   render: () => (
-    <TagGroup>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
       <AppTag size="S" color="default" closable>Default</AppTag>
       <AppTag size="S" color="blue" closable>Blue</AppTag>
       <AppTag size="S" color="red" closable>Red</AppTag>
       <AppTag size="S" color="yellow" closable>Yellow</AppTag>
       <AppTag size="S" color="green" closable>Green</AppTag>
-    </TagGroup>
+    </div>
   ),
 };
 
@@ -176,29 +154,29 @@ export const ClosableSmall: Story = {
 export const LongText: Story = {
   render: () => (
     <div style={{ maxWidth: '300px' }}>
-      <Section>
-        <SectionTitle>Размер M</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Размер M</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="M" color="default">
             Very long tag text that should be handled properly
           </AppTag>
           <AppTag size="M" color="blue" closable>
             Another long tag with close button
           </AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
       
-      <Section>
-        <SectionTitle>Размер S</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Размер S</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="S" color="default">
             Very long small tag text
           </AppTag>
           <AppTag size="S" color="red" closable>
             Small tag with close
           </AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
     </div>
   ),
 };
@@ -208,35 +186,35 @@ export const LongText: Story = {
 export const TagGroups: Story = {
   render: () => (
     <div style={{ maxWidth: '600px' }}>
-      <Section>
-        <SectionTitle>Категории</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Категории</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="M" color="blue">React</AppTag>
           <AppTag size="M" color="blue">TypeScript</AppTag>
           <AppTag size="M" color="blue">JavaScript</AppTag>
           <AppTag size="M" color="green">Frontend</AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
       
-      <Section>
-        <SectionTitle>Статусы</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Статусы</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="M" color="green">Completed</AppTag>
           <AppTag size="M" color="yellow">In Progress</AppTag>
           <AppTag size="M" color="red">Blocked</AppTag>
           <AppTag size="M" color="default">Pending</AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
       
-      <Section>
-        <SectionTitle>Фильтры (с закрытием)</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Фильтры (с закрытием)</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="S" color="blue" closable>Автомойка</AppTag>
           <AppTag size="S" color="blue" closable>Шиномонтаж</AppTag>
           <AppTag size="S" color="yellow" closable>Москва</AppTag>
           <AppTag size="S" color="green" closable>Онлайн оплата</AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
     </div>
   ),
 };
@@ -259,8 +237,8 @@ const InteractiveExample: React.FC = () => {
 
   return (
     <div>
-      <SectionTitle>Кликните на × чтобы удалить тег</SectionTitle>
-      <TagGroup>
+      <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Кликните на × чтобы удалить тег</h3>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
         {tags.map(tag => (
           <AppTag
             key={tag.id}
@@ -272,7 +250,7 @@ const InteractiveExample: React.FC = () => {
             {tag.text}
           </AppTag>
         ))}
-      </TagGroup>
+      </div>
       {tags.length === 0 && (
         <p style={{ marginTop: '16px', color: '#888' }}>
           Все теги удалены. Обновите страницу, чтобы сбросить.
@@ -291,45 +269,45 @@ export const Interactive: Story = {
 export const UseCases: Story = {
   render: () => (
     <div style={{ maxWidth: '800px' }}>
-      <Section>
-        <SectionTitle>Навыки и технологии</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Навыки и технологии</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="S" color="blue">React</AppTag>
           <AppTag size="S" color="blue">Vue</AppTag>
           <AppTag size="S" color="blue">Angular</AppTag>
           <AppTag size="S" color="green">HTML</AppTag>
           <AppTag size="S" color="green">CSS</AppTag>
           <AppTag size="S" color="yellow">JavaScript</AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
       
-      <Section>
-        <SectionTitle>Типы услуг</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Типы услуг</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="M" color="default">Мойка кузова</AppTag>
           <AppTag size="M" color="default">Химчистка салона</AppTag>
           <AppTag size="M" color="default">Полировка</AppTag>
           <AppTag size="M" color="default">Шиномонтаж</AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
       
-      <Section>
-        <SectionTitle>Активные фильтры</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Активные фильтры</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="M" color="blue" closable>Район: Центр</AppTag>
           <AppTag size="M" color="yellow" closable>Цена: до 5000₽</AppTag>
           <AppTag size="M" color="green" closable>Рейтинг: 4+</AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
       
-      <Section>
-        <SectionTitle>Уведомления</SectionTitle>
-        <TagGroup>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Уведомления</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <AppTag size="M" color="red">3 новых</AppTag>
           <AppTag size="M" color="yellow">5 ожидают</AppTag>
           <AppTag size="M" color="green">12 завершено</AppTag>
-        </TagGroup>
-      </Section>
+        </div>
+      </div>
     </div>
   ),
 };
@@ -339,15 +317,15 @@ export const UseCases: Story = {
 export const Accessibility: Story = {
   render: () => (
     <div>
-      <SectionTitle>Теги с правильными aria-атрибутами</SectionTitle>
-      <TagGroup>
+      <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '0 0 8px 0' }}>Теги с правильными aria-атрибутами</h3>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
         <AppTag size="M" color="default" data-testid="tag-default">
           Default Tag
         </AppTag>
         <AppTag size="M" color="blue" closable data-testid="tag-closable">
           Closable Tag
         </AppTag>
-      </TagGroup>
+      </div>
       <p style={{ marginTop: '16px', fontSize: '14px', color: '#666' }}>
         Компонент поддерживает клавиатурную навигацию и screen readers.
         Попробуйте использовать Tab для навигации и Enter/Space для закрытия.

@@ -1,0 +1,76 @@
+/* AuthCode Page */
+.auth-code {
+  background: #F9F8F5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.auth-code__logo {
+  margin-top: 100px;
+}
+
+.auth-code__title {
+  font-family: var(--font-onest);
+  font-weight: var(--font-weight-medium);
+  font-size: 28px;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+  margin-top: 28px;
+  text-align: center;
+}
+
+.auth-code__form {
+  background: var(--color-gray-25);
+  padding: 48px;
+  border-radius: 24px;
+  box-shadow: 0px 2px 4px 0px rgba(30, 27, 21, 0.05);
+  width: 412px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: 55px;
+}
+
+.auth-code__resend {
+  background: transparent;
+  border: none;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  cursor: pointer;
+  text-align: center;
+  padding: 0;
+  line-height: 1.2;
+  transition: opacity 0.2s ease;
+}
+
+.auth-code__resend_active {
+  color: var(--color-primary-500);
+}
+
+.auth-code__resend_active:hover {
+  opacity: 0.8;
+}
+
+.auth-code__resend_disabled {
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+.auth-code__button {
+  width: 100%;
+}
+
+.auth-code__button button {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .auth-code__form {
+    width: calc(100% - 32px);
+    padding: 32px 24px;
+  }
+}

@@ -1,0 +1,47 @@
+/* AppHeader */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #F9F8F5;
+  padding: 48px 0 32px;
+}
+
+.app-header__inner {
+  max-width: 1282px;
+  height: 49px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.app-header__actions {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+}
+
+.app-header__icon-button {
+  width: 49px;
+  height: 49px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.app-header__icon-button:hover {
+  border-color: #302F2D;
+}
+
+.app-header__icon-button:active {
+  transform: scale(0.95);
+}

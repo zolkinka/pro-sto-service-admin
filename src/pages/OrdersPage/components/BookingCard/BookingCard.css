@@ -1,0 +1,96 @@
+.booking-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 120px;
+  height: 69px;
+  padding: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  font-family: var(--font-onest);
+  font-size: 11px;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.2;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.booking-card:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-md);
+}
+
+.booking-card:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+.booking-card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.booking-card__content {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-gray-800);
+  overflow: hidden;
+}
+
+.booking-card__service {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.booking-card__time {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.booking-card__status {
+  margin: 0;
+  font-size: 11px;
+  font-weight: var(--font-weight-normal);
+}
+
+/* Status colors - completed */
+.booking-card_status_completed {
+  background-color: var(--color-green-25);
+}
+
+.booking-card_status_completed .booking-card__status {
+  color: var(--color-green-400);
+}
+
+/* Status colors - confirmed */
+.booking-card_status_confirmed {
+  background-color: #F9ECD2;
+}
+
+.booking-card_status_confirmed .booking-card__status {
+  color: var(--color-yellow-500);
+}
+
+/* Status colors - pending_confirmation */
+.booking-card_status_pending_confirmation {
+  background-color: #F9ECD2;
+}
+
+.booking-card_status_pending_confirmation .booking-card__status {
+  color: var(--color-yellow-500);
+}
+
+/* Status colors - cancelled */
+.booking-card_status_cancelled {
+  background-color: var(--color-gray-200);
+}
+
+.booking-card_status_cancelled .booking-card__status {
+  color: var(--color-gray-600);
+}

@@ -71,7 +71,7 @@ export const validateExpiryDate = (value: string): boolean => {
   }
   
   const month = parseInt(cleaned.slice(0, 2), 10);
-  const year = parseInt(cleaned.slice(2), 10);
+  let year = parseInt(cleaned.slice(2), 10);
   
   // Проверка месяца (01-12)
   if (month < 1 || month > 12) {
@@ -83,10 +83,13 @@ export const validateExpiryDate = (value: string): boolean => {
   const currentYear = now.getFullYear() % 100; // Последние 2 цифры года
   const currentMonth = now.getMonth() + 1;
   
+  // Если введенный год меньше текущего, считаем что это следующий век
+  // Например, если сейчас 2025 (25), а ввели 11, то это 2111 (111)
   if (year < currentYear) {
-    return false;
+    year += 100;
   }
   
+  // Проверяем, что дата не истекла
   if (year === currentYear && month < currentMonth) {
     return false;
   }

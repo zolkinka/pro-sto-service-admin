@@ -1,11 +1,11 @@
 import React from 'react';
 import { differenceInMinutes, format, isSameDay, addDays } from 'date-fns';
-import { DetailedBookingResponseDto } from '../../../../../services/api-client';
+import type { AdminBookingResponseDto } from '../../../../../services/api-client';
 import BookingCard from '../BookingCard/BookingCard';
 import './CalendarGrid.css';
 
 export interface CalendarGridProps {
-  bookings: DetailedBookingResponseDto[];
+  bookings: AdminBookingResponseDto[];
   weekStart: Date;
   onBookingClick: (bookingUuid: string) => void;
   workingHours: { start: number; end: number }; // например { start: 9, end: 18 }
@@ -20,7 +20,7 @@ const PIXELS_PER_MINUTE = PIXELS_PER_HOUR / 60; // 63 / 60 = 1.05
 const DAY_COLUMN_WIDTH = 120; // ширина колонки для одного дня
 const DAY_COLUMN_GAP = 12; // отступ между колонками дней
 
-interface BookingWithPosition extends DetailedBookingResponseDto {
+interface BookingWithPosition extends AdminBookingResponseDto {
   top: number;
   height: number;
   dayIndex: number;

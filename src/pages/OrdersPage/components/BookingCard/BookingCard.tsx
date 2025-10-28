@@ -1,14 +1,14 @@
 import React from 'react';
-import { DetailedBookingResponseDto } from '../../../../../services/api-client';
+import type { AdminBookingResponseDto } from '../../../../../services/api-client';
 import './BookingCard.css';
 
 export interface BookingCardProps {
-  booking: DetailedBookingResponseDto;
+  booking: AdminBookingResponseDto;
   onClick: () => void;
   style?: React.CSSProperties;
 }
 
-const STATUS_LABELS: Record<DetailedBookingResponseDto['status'], string> = {
+const STATUS_LABELS: Record<string, string> = {
   completed: 'Выполнен',
   confirmed: 'Ожидает',
   pending_confirmation: 'Ожидает',

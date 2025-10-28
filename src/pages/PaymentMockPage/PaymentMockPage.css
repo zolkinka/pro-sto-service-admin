@@ -1,0 +1,241 @@
+/* Основные стили для PaymentMockPage */
+.payment-mock-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+.payment-mock-page__container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 440px;
+  width: 100%;
+  padding: 32px;
+}
+
+.payment-mock-page__header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.payment-mock-page__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.payment-mock-page__security-icon {
+  color: #10b981;
+  font-size: 20px;
+}
+
+.payment-mock-page__subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.payment-mock-page__amount {
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.payment-mock-page__amount-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+}
+
+.payment-mock-page__amount-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.payment-mock-page__description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 12px 0 0 0;
+}
+
+.payment-mock-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.payment-mock-page__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.payment-mock-page__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payment-mock-page__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.payment-mock-page__input {
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.payment-mock-page__input:focus {
+  border-color: #667eea;
+}
+
+.payment-mock-page__input:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+}
+
+.payment-mock-page__input--error {
+  border-color: #ef4444;
+}
+
+.payment-mock-page__error-text {
+  font-size: 12px;
+  color: #ef4444;
+  margin: 0;
+}
+
+.payment-mock-page__submit-button {
+  margin-top: 8px;
+}
+
+.payment-mock-page__submit-button-full {
+  width: 100%;
+}
+
+.payment-mock-page__security-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.payment-mock-page__security-note svg {
+  color: #10b981;
+}
+
+/* Состояния */
+.payment-mock-page__status {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.payment-mock-page__status-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.payment-mock-page__status-icon--success {
+  color: #10b981;
+}
+
+.payment-mock-page__status-icon--error {
+  color: #ef4444;
+}
+
+.payment-mock-page__status-icon--warning {
+  color: #f59e0b;
+}
+
+.payment-mock-page__status-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.payment-mock-page__status-message {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+/* Loader */
+.payment-mock-page__loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+}
+
+.payment-mock-page__spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.payment-mock-page__loader-text {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .payment-mock-page {
+    padding: 12px;
+  }
+
+  .payment-mock-page__container {
+    padding: 24px;
+  }
+
+  .payment-mock-page__title {
+    font-size: 20px;
+  }
+
+  .payment-mock-page__amount-value {
+    font-size: 32px;
+  }
+
+  .payment-mock-page__row {
+    grid-template-columns: 1fr;
+  }
+}

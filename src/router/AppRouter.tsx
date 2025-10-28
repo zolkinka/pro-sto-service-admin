@@ -11,7 +11,8 @@ import {
   ServicesPage,
   OrdersPage,
   AnalyticsPage,
-  SchedulePage
+  SchedulePage,
+  PaymentMockPage
 } from '@/pages';
 
 /**
@@ -33,6 +34,9 @@ const AppRouter = observer(() => {
       {/* Публичные маршруты авторизации (без MainLayout) */}
       <Route path={ROUTES.AUTH_PHONE} element={<AuthPhonePage />} />
       <Route path={ROUTES.AUTH_CODE} element={<AuthCodePage />} />
+      
+      {/* Публичный маршрут для мок-платежа (без авторизации и без Layout) */}
+      <Route path={ROUTES.PAYMENT_MOCK} element={<PaymentMockPage />} />
 
       {/* Защищенные маршруты (с MainLayout) */}
       <Route

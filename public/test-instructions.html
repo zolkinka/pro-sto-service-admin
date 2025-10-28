@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock API для теста платежной страницы</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .info {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .info h2 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .info p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .info code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .link {
+            display: block;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .link:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Инструкция по тестированию</h1>
+        
+        <div class="info">
+            <h2>Проблема с тестированием</h2>
+            <p>
+                Для тестирования платежной страницы необходимо реальное бронирование из базы данных.
+                API endpoint <code>GET /api/bookings/{uuid}</code> требует авторизации и реальное бронирование.
+            </p>
+            <p>
+                Поскольку у нас нет доступа к реальным данным на данный момент, нужно:
+            </p>
+            <ol>
+                <li>Создать тестовое бронирование через основное приложение</li>
+                <li>Получить UUID этого бронирования</li>
+                <li>Использовать этот UUID для теста платежной страницы</li>
+            </ol>
+        </div>
+
+        <div class="info">
+            <h2>Что уже работает</h2>
+            <ul>
+                <li>✅ Публичный маршрут /payment-mock/:bookingUuid</li>
+                <li>✅ Дизайн формы оплаты</li>
+                <li>✅ Валидация полей карты</li>
+                <li>✅ Маски ввода (номер карты, MM/YY, CVV)</li>
+                <li>✅ Состояния: loading, ready, processing, success, error, already_paid, not_found</li>
+                <li>✅ PostMessage интеграция (PAYMENT_SUCCESS, PAYMENT_ERROR)</li>
+                <li>✅ Работа в iframe</li>
+                <li>✅ Адаптивный дизайн</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h2>Тестовые ссылки</h2>
+            <p>Следующий этап - тестирование с реальным UUID бронирования:</p>
+            <a class="link" href="http://localhost:3000/payment-mock/test-booking-uuid" target="_blank">
+                Открыть с несуществующим UUID (покажет "Не найдено")
+            </a>
+            <a class="link" href="http://localhost:3000/test-iframe.html" target="_blank">
+                Открыть тест iframe с PostMessage
+            </a>
+        </div>
+
+        <div class="info">
+            <h2>Следующие шаги</h2>
+            <p>
+                Для полноценного тестирования необходимо:
+            </p>
+            <ol>
+                <li>Получить реальный UUID бронирования из базы данных</li>
+                <li>Протестировать заполнение формы:
+                    <ul>
+                        <li>Номер карты: 1234 5678 9012 3456</li>
+                        <li>Срок: 12/25</li>
+                        <li>CVV: 123</li>
+                        <li>Имя: IVAN IVANOV</li>
+                    </ul>
+                </li>
+                <li>Проверить PostMessage события в iframe</li>
+                <li>Проверить адаптивность на мобильных устройствах</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

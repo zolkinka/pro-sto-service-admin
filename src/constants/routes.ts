@@ -7,6 +7,7 @@ export const ROUTES = {
   ORDERS: '/orders',
   ANALYTICS: '/analytics',
   SCHEDULE: '/schedule',
+  PAYMENT_MOCK: '/payment-mock/:bookingUuid',
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

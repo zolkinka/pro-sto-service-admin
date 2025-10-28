@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест iframe платежной страницы</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .iframe-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 700px;
+            border: none;
+        }
+        .messages {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .messages h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .message {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.cancelled {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .controls input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .controls button {
+            margin-top: 10px;
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест платежной страницы</h1>
+        
+        <div class="controls">
+            <label for="bookingUuid">UUID бронирования:</label>
+            <input type="text" id="bookingUuid" value="test-booking-uuid" placeholder="Введите UUID бронирования">
+            <button onclick="updateIframe()">Загрузить</button>
+        </div>
+
+        <div class="iframe-container">
+            <iframe id="paymentFrame" src="http://localhost:3000/payment-mock/test-booking-uuid"></iframe>
+        </div>
+        
+        <div class="messages">
+            <h2>📨 PostMessage события</h2>
+            <div id="messagesList">
+                <div class="message info">Ожидание событий...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesList = document.getElementById('messagesList');
+        
+        function updateIframe() {
+            const bookingUuid = document.getElementById('bookingUuid').value;
+            const iframe = document.getElementById('paymentFrame');
+            iframe.src = `http://localhost:3000/payment-mock/${bookingUuid}`;
+            
+            // Очищаем сообщения
+            messagesList.innerHTML = '<div class="message info">Загрузка новой страницы...</div>';
+        }
+        
+        function addMessage(type, data) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString('ru-RU');
+            messageDiv.textContent = `[${timestamp}] ${type.toUpperCase()}\n${JSON.stringify(data, null, 2)}`;
+            
+            // Удаляем сообщение "Ожидание событий..."
+            const waitingMsg = messagesList.querySelector('.message.info');
+            if (waitingMsg && waitingMsg.textContent.includes('Ожидание событий')) {
+                waitingMsg.remove();
+            }
+            
+            messagesList.insertBefore(messageDiv, messagesList.firstChild);
+        }
+        
+        // Слушаем PostMessage события
+        window.addEventListener('message', (event) => {
+            console.log('PostMessage получено:', event.data);
+            
+            if (!event.data || !event.data.type) {
+                return;
+            }
+            
+            const { type, data } = event.data;
+            
+            switch(type) {
+                case 'PAYMENT_SUCCESS':
+                    addMessage('success', data);
+                    break;
+                case 'PAYMENT_ERROR':
+                    addMessage('error', data);
+                    break;
+                case 'PAYMENT_CANCELLED':
+                    addMessage('cancelled', data);
+                    break;
+                default:
+                    addMessage('info', event.data);
+            }
+        });
+        
+        console.log('🧪 Тестовая страница для iframe загружена');
+        console.log('Ожидание PostMessage событий от iframe...');
+    </script>
+</body>
+</html>

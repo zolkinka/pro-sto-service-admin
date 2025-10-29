@@ -1,1 +1,2 @@
-export { AppMultiSelect, type AppMultiSelectProps, type OptionType } from './AppMultiSelect';
+export { AppMultiSelect } from './AppMultiSelect';
+export type { AppMultiSelectProps, SelectOption } from './AppMultiSelect.types';

@@ -11,3 +11,4 @@ export * from './AppCheckbox';
 export * from './AppTag';
 export * from './AppTable';
 export * from './AppSingleSelect';
+export * from './AppTimePicker';

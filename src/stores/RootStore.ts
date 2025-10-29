@@ -3,6 +3,7 @@ import { AuthStore, authStore } from './AuthStore';
 import { ToastStore, toastStore } from './ToastStore';
 import { ServicesStore, servicesStore } from './ServicesStore';
 import { BookingsStore, bookingsStore } from './BookingsStore';
+import { OperatingHoursStore, operatingHoursStore } from './OperatingHoursStore';
 
 /**
  * Root store that combines all application stores
@@ -12,6 +13,7 @@ export class RootStore {
   toastStore: ToastStore;
   servicesStore: ServicesStore;
   bookingsStore: BookingsStore;
+  operatingHoursStore: OperatingHoursStore;
 
   constructor() {
     // Используем singleton instances
@@ -19,6 +21,7 @@ export class RootStore {
     this.toastStore = toastStore;
     this.servicesStore = servicesStore;
     this.bookingsStore = bookingsStore;
+    this.operatingHoursStore = operatingHoursStore;
     
     makeAutoObservable(this);
   }

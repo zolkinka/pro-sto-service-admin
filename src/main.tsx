@@ -14,7 +14,7 @@ import '@/styles/global.css';
 import '@/styles/animations.css';
 
 // Настройка базового URL для API
-OpenAPI.BASE = 'http://localhost:5201';
+OpenAPI.BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5201';
 
 // Настройка interceptors для автоматического обновления токенов
 setupApiInterceptors(authStore);

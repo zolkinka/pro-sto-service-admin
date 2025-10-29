@@ -125,9 +125,17 @@ export class AuthStore {
    * Обновление токенов
    */
   refreshTokens = async (): Promise<void> => {
-    if (!this.accessToken) return;
+    if (!this.refreshToken) {
+      console.error('Refresh token отсутствует');
+      this.logout();
+      return;
+    }
 
     try {
+      // Устанавливаем refresh token как TOKEN для запроса refresh
+      // Это позволит передать refresh token в Authorization header
+      OpenAPI.TOKEN = this.refreshToken;
+      
       const response = await authRefresh();
 
       runInAction(() => {
@@ -136,7 +144,7 @@ export class AuthStore {
         localStorage.setItem('accessToken', response.accessToken);
       });
 
-      // Обновляем токен в OpenAPI
+      // Обновляем токен в OpenAPI на новый access token
       OpenAPI.TOKEN = response.accessToken;
 
       this.setupTokenRefresh();
@@ -144,6 +152,7 @@ export class AuthStore {
       console.error('Ошибка при обновлении токенов:', error);
       // Если не удалось обновить токены - разлогиниваем
       this.logout();
+      throw error; // Пробрасываем ошибку для interceptor
     }
   };
 

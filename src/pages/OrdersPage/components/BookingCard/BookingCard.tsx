@@ -10,7 +10,7 @@ export interface BookingCardProps {
 
 const STATUS_LABELS: Record<string, string> = {
   completed: 'Выполнен',
-  confirmed: 'Ожидает',
+  confirmed: 'Подтверждена',
   pending_confirmation: 'Ожидает',
   cancelled: 'Отменён',
 };

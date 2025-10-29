@@ -85,8 +85,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   });
 
   // Вычисляем высоту контейнера с бронированиями
+  // Добавляем дополнительный час после последнего времени для отображения завершающих заказов
   const totalHours = hours.length;
-  const bookingsHeight = (totalHours - 1) * PIXELS_PER_HOUR + TIME_ROW_HEIGHT;
+  const bookingsHeight = totalHours * PIXELS_PER_HOUR;
 
   return (
     <div className="calendar-grid">
@@ -105,7 +106,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         {/* Сетка с днями */}
         <div className="calendar-grid__days-container">
           {/* Горизонтальные линии для каждого часа */}
-          <div className="calendar-grid__horizontal-lines">
+          <div 
+            className="calendar-grid__horizontal-lines"
+            style={{ height: `${bookingsHeight}px` }}
+          >
             {hours.map((hour, index) => {
               // Каждая линия располагается точно на расстоянии index * 63px от начала
               const top = index * PIXELS_PER_HOUR;
@@ -120,7 +124,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           </div>
 
           {/* Вертикальные линии для каждого дня */}
-          <div className="calendar-grid__vertical-lines">
+          <div 
+            className="calendar-grid__vertical-lines"
+            style={{ height: `${bookingsHeight}px` }}
+          >
             {Array.from({ length: 7 }).map((_, dayIndex) => (
               <div key={dayIndex} className="calendar-grid__day-line" />
             ))}

@@ -70,11 +70,11 @@
 
 /* Status colors - confirmed */
 .booking-card_status_confirmed {
-  background-color: #F9ECD2; /* Yellow/50 из макета */
+  background-color: #EEF0FC; /* Blue/50 из макета */
 }
 
 .booking-card_status_confirmed .booking-card__status {
-  color: #CC8D18; /* Yellow/400 из макета */
+  color: #4169E3; /* Blue/500 из макета */
 }
 
 /* Status colors - pending_confirmation */

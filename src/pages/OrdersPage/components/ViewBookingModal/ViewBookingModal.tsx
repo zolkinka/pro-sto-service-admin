@@ -4,6 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useStores } from '@/hooks';
 import { AppTag } from '@/components/ui/AppTag';
+import { NotificationIcon } from '@/components/ui/icons';
 import type { BookingStatus } from '@/stores/BookingsStore';
 import './ViewBookingModal.css';
 
@@ -12,6 +13,9 @@ interface ViewBookingModalProps {
   onClose: () => void;
   bookingUuid: string;
   onUpdate: () => void;
+  showAsNewBooking?: boolean;
+  pendingCount?: number;
+  currentPendingIndex?: number;
 }
 
 // Маппинг статусов на параметры тегов
@@ -22,8 +26,16 @@ const STATUS_CONFIG: Record<BookingStatus, { color: 'yellow' | 'blue' | 'green' 
   cancelled: { color: 'red', label: 'Отменён' },
 };
 
-const ViewBookingModal = observer(({ isOpen, onClose, bookingUuid, onUpdate }: ViewBookingModalProps) => {
-  const { bookingsStore } = useStores();
+const ViewBookingModal = observer(({ 
+  isOpen, 
+  onClose, 
+  bookingUuid, 
+  onUpdate, 
+  showAsNewBooking = false,
+  pendingCount,
+  currentPendingIndex,
+}: ViewBookingModalProps) => {
+  const { bookingsStore, toastStore } = useStores();
 
   useEffect(() => {
     if (isOpen && bookingUuid) {
@@ -45,6 +57,21 @@ const ViewBookingModal = observer(({ isOpen, onClose, bookingUuid, onUpdate }: V
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleConfirm = async () => {
+    try {
+      const success = await bookingsStore.updateBookingStatus(bookingUuid, 'confirmed');
+      
+      if (success) {
+        toastStore.showSuccess('Заказ подтвержден');
+        onUpdate();
+        onClose();
+      }
+    } catch (error) {
+      console.error('Ошибка подтверждения заказа:', error);
+      toastStore.showError('Не удалось подтвердить заказ');
+    }
+  };
 
   const handleCancelBooking = async () => {
     const confirmed = window.confirm('Вы уверены, что хотите отменить эту запись?');
@@ -129,6 +156,19 @@ const ViewBookingModal = observer(({ isOpen, onClose, bookingUuid, onUpdate }: V
       </div>
 
       <div className="view-booking-modal__content">
+        {/* Блок уведомления "Новая запись" */}
+        {showAsNewBooking && (
+          <div className="view-booking-modal__notification">
+            <NotificationIcon />
+            <span>Новая запись</span>
+            {pendingCount !== undefined && currentPendingIndex !== undefined && pendingCount > 1 && (
+              <span className="view-booking-modal__counter">
+                {currentPendingIndex + 1} из {pendingCount}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Блок информации об автомобиле */}
         <div className="view-booking-modal__car-section">
           <div className="view-booking-modal__car-image">
@@ -188,14 +228,24 @@ const ViewBookingModal = observer(({ isOpen, onClose, bookingUuid, onUpdate }: V
           </div>
         </div>
 
-        {/* Кнопка отмены */}
+        {/* Футер с кнопками */}
         {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-          <button className="view-booking-modal__cancel-button" onClick={handleCancelBooking}>
-            <span>Отменить запись</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <div className="view-booking-modal__footer">
+            {showAsNewBooking && (
+              <button 
+                className="view-booking-modal__confirm-button"
+                onClick={handleConfirm}
+              >
+                Подтвердить
+              </button>
+            )}
+            <button className="view-booking-modal__cancel-button" onClick={handleCancelBooking}>
+              <span>Отменить запись</span>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
         )}
       </div>
     </div>

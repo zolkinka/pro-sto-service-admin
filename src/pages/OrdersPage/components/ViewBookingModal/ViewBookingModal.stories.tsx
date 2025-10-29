@@ -186,3 +186,62 @@ export const Loading: Story = {
     bookingsStore.isLoadingDetails = true;
   },
 };
+
+// Story для режима "Новая запись" (showAsNewBooking)
+export const NewBooking: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => console.log('Close modal'),
+    bookingUuid: mockBooking.uuid,
+    onUpdate: () => console.log('Update bookings'),
+    showAsNewBooking: true,
+  },
+  play: async () => {
+    bookingsStore.selectedBooking = {
+      ...mockBooking,
+      status: 'pending_confirmation',
+    };
+    bookingsStore.isLoadingDetails = false;
+  },
+};
+
+// Story для режима "Новая запись" с счетчиком (несколько pending заказов)
+export const NewBookingWithCounter: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => console.log('Close modal'),
+    bookingUuid: mockBooking.uuid,
+    onUpdate: () => console.log('Update bookings'),
+    showAsNewBooking: true,
+    pendingCount: 3,
+    currentPendingIndex: 0,
+  },
+  play: async () => {
+    bookingsStore.selectedBooking = {
+      ...mockBooking,
+      status: 'pending_confirmation',
+    };
+    bookingsStore.isLoadingDetails = false;
+  },
+};
+
+// Story для второго pending заказа из трех
+export const NewBookingSecondOfThree: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => console.log('Close modal'),
+    bookingUuid: mockBooking.uuid,
+    onUpdate: () => console.log('Update bookings'),
+    showAsNewBooking: true,
+    pendingCount: 3,
+    currentPendingIndex: 1,
+  },
+  play: async () => {
+    bookingsStore.selectedBooking = {
+      ...mockBooking,
+      status: 'pending_confirmation',
+    };
+    bookingsStore.isLoadingDetails = false;
+  },
+};
+

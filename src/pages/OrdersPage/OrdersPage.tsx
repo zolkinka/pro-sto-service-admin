@@ -12,6 +12,11 @@ const OrdersPage = observer(() => {
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week'>('week');
+  
+  // Состояния для автоматического показа pending заказов
+  const [pendingBookings, setPendingBookings] = useState<string[]>([]);
+  const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
+  const [showingPendingBooking, setShowingPendingBooking] = useState(false);
 
   // Рабочие часы (динамически рассчитываются на основе заказов)
   const workingHours = useMemo(() => {
@@ -61,7 +66,26 @@ const OrdersPage = observer(() => {
     }
   }, [currentDate, authStore.user, bookingsStore]);
 
+  // Эффект для автоматического показа pending заказов
+  useEffect(() => {
+    // После загрузки заказов проверяем наличие pending_confirmation
+    if (!bookingsStore.isLoading && bookingsStore.bookings.length > 0) {
+      const pending = bookingsStore.bookings
+        .filter(b => b.status === 'pending_confirmation')
+        .map(b => b.uuid);
+      
+      if (pending.length > 0 && !showingPendingBooking) {
+        setPendingBookings(pending);
+        setCurrentPendingIndex(0);
+        setShowingPendingBooking(true);
+        setSelectedBooking(pending[0]);
+      }
+    }
+  }, [bookingsStore.bookings, bookingsStore.isLoading, showingPendingBooking]);
+
   const handleBookingClick = (bookingUuid: string) => {
+    // При ручном клике сбрасываем режим автоматического показа
+    setShowingPendingBooking(false);
     setSelectedBooking(bookingUuid);
   };
 
@@ -70,9 +94,48 @@ const OrdersPage = observer(() => {
     bookingsStore.clearSelectedBooking();
   };
 
+  const handleClosePendingModal = () => {
+    // Переходим к следующему pending заказу или закрываем модалку
+    if (currentPendingIndex < pendingBookings.length - 1) {
+      const nextIndex = currentPendingIndex + 1;
+      setCurrentPendingIndex(nextIndex);
+      setSelectedBooking(pendingBookings[nextIndex]);
+    } else {
+      // Все pending заказы просмотрены
+      setShowingPendingBooking(false);
+      setSelectedBooking(null);
+      setPendingBookings([]);
+      setCurrentPendingIndex(0);
+    }
+  };
+
   const handleUpdateBooking = () => {
     // Перезагружаем список заказов после обновления
     bookingsStore.fetchBookings();
+  };
+
+  const handleUpdateFromPending = () => {
+    // Перезагружаем список заказов
+    bookingsStore.fetchBookings();
+    
+    // Убираем текущий заказ из списка pending
+    const updatedPending = pendingBookings.filter(
+      (_uuid, idx) => idx !== currentPendingIndex
+    );
+    
+    if (updatedPending.length > 0) {
+      setPendingBookings(updatedPending);
+      // Индекс остается тем же, но теперь указывает на следующий элемент
+      const nextUuid = updatedPending[currentPendingIndex] || updatedPending[0];
+      setSelectedBooking(nextUuid);
+      setCurrentPendingIndex(Math.min(currentPendingIndex, updatedPending.length - 1));
+    } else {
+      // Больше нет pending заказов
+      setShowingPendingBooking(false);
+      setSelectedBooking(null);
+      setPendingBookings([]);
+      setCurrentPendingIndex(0);
+    }
   };
 
   // Вычисляем начало недели для передачи в WeekDaysRow и CalendarGrid
@@ -91,13 +154,16 @@ const OrdersPage = observer(() => {
         {selectedBooking && (
           <ViewBookingModal
             isOpen={selectedBooking !== null}
-            onClose={handleCloseModal}
+            onClose={showingPendingBooking ? handleClosePendingModal : handleCloseModal}
             bookingUuid={selectedBooking}
-            onUpdate={handleUpdateBooking}
+            onUpdate={showingPendingBooking ? handleUpdateFromPending : handleUpdateBooking}
+            showAsNewBooking={showingPendingBooking}
+            pendingCount={pendingBookings.length}
+            currentPendingIndex={currentPendingIndex}
           />
         )}
 
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden' }}>
           <CalendarGrid
             bookings={bookingsStore.bookings}
             weekStart={weekStart}

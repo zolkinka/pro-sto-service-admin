@@ -4,7 +4,7 @@ import { startOfWeek } from 'date-fns';
 import { useStores } from '@/hooks';
 import CalendarHeader from './components/CalendarHeader/CalendarHeader';
 import CalendarGrid from './components/CalendarGrid/CalendarGrid';
-import EditBookingModal from './components/EditBookingModal/EditBookingModal';
+import ViewBookingModal from './components/ViewBookingModal/ViewBookingModal';
 import './OrdersPage.css';
 
 const OrdersPage = observer(() => {
@@ -88,6 +88,15 @@ const OrdersPage = observer(() => {
           onViewModeChange={setViewMode}
         />
 
+        {selectedBooking && (
+          <ViewBookingModal
+            isOpen={selectedBooking !== null}
+            onClose={handleCloseModal}
+            bookingUuid={selectedBooking}
+            onUpdate={handleUpdateBooking}
+          />
+        )}
+
         <div style={{ position: 'relative' }}>
           <CalendarGrid
             bookings={bookingsStore.bookings}
@@ -95,17 +104,6 @@ const OrdersPage = observer(() => {
             onBookingClick={handleBookingClick}
             workingHours={workingHours}
           />
-
-          {selectedBooking && (
-            <EditBookingModal
-              isOpen={selectedBooking !== null}
-              startHour={workingHours.start}
-              endHour={workingHours.end}
-              onClose={handleCloseModal}
-              bookingUuid={selectedBooking}
-              onUpdate={handleUpdateBooking}
-            />
-          )}
         </div>
       </div>
     </div>

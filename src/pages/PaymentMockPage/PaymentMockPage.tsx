@@ -36,6 +36,8 @@ const PaymentMockPage = () => {
   const [status, setStatus] = useState<PaymentPageStatus>('loading');
   const [booking, setBooking] = useState<DetailedBookingResponseDto | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [retryAttempt, setRetryAttempt] = useState<number>(0);
+  const [isRetrying, setIsRetrying] = useState<boolean>(false);
   
   const [formData, setFormData] = useState<PaymentFormData>({
     cardNumber: '',
@@ -72,12 +74,81 @@ const PaymentMockPage = () => {
       
       setBooking(response);
       setStatus('ready');
-    } catch (error) {
+      setIsRetrying(false);
+      setRetryAttempt(0);
+    } catch (error: unknown) {
       console.error('Ошибка загрузки бронирования:', error);
-      setStatus('not_found');
-      setErrorMessage('Бронирование не найдено');
+      
+      // Проверяем, является ли это 404 ошибкой
+      const is404 = (error as { status?: number; statusCode?: number })?.status === 404 || 
+                    (error as { status?: number; statusCode?: number })?.statusCode === 404;
+      
+      if (is404) {
+        setIsRetrying(true);
+        console.log('Получена 404 ошибка, начинаем повторные попытки...');
+      } else {
+        setStatus('not_found');
+        setErrorMessage('Бронирование не найдено');
+        setIsRetrying(false);
+      }
     }
   }, [bookingUuid, searchParams]);
+
+  /**
+   * Логика повторных попыток при 404
+   */
+  useEffect(() => {
+    if (!isRetrying) return;
+
+    const maxRetries = 15; // 15 попыток * 2 секунды = 30 секунд
+    const retryInterval = 2000; // 2 секунды
+
+    if (retryAttempt >= maxRetries) {
+      console.log('Достигнуто максимальное количество попыток');
+      setStatus('not_found');
+      setErrorMessage('Бронирование не найдено. Превышено время ожидания.');
+      setIsRetrying(false);
+      return;
+    }
+
+    console.log(`Попытка ${retryAttempt + 1} из ${maxRetries}...`);
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await bookingGetOne({ uuid: bookingUuid! });
+        
+        // Успешно получили данные
+        console.log('Бронирование успешно загружено после повторной попытки');
+        
+        if (response.payment_status === 'paid') {
+          setStatus('already_paid');
+          setBooking(response);
+        } else {
+          setBooking(response);
+          setStatus('ready');
+        }
+        
+        setIsRetrying(false);
+        setRetryAttempt(0);
+      } catch (error: unknown) {
+        const is404 = (error as { status?: number; statusCode?: number })?.status === 404 || 
+                      (error as { status?: number; statusCode?: number })?.statusCode === 404;
+        
+        if (is404) {
+          // Продолжаем попытки
+          setRetryAttempt((prev) => prev + 1);
+        } else {
+          // Другая ошибка - прекращаем попытки
+          console.error('Получена не-404 ошибка:', error);
+          setStatus('not_found');
+          setErrorMessage('Ошибка при загрузке бронирования');
+          setIsRetrying(false);
+        }
+      }
+    }, retryInterval);
+
+    return () => clearTimeout(timeoutId);
+  }, [isRetrying, retryAttempt, bookingUuid]);
 
   /**
    * Загрузка данных о бронировании при монтировании
@@ -294,13 +365,17 @@ const PaymentMockPage = () => {
   /**
    * Рендер состояния загрузки
    */
-  if (status === 'loading') {
+  if (status === 'loading' || isRetrying) {
+    const message = isRetrying 
+      ? `Ожидание создания бронирования... (попытка ${retryAttempt + 1}/15)`
+      : 'Загрузка данных...';
+    
     return (
       <div className="payment-mock-page">
         <div className="payment-mock-page__container">
           <div className="payment-mock-page__loader">
             <div className="payment-mock-page__spinner" />
-            <p className="payment-mock-page__loader-text">Загрузка данных...</p>
+            <p className="payment-mock-page__loader-text">{message}</p>
           </div>
         </div>
       </div>

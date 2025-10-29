@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { parseISO } from 'date-fns';
 import { bookingsStore, toastStore } from '@/stores';
@@ -33,6 +33,7 @@ const EditBookingModal: React.FC<EditBookingModalProps> = observer(({
   bookingUuid,
   onUpdate,
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
   const [booking, setBooking] = useState<DetailedBookingResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -41,18 +42,6 @@ const EditBookingModal: React.FC<EditBookingModalProps> = observer(({
     additionalService: '',
     comment: '',
   });
-
-  // Блокируем скролл страницы когда модальное окно открыто
-  useEffect(() => {
-    if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [isOpen]);
 
   // Загрузка данных бронирования при открытии
   const loadBookingData = useCallback(async () => {
@@ -89,24 +78,36 @@ const EditBookingModal: React.FC<EditBookingModalProps> = observer(({
     }
   }, [isOpen, bookingUuid, loadBookingData]);
 
-  // Опции для селекта времени начала
-  const startTimeOptions: SelectOption[] = useMemo(() => {
+  // Сброс прокрутки при открытии модального окна
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.scrollTop = 0;
+    }
+  }, [isOpen]);
+
+  // Вычисляем продолжительность в часах из данных бронирования
+  const durationInHours = useMemo(() => {
+    if (!booking) return 1;
+    const start = parseISO(booking.start_time);
+    const end = parseISO(booking.end_time);
+    const diffInMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+    return Math.max(1, Math.round(diffInMinutes / 60));
+  }, [booking]);
+
+  // Опции для селекта времени - показываем диапазоны
+  const timeRangeOptions: SelectOption[] = useMemo(() => {
     const options: SelectOption[] = [];
     for (let hour = startHour; hour <= endHour; hour++) {
-      const timeString = `${hour.toString().padStart(2, '0')}:00`;
+      const startTimeString = `${hour.toString().padStart(2, '0')}:00`;
+      const endHour = hour + durationInHours;
+      const endTimeString = `${endHour.toString().padStart(2, '0')}:00`;
       options.push({
-        label: timeString,
+        label: `${startTimeString}-${endTimeString}`,
         value: hour.toString(),
       });
     }
     return options;
-  }, [startHour, endHour]);
-
-  // Время окончания (начало + 1 час)
-  const endTime = useMemo(() => {
-    const endHourValue = formData.startHour + 1;
-    return `${endHourValue.toString().padStart(2, '0')}:00`;
-  }, [formData.startHour]);
+  }, [startHour, endHour, durationInHours]);
 
   const handleStartTimeChange = (option: SelectOption | null) => {
     if (option) {
@@ -143,12 +144,6 @@ const EditBookingModal: React.FC<EditBookingModalProps> = observer(({
     }
   };
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   if (!isOpen) return null;
 
   // Маппинг статусов для тегов
@@ -182,22 +177,42 @@ const EditBookingModal: React.FC<EditBookingModalProps> = observer(({
 
   const licensePlateData = booking?.car?.license_plate ? formatLicensePlate(booking.car.license_plate) : { number: '', region: '' };
 
+  // Компонент иконки крестика
+  const CloseIcon: React.FC = () => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M15 5L5 15M5 5L15 15"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
   return (
-    <div className="edit-booking-modal-overlay" onClick={handleOverlayClick}>
-      <div className="edit-booking-modal">
-        {isLoading ? (
-          <div className="edit-booking-modal__loading">Загрузка...</div>
+    <div className="edit-booking-modal" ref={modalRef}>
+      {isLoading ? (
+        <div className="edit-booking-modal__loading">Загрузка...</div>
         ) : booking ? (
           <>
             {/* Заголовок */}
             <div className="edit-booking-modal__header">
-              <h2 className="edit-booking-modal__title">Запись</h2>
-              <AppTag size="M" color={statusConfig.color}>
-                {statusConfig.label}
-              </AppTag>
-            </div>
-
-            {/* Информация о машине */}
+              <div className="edit-booking-modal__header-content">
+                <h2 className="edit-booking-modal__title">Запись</h2>
+                <AppTag size="M" color={statusConfig.color}>
+                  {statusConfig.label}
+                </AppTag>
+              </div>
+              <button
+                type="button"
+                className="edit-booking-modal__close-button"
+                onClick={onClose}
+                aria-label="Закрыть"
+              >
+                <CloseIcon />
+              </button>
+            </div>            {/* Информация о машине */}
             <div className="edit-booking-modal__car-info">
               <div className="edit-booking-modal__car-image">
                 <div className="edit-booking-modal__car-placeholder" />
@@ -223,20 +238,12 @@ const EditBookingModal: React.FC<EditBookingModalProps> = observer(({
               {/* Продолжительность */}
               <div className="edit-booking-modal__field">
                 <label className="edit-booking-modal__label">Продолжительность</label>
-                <div className="edit-booking-modal__time-selects">
-                  <AppSingleSelect
-                    value={startTimeOptions.find(opt => opt.value === formData.startHour.toString()) || null}
-                    options={startTimeOptions}
-                    onChange={handleStartTimeChange}
-                    placeholder="Начало"
-                  />
-                  <div className="edit-booking-modal__time-divider">---</div>
-                  <AppInput
-                    value={endTime}
-                    disabled
-                    readOnly
-                  />
-                </div>
+                <AppSingleSelect
+                  value={timeRangeOptions.find(opt => opt.value === formData.startHour.toString()) || null}
+                  options={timeRangeOptions}
+                  onChange={handleStartTimeChange}
+                  placeholder="Выберите время"
+                />
               </div>
 
               {/* Название услуги */}
@@ -282,7 +289,6 @@ const EditBookingModal: React.FC<EditBookingModalProps> = observer(({
         ) : (
           <div className="edit-booking-modal__error">Не удалось загрузить данные заказа</div>
         )}
-      </div>
     </div>
   );
 });

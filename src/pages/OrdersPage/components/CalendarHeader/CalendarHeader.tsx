@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import { format, isSameDay, addDays, startOfWeek } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import './CalendarHeader.css';
 
 interface CalendarHeaderProps {
@@ -86,46 +88,76 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
   const formattedTime = dayjs(currentTime).format('HH:mm:ss');
 
+  // Генерируем дни недели
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  const weekDays = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
+  const monthName = format(weekStart, 'LLLL', { locale: ru });
+  const capitalizedMonthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
   return (
-    <div className="calendar-header">
-      <div className="calendar-header__tabs">
-        <button
-          className={`calendar-header__tab ${viewMode === 'day' ? 'calendar-header__tab_active' : ''}`}
-          onClick={() => onViewModeChange('day')}
-          disabled={true}
-        >
-          День
-        </button>
-        <button
-          className={`calendar-header__tab ${viewMode === 'week' ? 'calendar-header__tab_active' : ''}`}
-          onClick={() => onViewModeChange('week')}
-        >
-          Неделя
-        </button>
+    <>
+      <div className="calendar-header">
+        <div className="calendar-header__tabs">
+          <button
+            className={`calendar-header__tab ${viewMode === 'day' ? 'calendar-header__tab_active' : ''}`}
+            onClick={() => onViewModeChange('day')}
+            disabled={true}
+          >
+            День
+          </button>
+          <button
+            className={`calendar-header__tab ${viewMode === 'week' ? 'calendar-header__tab_active' : ''}`}
+            onClick={() => onViewModeChange('week')}
+          >
+            Неделя
+          </button>
+        </div>
+
+        <div className="calendar-header__time">
+          <ClockIcon />
+          <span className="calendar-header__time-text">{formattedTime}</span>
+        </div>
+
+        <div className="calendar-header__navigation">
+          <button
+            className="calendar-header__nav-button"
+            onClick={handlePrevious}
+            aria-label="Предыдущая неделя"
+          >
+            <ChevronLeftIcon />
+          </button>
+          <button
+            className="calendar-header__nav-button"
+            onClick={handleNext}
+            aria-label="Следующая неделя"
+          >
+            <ChevronRightIcon />
+          </button>
+        </div>
       </div>
 
-      <div className="calendar-header__time">
-        <ClockIcon />
-        <span className="calendar-header__time-text">{formattedTime}</span>
-      </div>
+      {/* Week Days Row - интегрированная часть заголовка */}
+      <div className="calendar-header__week-days">
+        <div className="calendar-header__month">{capitalizedMonthName}</div>
+        <div className="calendar-header__days">
+          {weekDays.map((day, index) => {
+            const isCurrentDay = isSameDay(day, currentDate);
+            const dayOfWeek = format(day, 'EEEEEE', { locale: ru });
+            const dayNumber = format(day, 'd');
 
-      <div className="calendar-header__navigation">
-        <button
-          className="calendar-header__nav-button"
-          onClick={handlePrevious}
-          aria-label="Предыдущая неделя"
-        >
-          <ChevronLeftIcon />
-        </button>
-        <button
-          className="calendar-header__nav-button"
-          onClick={handleNext}
-          aria-label="Следующая неделя"
-        >
-          <ChevronRightIcon />
-        </button>
+            return (
+              <div
+                key={index}
+                className={`calendar-header__day ${isCurrentDay ? 'calendar-header__day_current' : ''}`}
+              >
+                <span className="calendar-header__day-name">{dayOfWeek}</span>
+                <span className="calendar-header__day-number">{dayNumber}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

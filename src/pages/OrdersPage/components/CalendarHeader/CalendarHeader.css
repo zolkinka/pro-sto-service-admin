@@ -2,11 +2,8 @@
 .calendar-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 13px;
-  padding: 28px;
-  background: #FFFFFF;
-  border-radius: 20px;
-  box-shadow: 0px 1px 2px 0px rgba(30, 27, 21, 0.05);
   font-family: var(--font-onest);
 }
 
@@ -100,6 +97,70 @@
   height: 20px;
 }
 
+/* Week Days Row - интегрированная часть заголовка */
+.calendar-header__week-days {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--font-onest);
+}
+
+.calendar-header__month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 81px;
+  height: 56px;
+  padding: 19px 12px;
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  border-radius: 16px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.calendar-header__days {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+.calendar-header__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 120px;
+  height: 56px;
+  padding: 8px;
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.calendar-header__day_current {
+  background: #EFEEEB;
+  color: var(--color-gray-900);
+}
+
+.calendar-header__day-name {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.calendar-header__day-number {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .calendar-header {
@@ -109,6 +170,25 @@
 
   .calendar-header__navigation {
     margin-left: 0;
+  }
+
+  .calendar-header__week-days {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .calendar-header__month {
+    min-width: auto;
+  }
+
+  .calendar-header__days {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .calendar-header__day {
+    min-width: 100px;
   }
 }
 
@@ -125,5 +205,19 @@
     flex: 1;
     padding: 8px 12px;
     font-size: 13px;
+  }
+
+  .calendar-header__day {
+    min-width: 80px;
+    height: 50px;
+    padding: 6px;
+  }
+
+  .calendar-header__day-name {
+    font-size: 14px;
+  }
+
+  .calendar-header__day-number {
+    font-size: 20px;
   }
 }

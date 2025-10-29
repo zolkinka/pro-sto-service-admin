@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite';
 import { startOfWeek } from 'date-fns';
 import { useStores } from '@/hooks';
 import CalendarHeader from './components/CalendarHeader/CalendarHeader';
-import WeekDaysRow from './components/WeekDaysRow/WeekDaysRow';
 import CalendarGrid from './components/CalendarGrid/CalendarGrid';
 import EditBookingModal from './components/EditBookingModal/EditBookingModal';
 import './OrdersPage.css';
@@ -57,32 +56,34 @@ const OrdersPage = observer(() => {
 
   return (
     <div className="orders-page">
-      <CalendarHeader
-        currentDate={currentDate}
-        onDateChange={setCurrentDate}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
-
-      <WeekDaysRow startDate={weekStart} currentDate={currentDate} />
-
-      <CalendarGrid
-        bookings={bookingsStore.bookings}
-        weekStart={weekStart}
-        onBookingClick={handleBookingClick}
-        workingHours={workingHours}
-      />
-
-      {selectedBooking && (
-        <EditBookingModal
-          isOpen={selectedBooking !== null}
-          startHour={workingHours.start}
-          endHour={workingHours.end}
-          onClose={handleCloseModal}
-          bookingUuid={selectedBooking}
-          onUpdate={handleUpdateBooking}
+      <div className="orders-page__container">
+        <CalendarHeader
+          currentDate={currentDate}
+          onDateChange={setCurrentDate}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
-      )}
+
+        <div style={{ position: 'relative' }}>
+          <CalendarGrid
+            bookings={bookingsStore.bookings}
+            weekStart={weekStart}
+            onBookingClick={handleBookingClick}
+            workingHours={workingHours}
+          />
+
+          {selectedBooking && (
+            <EditBookingModal
+              isOpen={selectedBooking !== null}
+              startHour={workingHours.start}
+              endHour={workingHours.end}
+              onClose={handleCloseModal}
+              bookingUuid={selectedBooking}
+              onUpdate={handleUpdateBooking}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 });

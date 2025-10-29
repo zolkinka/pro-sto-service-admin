@@ -8,7 +8,7 @@
 
 .app-layout__content {
   flex: 1;
-  padding-top: 129px; /* 48px top + 49px header + 32px spacing */
+  padding-top: 58px; /* 48px top + 49px header + 32px spacing */
   display: flex;
   flex-direction: column;
   align-items: center;

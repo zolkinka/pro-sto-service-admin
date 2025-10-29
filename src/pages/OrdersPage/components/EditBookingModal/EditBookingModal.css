@@ -1,27 +1,24 @@
 /* EditBookingModal */
 .edit-booking-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  /* Убираем fixed overlay - модальное окно теперь внутри контейнера */
+  display: none;
 }
 
 .edit-booking-modal {
+  position: fixed; /* Изменено с absolute на fixed для фиксации при скролле */
+  top: 50%; /* Центрируем по вертикали */
+  right: 20px; /* Отступ справа от края экрана */
+  transform: translateY(-50%); /* Центрирование по вертикали */
   background: white;
+  border: 1px solid #F4F3F0;
   border-radius: 20px;
   width: 346px;
-  max-height: 90vh;
+  max-height: calc(100vh - 40px); /* Максимальная высота с учетом отступов сверху и снизу */
   box-shadow: 0px 1px 2px rgba(30, 27, 21, 0.05);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #F4F3F0;
+  z-index: 10;
 }
 
 .edit-booking-modal__loading,
@@ -37,11 +34,21 @@
 /* Header */
 .edit-booking-modal__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
   width: 100%;
-  padding: 24px 20px 0 20px;
+  padding: 24px 20px 16px 20px; /* Увеличил нижний padding */
   flex-shrink: 0;
+}
+
+.edit-booking-modal__header-content {
+  display: flex;
+  flex-direction: column; /* Изменено на вертикальное расположение */
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .edit-booking-modal__title {
@@ -53,13 +60,44 @@
   margin: 0;
 }
 
+.edit-booking-modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.edit-booking-modal__close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #53514F;
+  transition: background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.edit-booking-modal__close-button:hover {
+  background: #F9F8F5;
+  color: #302F2D;
+}
+
+.edit-booking-modal__close-button:active {
+  background: #F4F3F0;
+}
+
 /* Car info */
 .edit-booking-modal__car-info {
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 0 20px;
-  margin-top: 16px;
+  margin-top: 8px; /* Уменьшен отступ сверху */
   background: white;
   border: 1px solid #F4F3F0;
   border-radius: 16px;

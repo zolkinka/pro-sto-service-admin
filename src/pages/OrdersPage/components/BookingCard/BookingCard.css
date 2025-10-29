@@ -61,29 +61,29 @@
 
 /* Status colors - completed */
 .booking-card_status_completed {
-  background-color: var(--color-green-25);
+  background-color: #DEF7E7; /* Green/25 из макета */
 }
 
 .booking-card_status_completed .booking-card__status {
-  color: var(--color-green-400);
+  color: #0AB878; /* Green/400 из макета */
 }
 
 /* Status colors - confirmed */
 .booking-card_status_confirmed {
-  background-color: #F9ECD2;
+  background-color: #F9ECD2; /* Yellow/50 из макета */
 }
 
 .booking-card_status_confirmed .booking-card__status {
-  color: var(--color-yellow-500);
+  color: #CC8D18; /* Yellow/400 из макета */
 }
 
 /* Status colors - pending_confirmation */
 .booking-card_status_pending_confirmation {
-  background-color: #F9ECD2;
+  background-color: #F9ECD2; /* Yellow/50 из макета */
 }
 
 .booking-card_status_pending_confirmation .booking-card__status {
-  color: var(--color-yellow-500);
+  color: #CC8D18; /* Yellow/400 из макета */
 }
 
 /* Status colors - cancelled */

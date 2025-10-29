@@ -3,9 +3,10 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  min-height: 100%;
+  height: calc(100vh - 73px); /* Вычитаем высоту хедера */
   padding: 28px;
   background: #F9F8F5;
+  overflow: hidden;
 }
 
 .orders-page__container {
@@ -15,9 +16,10 @@
   gap: 16px;
   width: 100%;
   max-width: 1064px;
+  height: 100%;
   padding: 28px;
   background: white;
   border-radius: 20px;
   box-shadow: 0px 1px 2px 0px rgba(30, 27, 21, 0.05);
-  overflow: visible; /* Важно для видимости модального окна справа */
+  overflow: hidden; /* Убираем скролл на уровне контейнера */
 }

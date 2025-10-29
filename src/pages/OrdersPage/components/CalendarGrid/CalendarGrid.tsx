@@ -19,6 +19,7 @@ const PIXELS_PER_HOUR = TIME_ROW_HEIGHT + TIME_ROW_GAP; // 13 + 50 = 63px
 const PIXELS_PER_MINUTE = PIXELS_PER_HOUR / 60; // 63 / 60 = 1.05
 const DAY_COLUMN_WIDTH = 120; // ширина колонки для одного дня
 const DAY_COLUMN_GAP = 12; // отступ между колонками дней
+const CARD_PADDING = 4; // отступ карточки от линий сетки в пикселях
 
 interface BookingWithPosition extends AdminBookingResponseDto {
   top: number;
@@ -61,11 +62,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     const startHour = startTime.getHours();
     const startMinute = startTime.getMinutes();
     const minutesFromStart = (startHour - workingHours.start) * 60 + startMinute;
-    const top = minutesFromStart * PIXELS_PER_MINUTE;
+    // Добавляем отступ сверху (CARD_PADDING) для визуального отделения от линии
+    const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
 
     // Рассчитываем высоту карточки
     const durationMinutes = differenceInMinutes(endTime, startTime);
-    const height = durationMinutes * PIXELS_PER_MINUTE;
+    // Вычитаем отступы сверху и снизу (CARD_PADDING * 2)
+    const height = durationMinutes * PIXELS_PER_MINUTE - (CARD_PADDING * 2);
 
     return {
       ...booking,
@@ -80,6 +83,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   bookingsWithPositions.forEach((booking) => {
     bookingsByDay[booking.dayIndex].push(booking);
   });
+
+  // Вычисляем высоту контейнера с бронированиями
+  const totalHours = hours.length;
+  const bookingsHeight = (totalHours - 1) * PIXELS_PER_HOUR + TIME_ROW_HEIGHT;
 
   return (
     <div className="calendar-grid">
@@ -99,9 +106,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         <div className="calendar-grid__days-container">
           {/* Горизонтальные линии для каждого часа */}
           <div className="calendar-grid__horizontal-lines">
-            {hours.map((hour) => (
-              <div key={hour} className="calendar-grid__hour-line" />
-            ))}
+            {hours.map((hour, index) => {
+              // Каждая линия располагается точно на расстоянии index * 63px от начала
+              const top = index * PIXELS_PER_HOUR;
+              return (
+                <div 
+                  key={hour} 
+                  className="calendar-grid__hour-line"
+                  style={{ top: `${top}px` }}
+                />
+              );
+            })}
           </div>
 
           {/* Вертикальные линии для каждого дня */}
@@ -112,7 +127,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           </div>
 
           {/* Карточки заказов */}
-          <div className="calendar-grid__bookings">
+          <div 
+            className="calendar-grid__bookings"
+            style={{ height: `${bookingsHeight}px` }}
+          >
             {bookingsWithPositions.map((booking) => {
               const left = booking.dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
               

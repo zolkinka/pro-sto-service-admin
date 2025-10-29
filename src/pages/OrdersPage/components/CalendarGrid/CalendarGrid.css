@@ -1,8 +1,29 @@
 .calendar-grid {
-  position: relative; /* Для абсолютного позиционирования модального окна */
+  position: relative;
   width: 100%;
-  overflow: auto;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   font-family: var(--font-onest);
+}
+
+/* Webkit scrollbar styling */
+.calendar-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.calendar-grid::-webkit-scrollbar-track {
+  background: #F9F8F5;
+  border-radius: 10px;
+}
+
+.calendar-grid::-webkit-scrollbar-thumb {
+  background: #EFEEEB;
+  border-radius: 10px;
+}
+
+.calendar-grid::-webkit-scrollbar-thumb:hover {
+  background: #E4E3E0;
 }
 
 .calendar-grid__content {
@@ -43,13 +64,14 @@
   top: 0;
   left: 0;
   right: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 63px; /* 13px (высота строки времени) + 50px (gap) */
   pointer-events: none;
+  height: 100%;
 }
 
 .calendar-grid__hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
   height: 1px;
   background-color: var(--color-gray-200);
   width: 100%;
@@ -89,7 +111,7 @@
 
 .calendar-grid__bookings {
   position: relative;
-  min-height: calc(63px * 10); /* 10 часов * 63px (13px высота + 50px gap) между каждым */
+  /* Высота вычисляется автоматически на основе количества часов в компоненте */
 }
 
 .calendar-grid__booking-wrapper {

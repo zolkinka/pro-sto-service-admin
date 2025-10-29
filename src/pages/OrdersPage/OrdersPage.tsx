@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { startOfWeek } from 'date-fns';
 import { useStores } from '@/hooks';
@@ -13,8 +13,32 @@ const OrdersPage = observer(() => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week'>('week');
 
-  // Рабочие часы (можно сделать настраиваемыми в будущем)
-  const workingHours = { start: 9, end: 18 };
+  // Рабочие часы (динамически рассчитываются на основе заказов)
+  const workingHours = useMemo(() => {
+    if (bookingsStore.bookings.length === 0) {
+      return { start: 9, end: 18 }; // дефолтные часы, если нет заказов
+    }
+
+    let minHour = 9;
+    let maxHour = 18;
+
+    bookingsStore.bookings.forEach((booking) => {
+      const startTime = new Date(booking.start_time);
+      const endTime = new Date(booking.end_time);
+      
+      const startHour = startTime.getHours();
+      const endHour = endTime.getHours();
+      const endMinute = endTime.getMinutes();
+      
+      // Если есть минуты в конце, округляем час вверх
+      const effectiveEndHour = endMinute > 0 ? endHour + 1 : endHour;
+      
+      minHour = Math.min(minHour, startHour);
+      maxHour = Math.max(maxHour, effectiveEndHour);
+    });
+
+    return { start: minHour, end: maxHour };
+  }, [bookingsStore.bookings]);
 
   useEffect(() => {
     // Загрузка заказов при монтировании и изменении даты

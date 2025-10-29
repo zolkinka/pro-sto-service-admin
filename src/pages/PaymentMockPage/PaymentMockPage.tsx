@@ -88,7 +88,7 @@ const PaymentMockPage = () => {
         console.log('Получена 404 ошибка, начинаем повторные попытки...');
       } else {
         setStatus('not_found');
-        setErrorMessage('Бронирование не найдено');
+        setErrorMessage(JSON.stringify(error));
         setIsRetrying(false);
       }
     }

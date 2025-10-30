@@ -12,9 +12,15 @@ export class OperatingHoursStore {
   timezone: string = 'Europe/Moscow'; // Default timezone
   loading = false;
   error: string | null = null;
+  private rootStore?: RootStore;
 
-  constructor(private rootStore: RootStore) {
+  constructor(rootStore?: RootStore) {
+    this.rootStore = rootStore;
     makeAutoObservable(this);
+  }
+  
+  setRootStore(rootStore: RootStore) {
+    this.rootStore = rootStore;
   }
 
   async loadOperatingHours(serviceCenterUuid: string) {
@@ -53,7 +59,7 @@ export class OperatingHoursStore {
       });
       
       // Показываем toast с успехом
-      this.rootStore.toastStore.showSuccess('Расписание успешно обновлено');
+      this.rootStore?.toastStore.showSuccess('Расписание успешно обновлено');
       
       // Перезагружаем данные после обновления
       try {
@@ -72,7 +78,7 @@ export class OperatingHoursStore {
         this.loading = false;
       });
       
-      this.rootStore.toastStore.showError('Не удалось сохранить расписание');
+      this.rootStore?.toastStore.showError('Не удалось сохранить расписание');
       
       console.error('Error updating regular schedule:', error);
       throw error;
@@ -88,5 +94,6 @@ export class OperatingHoursStore {
   }
 }
 
-// Создаем singleton instance
-export const operatingHoursStore = new OperatingHoursStore({} as RootStore);
+// Создаем singleton instance без RootStore
+// RootStore будет установлен позже через setRootStore
+export const operatingHoursStore = new OperatingHoursStore();

@@ -23,6 +23,9 @@ export class RootStore {
     this.bookingsStore = bookingsStore;
     this.operatingHoursStore = operatingHoursStore;
     
+    // Устанавливаем ссылку на rootStore в operatingHoursStore
+    this.operatingHoursStore.setRootStore(this);
+    
     makeAutoObservable(this);
   }
 }

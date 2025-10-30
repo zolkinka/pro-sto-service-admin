@@ -10,13 +10,11 @@ import * as S from './SchedulePage.styles';
 interface OperatingHoursFormProps {
   schedule: OperatingHoursResponseDto[];
   onSave: (data: UpdateRegularScheduleDto) => Promise<void>;
-  onCancel: () => void;
 }
 
 interface DayScheduleFormData {
   open: string;
   close: string;
-  is_closed: boolean;
 }
 
 interface FormData {
@@ -25,7 +23,7 @@ interface FormData {
   weekSchedule: Record<string, DayScheduleFormData>;
 }
 
-const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSave, onCancel }) => {
+const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSave }) => {
   const [formData, setFormData] = useState<FormData>(() => {
     const initialWeekSchedule: Record<string, DayScheduleFormData> = {};
     
@@ -34,7 +32,6 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
       initialWeekSchedule[day] = {
         open: dayData ? formatTime(dayData.open_time) : '09:00',
         close: dayData ? formatTime(dayData.close_time) : '18:00',
-        is_closed: dayData ? dayData.is_closed : false,
       };
     });
 
@@ -45,8 +42,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
       const current = initialWeekSchedule[day];
       return (
         first.open === current.open &&
-        first.close === current.close &&
-        first.is_closed === current.is_closed
+        first.close === current.close
       );
     });
 
@@ -104,14 +100,12 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
     } else {
       DAYS_ORDER.forEach(day => {
         const daySchedule = formData.weekSchedule[day];
-        if (!daySchedule.is_closed) {
-          if (!daySchedule.open) {
-            newErrors[day] = 'Укажите время открытия';
-          } else if (!daySchedule.close) {
-            newErrors[day] = 'Укажите время закрытия';
-          } else if (!validateTimeRange(daySchedule.open, daySchedule.close)) {
-            newErrors[day] = 'Время закрытия должно быть позже времени открытия';
-          }
+        if (!daySchedule.open) {
+          newErrors[day] = 'Укажите время открытия';
+        } else if (!daySchedule.close) {
+          newErrors[day] = 'Укажите время закрытия';
+        } else if (!validateTimeRange(daySchedule.open, daySchedule.close)) {
+          newErrors[day] = 'Время закрытия должно быть позже времени открытия';
         }
       });
     }
@@ -151,10 +145,9 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
           const closeTime = parseTime(daySchedule.close);
 
           updateData[day] = {
-            // API требует валидный формат HH:mm даже для выходных дней
             open_time: openTime ? `${openTime.hour.toString().padStart(2, '0')}:${openTime.minute.toString().padStart(2, '0')}` : '00:00',
             close_time: closeTime ? `${closeTime.hour.toString().padStart(2, '0')}:${closeTime.minute.toString().padStart(2, '0')}` : '00:00',
-            is_closed: daySchedule.is_closed,
+            is_closed: false,
           };
         });
       }
@@ -221,14 +214,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
         </div>
       )}
 
-      <S.ButtonsRow>
-        <AppButton
-          variant="secondary"
-          onClick={onCancel}
-          disabled={isSaving}
-        >
-          Отмена
-        </AppButton>
+      <S.SaveButton>
         <AppButton
           variant="primary"
           onClick={handleSubmit}
@@ -237,7 +223,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
         >
           Сохранить
         </AppButton>
-      </S.ButtonsRow>
+      </S.SaveButton>
     </div>
   );
 };

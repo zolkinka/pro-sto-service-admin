@@ -4,8 +4,8 @@ import * as S from './SchedulePage.styles';
 
 interface DayScheduleRowProps {
   dayName: string;
-  value: { open: string; close: string; is_closed: boolean };
-  onChange: (value: { open: string; close: string; is_closed: boolean }) => void;
+  value: { open: string; close: string };
+  onChange: (value: { open: string; close: string }) => void;
 }
 
 const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChange }) => {
@@ -17,10 +17,6 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChang
     onChange({ ...value, close: time });
   };
 
-  const handleClosedToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...value, is_closed: event.target.checked });
-  };
-
   return (
     <S.DayRow>
       <S.DayName>{dayName}</S.DayName>
@@ -28,25 +24,15 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChang
         <AppTimePicker
           value={value.open}
           onChange={handleOpenTimeChange}
-          disabled={value.is_closed}
           placeholder="Открытие"
         />
         <S.TimeSeparator />
         <AppTimePicker
           value={value.close}
           onChange={handleCloseTimeChange}
-          disabled={value.is_closed}
           placeholder="Закрытие"
         />
       </S.TimeRangeContainer>
-      <S.CheckboxWrapper>
-        <input
-          type="checkbox"
-          checked={value.is_closed}
-          onChange={handleClosedToggle}
-        />
-        Выходной
-      </S.CheckboxWrapper>
     </S.DayRow>
   );
 };

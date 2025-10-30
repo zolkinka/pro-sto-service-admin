@@ -59,7 +59,7 @@ export const TimeRangeContainer = styled.div`
   flex: 1;
   
   /* AppTimePicker внутри должен занимать всё доступное пространство */
-  & > div {
+  & > .app-time-picker {
     flex: 1 1 0;
     min-width: 50px;
   }
@@ -136,25 +136,13 @@ export const ButtonsRow = styled.div`
   margin-top: 24px;
 `;
 
-export const DayScheduleSection = styled.div`
-  margin-top: 20px;
+export const SaveButton = styled.div`
+  margin-top: 28px;
+  width: 100%;
 `;
 
-export const CheckboxWrapper = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'Onest', sans-serif;
-  font-size: 14px;
-  color: #302F2D;
-  cursor: pointer;
-  user-select: none;
-  
-  input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-  }
+export const DayScheduleSection = styled.div`
+  margin-top: 20px;
 `;
 
 export const Title = styled.h1`

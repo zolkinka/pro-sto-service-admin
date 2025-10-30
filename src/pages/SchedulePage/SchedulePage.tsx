@@ -29,10 +29,6 @@ const SchedulePage: React.FC = observer(() => {
     setIsEditing(true);
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
-
   const handleSave = async (data: UpdateRegularScheduleDto) => {
     if (!serviceCenterUuid) {
       return;
@@ -88,7 +84,6 @@ const SchedulePage: React.FC = observer(() => {
           <OperatingHoursForm
             schedule={operatingHoursStore.regularSchedule}
             onSave={handleSave}
-            onCancel={handleCancel}
           />
         ) : (
           <OperatingHoursView

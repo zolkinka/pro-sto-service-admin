@@ -144,14 +144,6 @@ const ViewBookingModal = observer(({
     licensePlateRegion = plate.region || null;
   }
 
-  // Получаем изображение автомобиля (если есть) - поле generated_image может присутствовать в runtime
-  // но отсутствует в типе BookingCarDto, поэтому используем type assertion
-  const carImagePath = (booking.car as { generated_image?: string | null }).generated_image;
-  
-  // Формируем полный URL для изображения с учетом BASE_STATIC_PATH
-  const baseStaticPath = import.meta.env.VITE_BASE_STATIC_PATH || '';
-  const carImage = carImagePath ? `${baseStaticPath}${carImagePath}` : null;
-
   // Конфигурация статуса
   const statusConfig = STATUS_CONFIG[booking.status as BookingStatus] || STATUS_CONFIG.pending_confirmation;
 
@@ -196,18 +188,6 @@ const ViewBookingModal = observer(({
 
         {/* Блок информации об автомобиле */}
         <div className="view-booking-modal__car-section">
-          <div className="view-booking-modal__car-image">
-            {/* Отображаем изображение автомобиля, если оно есть */}
-            {carImage ? (
-              <img 
-                src={carImage} 
-                alt={`${booking.car.make} ${booking.car.model}`}
-                className="view-booking-modal__car-photo"
-              />
-            ) : (
-              <div className="view-booking-modal__car-placeholder" />
-            )}
-          </div>
           <div className="view-booking-modal__car-info">
             <div className="view-booking-modal__car-name">{booking.car.make} {booking.car.model}</div>
             <div className="view-booking-modal__car-plate-container">

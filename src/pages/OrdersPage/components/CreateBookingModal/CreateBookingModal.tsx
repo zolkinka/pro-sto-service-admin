@@ -300,18 +300,19 @@ const CreateBookingModal = observer(({
   if (!isOpen) return null;
 
   return (
-    <div className="create-booking-modal">
-      <div className="create-booking-modal__header">
-        <h2 className="create-booking-modal__title">Добавление записи</h2>
-        <button 
-          className="create-booking-modal__close" 
-          onClick={handleClose} 
-          aria-label="Закрыть"
-          disabled={isSubmitting}
-        >
-          ×
-        </button>
-      </div>
+    <div className="create-booking-modal__overlay" onClick={handleClose}>
+      <div className="create-booking-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="create-booking-modal__header">
+          <h2 className="create-booking-modal__title">Добавление записи</h2>
+          <button 
+            className="create-booking-modal__close" 
+            onClick={handleClose} 
+            aria-label="Закрыть"
+            disabled={isSubmitting}
+          >
+            ×
+          </button>
+        </div>
 
       <div className="create-booking-modal__body">
         <div className="create-booking-modal__field">
@@ -368,9 +369,9 @@ const CreateBookingModal = observer(({
             />
           </div>
 
-          <div className="create-booking-modal__field create-booking-modal__field--time">
-            <label className="create-booking-modal__time-label">&nbsp;</label>
+          <div className="create-booking-modal__field">
             <AppTimePicker
+              label="Время"
               value={selectedTime}
               onChange={setSelectedTime}
               placeholder="09:00"
@@ -420,6 +421,7 @@ const CreateBookingModal = observer(({
         </AppButton>
       </div>
     </div>
+  </div>
   );
 });
 

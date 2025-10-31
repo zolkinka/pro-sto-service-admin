@@ -187,16 +187,6 @@ const OrdersPage = observer(() => {
           />
         )}
 
-        {isCreateModalOpen && (
-          <CreateBookingModal
-            isOpen={isCreateModalOpen}
-            onClose={handleCloseCreateModal}
-            onSuccess={handleCreateBookingSuccess}
-            initialDate={createBookingDate || undefined}
-            initialTime={createBookingTime}
-          />
-        )}
-
         <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden' }}>
           <CalendarGrid
             bookings={bookingsStore.bookings}
@@ -208,6 +198,16 @@ const OrdersPage = observer(() => {
           />
         </div>
       </div>
+
+      {isCreateModalOpen && (
+        <CreateBookingModal
+          isOpen={isCreateModalOpen}
+          onClose={handleCloseCreateModal}
+          onSuccess={handleCreateBookingSuccess}
+          initialDate={createBookingDate || undefined}
+          initialTime={createBookingTime}
+        />
+      )}
     </div>
   );
 });

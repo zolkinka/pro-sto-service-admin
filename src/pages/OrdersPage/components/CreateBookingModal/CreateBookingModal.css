@@ -1,16 +1,28 @@
-.create-booking-modal {
-  position: absolute;
+/* Overlay */
+.create-booking-modal__overlay {
+  position: fixed;
   top: 0;
+  left: 0;
   right: 0;
-  width: 420px;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.create-booking-modal {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
   background: #FFFFFF;
   border: 1px solid #F4F3F0;
   border-radius: 20px;
-  box-shadow: 0px 1px 2px 0px rgba(30, 27, 21, 0.05);
-  z-index: 100;
+  box-shadow: 0px 8px 32px rgba(30, 27, 21, 0.12);
   font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  overflow: visible;
-  max-height: calc(100vh - 100px);
+  max-height: calc(100vh - 40px);
   display: flex;
   flex-direction: column;
 }
@@ -64,7 +76,7 @@
 .create-booking-modal__body {
   flex: 1;
   overflow-y: auto;
-  padding: 0 20px;
+  padding: 0 20px 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -107,20 +119,9 @@
   min-width: 0;
 }
 
-/* Time field label alignment */
-.create-booking-modal__time-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.2;
-  color: #53514F;
-  margin-bottom: 8px;
-  height: 15.6px; /* Высота одной строки текста */
-}
-
 /* Footer */
 .create-booking-modal__footer {
-  padding: 16px 20px 24px;
+  padding: 20px;
   flex-shrink: 0;
 }
 

@@ -12,6 +12,7 @@ import {
   OrdersPage,
   AnalyticsPage,
   SchedulePage,
+  SettingsPage,
   PaymentMockPage
 } from '@/pages';
 
@@ -80,6 +81,15 @@ const AppRouter = observer(() => {
         element={
           <PrivateRoute>
             <SchedulePage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.SETTINGS}
+        element={
+          <PrivateRoute>
+            <SettingsPage />
           </PrivateRoute>
         }
       />

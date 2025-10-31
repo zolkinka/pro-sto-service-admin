@@ -6,16 +6,22 @@ import {
 } from 'firebase/messaging';
 import { getFirebaseMessaging, VAPID_KEY, isFirebaseConfigured } from './firebase';
 import { toastStore } from '@/stores/ToastStore';
+import { 
+  registerNotificationToken,
+  unregisterNotificationToken,
+  getNotificationSettings,
+  updateNotificationSettings,
+  type NotificationSettingsDto
+} from '../../services/api-client';
 
 /**
- * Типы уведомлений в системе
+ * Типы уведомлений в системе (соответствуют API)
  */
 export enum NotificationType {
-  BOOKING_CREATED = 'booking_created',
-  BOOKING_CONFIRMED = 'booking_confirmed',
-  BOOKING_CANCELLED = 'booking_cancelled',
-  BOOKING_REMINDER = 'booking_reminder',
-  BOOKING_COMPLETED = 'booking_completed',
+  NEW_BOOKING = 'newBooking',
+  STATUS_CHANGE = 'statusChange',
+  REMINDERS = 'reminders',
+  PROMOTIONS = 'promotions',
 }
 
 /**
@@ -34,11 +40,10 @@ export interface NotificationSettings {
 const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   enabled: true,
   types: {
-    [NotificationType.BOOKING_CREATED]: true,
-    [NotificationType.BOOKING_CONFIRMED]: true,
-    [NotificationType.BOOKING_CANCELLED]: true,
-    [NotificationType.BOOKING_REMINDER]: true,
-    [NotificationType.BOOKING_COMPLETED]: true,
+    [NotificationType.NEW_BOOKING]: true,
+    [NotificationType.STATUS_CHANGE]: true,
+    [NotificationType.REMINDERS]: true,
+    [NotificationType.PROMOTIONS]: true,
   },
 };
 
@@ -149,21 +154,24 @@ class NotificationService {
 
   /**
    * Отправка токена на сервер
-   * TODO: Реализовать, когда будет готов API endpoint
-   * 
-   * @param token FCM токен для отправки
    */
   async sendTokenToServer(token: string): Promise<void> {
     try {
-      // TODO: Добавить вызов API endpoint для сохранения токена
-      // Пример:
-      // await apiClient.saveDeviceToken({ fcm_token: token });
-      
-      console.log('Token should be sent to server:', token);
-      console.warn('API endpoint for saving FCM token is not implemented yet');
-      
-      // Временное решение - сохраняем в localStorage
-      localStorage.setItem('fcm_token', token);
+      // Получаем информацию об устройстве
+      const deviceId = this.getDeviceId();
+      const deviceType = this.getDeviceType();
+      const deviceName = this.getDeviceName();
+
+      await registerNotificationToken({
+        requestBody: {
+          token,
+          deviceId,
+          deviceType,
+          deviceName,
+        },
+      });
+
+      console.log('Token successfully sent to server');
     } catch (error) {
       console.error('Error sending token to server:', error);
       throw error;
@@ -172,23 +180,72 @@ class NotificationService {
 
   /**
    * Удаление токена с сервера
-   * TODO: Реализовать, когда будет готов API endpoint
    */
   async removeTokenFromServer(): Promise<void> {
     try {
-      // TODO: Добавить вызов API endpoint для удаления токена
-      // Пример:
-      // await apiClient.removeDeviceToken();
-      
-      console.log('Token should be removed from server');
-      console.warn('API endpoint for removing FCM token is not implemented yet');
-      
-      // Временное решение - удаляем из localStorage
-      localStorage.removeItem('fcm_token');
+      const deviceId = this.getDeviceId();
+
+      await unregisterNotificationToken({
+        requestBody: {
+          deviceId,
+        },
+      });
+
+      console.log('Token successfully removed from server');
     } catch (error) {
       console.error('Error removing token from server:', error);
       throw error;
     }
+  }
+
+  /**
+   * Получить уникальный ID устройства
+   */
+  private getDeviceId(): string {
+    let deviceId = localStorage.getItem('device_id');
+    
+    if (!deviceId) {
+      // Генерируем уникальный ID устройства
+      deviceId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      localStorage.setItem('device_id', deviceId);
+    }
+    
+    return deviceId;
+  }
+
+  /**
+   * Получить тип устройства
+   */
+  private getDeviceType(): string {
+    const ua = navigator.userAgent;
+    
+    if (/mobile/i.test(ua)) {
+      return 'mobile';
+    } else if (/tablet/i.test(ua)) {
+      return 'tablet';
+    }
+    
+    return 'desktop';
+  }
+
+  /**
+   * Получить название устройства
+   */
+  private getDeviceName(): string {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown Browser';
+    
+    if (ua.indexOf('Firefox') > -1) {
+      browser = 'Firefox';
+    } else if (ua.indexOf('Chrome') > -1) {
+      browser = 'Chrome';
+    } else if (ua.indexOf('Safari') > -1) {
+      browser = 'Safari';
+    } else if (ua.indexOf('Edge') > -1) {
+      browser = 'Edge';
+    }
+    
+    return `${browser} on ${this.getDeviceType()}`;
   }
 
   /**
@@ -203,8 +260,8 @@ class NotificationService {
         return false;
       }
 
-      // Загружаем сохраненные настройки
-      this.loadSettings();
+      // Загружаем настройки с сервера
+      await this.loadSettingsFromServer();
 
       // Если уведомления отключены, не инициализируем
       if (!this.settings.enabled) {
@@ -306,8 +363,8 @@ class NotificationService {
       ...settings,
     };
 
-    // Сохраняем настройки в localStorage
-    this.saveSettings();
+    // Сохраняем настройки на сервере
+    await this.saveSettingsToServer();
 
     // Если уведомления были отключены, удаляем токен с сервера
     if (settings.enabled === false) {
@@ -320,27 +377,80 @@ class NotificationService {
   }
 
   /**
-   * Загрузка настроек из localStorage
+   * Загрузка настроек с сервера
    */
-  private loadSettings(): void {
+  private async loadSettingsFromServer(): Promise<void> {
+    try {
+      const serverSettings = await getNotificationSettings();
+      
+      // Маппим серверные настройки на клиентские
+      this.settings = {
+        enabled: true, // Если настройки есть на сервере, считаем что включены
+        types: {
+          [NotificationType.NEW_BOOKING]: serverSettings.newBooking ?? true,
+          [NotificationType.STATUS_CHANGE]: serverSettings.statusChange ?? true,
+          [NotificationType.REMINDERS]: serverSettings.reminders ?? true,
+          [NotificationType.PROMOTIONS]: serverSettings.promotions ?? true,
+        },
+      };
+
+      // Также сохраняем в localStorage для кэша
+      this.saveSettingsToLocalStorage();
+    } catch (error) {
+      console.error('Error loading notification settings from server:', error);
+      // В случае ошибки загружаем из localStorage
+      this.loadSettingsFromLocalStorage();
+    }
+  }
+
+  /**
+   * Сохранение настроек на сервере
+   */
+  private async saveSettingsToServer(): Promise<void> {
+    try {
+      const serverSettings: NotificationSettingsDto = {
+        newBooking: this.settings.types[NotificationType.NEW_BOOKING],
+        statusChange: this.settings.types[NotificationType.STATUS_CHANGE],
+        reminders: this.settings.types[NotificationType.REMINDERS],
+        promotions: this.settings.types[NotificationType.PROMOTIONS],
+      };
+
+      await updateNotificationSettings({
+        requestBody: serverSettings,
+      });
+
+      // Также сохраняем в localStorage
+      this.saveSettingsToLocalStorage();
+      
+      console.log('Notification settings saved to server');
+    } catch (error) {
+      console.error('Error saving notification settings to server:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Загрузка настроек из localStorage (fallback)
+   */
+  private loadSettingsFromLocalStorage(): void {
     try {
       const saved = localStorage.getItem('notification_settings');
       if (saved) {
         this.settings = JSON.parse(saved);
       }
     } catch (error) {
-      console.error('Error loading notification settings:', error);
+      console.error('Error loading notification settings from localStorage:', error);
     }
   }
 
   /**
-   * Сохранение настроек в localStorage
+   * Сохранение настроек в localStorage (кэш)
    */
-  private saveSettings(): void {
+  private saveSettingsToLocalStorage(): void {
     try {
       localStorage.setItem('notification_settings', JSON.stringify(this.settings));
     } catch (error) {
-      console.error('Error saving notification settings:', error);
+      console.error('Error saving notification settings to localStorage:', error);
     }
   }
 

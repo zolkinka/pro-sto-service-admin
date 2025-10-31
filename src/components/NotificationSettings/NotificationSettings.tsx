@@ -115,11 +115,10 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = observer(({
    */
   const getNotificationTypeName = (type: NotificationType): string => {
     const names: Record<NotificationType, string> = {
-      [NotificationType.BOOKING_CREATED]: 'Создание бронирования',
-      [NotificationType.BOOKING_CONFIRMED]: 'Подтверждение бронирования',
-      [NotificationType.BOOKING_CANCELLED]: 'Отмена бронирования',
-      [NotificationType.BOOKING_REMINDER]: 'Напоминание о бронировании',
-      [NotificationType.BOOKING_COMPLETED]: 'Завершение бронирования',
+      [NotificationType.NEW_BOOKING]: 'Новые бронирования',
+      [NotificationType.STATUS_CHANGE]: 'Изменения статуса заказов',
+      [NotificationType.REMINDERS]: 'Напоминания',
+      [NotificationType.PROMOTIONS]: 'Промо-акции',
     };
 
     return names[type] || type;

@@ -1,0 +1,152 @@
+/* AppDatePicker Component */
+
+.app-date-picker {
+  position: relative;
+  width: 100%;
+}
+
+.app-date-picker_disabled {
+  opacity: 0.6;
+}
+
+.app-date-picker__input-container {
+  cursor: pointer;
+}
+
+/* Календарь */
+.app-date-picker__calendar {
+  width: 339px;
+  padding: 20px 24px;
+  background: var(--color-gray-25);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Заголовок с навигацией */
+.app-date-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-date-picker__month-title {
+  font-family: var(--font-onest);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--color-gray-800);
+}
+
+.app-date-picker__nav-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease;
+}
+
+.app-date-picker__nav-button:hover {
+  background: var(--color-gray-300);
+}
+
+.app-date-picker__nav-button:active {
+  background: var(--color-gray-400);
+}
+
+/* Дни недели */
+.app-date-picker__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.app-date-picker__weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-gray-800);
+  height: 40px;
+}
+
+/* Сетка дат */
+.app-date-picker__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-date-picker__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+/* Ячейка даты */
+.app-date-picker__day {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-gray-900);
+  background: none;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  padding: 0;
+}
+
+/* Дата текущего месяца */
+.app-date-picker__day_current-month {
+  color: var(--color-gray-900);
+}
+
+/* Дата других месяцев */
+.app-date-picker__day_other-month {
+  color: var(--color-gray-500);
+}
+
+/* Hover состояние */
+.app-date-picker__day:not(.app-date-picker__day_disabled):not(.app-date-picker__day_selected):hover {
+  background: var(--color-gray-300);
+}
+
+/* Выбранная дата */
+.app-date-picker__day_selected {
+  background: var(--color-gray-900);
+  color: var(--color-gray-25);
+}
+
+.app-date-picker__day_selected:hover {
+  background: var(--color-gray-900);
+  color: var(--color-gray-25);
+}
+
+/* Отключенная дата */
+.app-date-picker__day_disabled {
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.app-date-picker__day_disabled:hover {
+  background: none;
+}

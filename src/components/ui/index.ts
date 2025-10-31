@@ -12,3 +12,4 @@ export * from './AppTag';
 export * from './AppTable';
 export * from './AppSingleSelect';
 export * from './AppTimePicker';
+export * from './AppDatePicker';

@@ -10,6 +10,7 @@ import {
   adminBookingsGetOne,
   adminBookingsUpdate,
   adminBookingsUpdateStatus,
+  adminBookingsGetPending,
 } from '../../services/api-client';
 import { toastStore } from './ToastStore';
 
@@ -24,12 +25,16 @@ export class BookingsStore {
   // Список бронирований
   bookings: AdminBookingResponseDto[] = [];
   
+  // Список бронирований ожидающих подтверждения
+  pendingBookings: AdminBookingResponseDto[] = [];
+  
   // Детальная информация о выбранном бронировании
   selectedBooking: DetailedBookingResponseDto | null = null;
   
   // Состояние загрузки
   isLoading = false;
   isLoadingDetails = false;
+  isLoadingPending = false;
   
   // Ошибки
   error: string | null = null;
@@ -107,6 +112,37 @@ export class BookingsStore {
       });
       console.error('Ошибка при загрузке бронирований:', error);
       toastStore.showError('Не удалось загрузить список заказов');
+    }
+  }
+
+  /**
+   * Загрузка бронирований в статусе pending_confirmation
+   */
+  async fetchPendingBookings(): Promise<void> {
+    if (!this.serviceCenterUuid) {
+      console.warn('ServiceCenterUuid не установлен');
+      return;
+    }
+
+    this.isLoadingPending = true;
+    this.error = null;
+
+    try {
+      const response = await adminBookingsGetPending({
+        serviceCenterUuid: this.serviceCenterUuid,
+      });
+
+      runInAction(() => {
+        this.pendingBookings = response.data;
+        this.isLoadingPending = false;
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.error = 'Ошибка загрузки ожидающих бронирований';
+        this.isLoadingPending = false;
+      });
+      console.error('Ошибка при загрузке ожидающих бронирований:', error);
+      toastStore.showError('Не удалось загрузить список ожидающих заказов');
     }
   }
 

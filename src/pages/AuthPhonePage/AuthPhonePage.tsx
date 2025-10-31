@@ -10,14 +10,12 @@ import { extractPhoneDigits } from '@/components/ui/AppPhoneInput/utils/phoneHel
 import './AuthPhonePage.css';
 
 const AuthPhonePage: React.FC = observer(() => {
-  const [phone, setPhone] = useState('');
   const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
   const phoneInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePhoneChange = (value: string) => {
-    // value приходит без +7, сохраняем для формирования финального номера
-    setPhone(value);
+  const handlePhoneChange = () => {
+    // Телефон берётся напрямую из ref, параметр value не нужен
   };
 
   const handlePhoneValidate = (valid: boolean, cleanPhone: string) => {

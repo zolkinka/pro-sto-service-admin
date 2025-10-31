@@ -2405,6 +2405,15 @@ export type AdminCreateBookingData = {
 
 export type AdminCreateBookingResponse = (AdminCreateBookingResponseDto);
 
+export type AdminBookingsGetPendingData = {
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+};
+
+export type AdminBookingsGetPendingResponse = (AdminBookingListResponseDto);
+
 export type AdminBookingsGetOneData = {
     /**
      * UUID бронирования

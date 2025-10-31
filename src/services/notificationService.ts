@@ -307,7 +307,7 @@ class NotificationService {
       return;
     }
 
-    onMessage(messaging, (payload) => {
+    onMessage(messaging, (payload: MessagePayload) => {
       console.log('Foreground message received:', payload);
 
       // Вызываем пользовательские обработчики

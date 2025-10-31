@@ -70,6 +70,9 @@ const OrdersPage = observer(() => {
       // Загружаем данные
       bookingsStore.fetchBookings();
       
+      // Загружаем pending бронирования
+      bookingsStore.fetchPendingBookings();
+      
       // Загружаем сервисы если их еще нет
       if (servicesStore.services.length === 0) {
         servicesStore.fetchServices();
@@ -79,20 +82,18 @@ const OrdersPage = observer(() => {
 
   // Эффект для автоматического показа pending заказов
   useEffect(() => {
-    // После загрузки заказов проверяем наличие pending_confirmation
-    if (!bookingsStore.isLoading && bookingsStore.bookings.length > 0) {
-      const pending = bookingsStore.bookings
-        .filter(b => b.status === 'pending_confirmation')
-        .map(b => b.uuid);
+    // После загрузки pending заказов проверяем их наличие
+    if (!bookingsStore.isLoadingPending && bookingsStore.pendingBookings.length > 0) {
+      const pendingUuids = bookingsStore.pendingBookings.map(b => b.uuid);
       
-      if (pending.length > 0 && !showingPendingBooking) {
-        setPendingBookings(pending);
+      if (pendingUuids.length > 0 && !showingPendingBooking) {
+        setPendingBookings(pendingUuids);
         setCurrentPendingIndex(0);
         setShowingPendingBooking(true);
-        setSelectedBooking(pending[0]);
+        setSelectedBooking(pendingUuids[0]);
       }
     }
-  }, [bookingsStore.bookings, bookingsStore.isLoading, showingPendingBooking]);
+  }, [bookingsStore.pendingBookings, bookingsStore.isLoadingPending, showingPendingBooking]);
 
   const handleBookingClick = (bookingUuid: string) => {
     // При ручном клике сбрасываем режим автоматического показа
@@ -126,10 +127,11 @@ const OrdersPage = observer(() => {
   };
 
   const handleUpdateFromPending = () => {
-    // Перезагружаем список заказов
+    // Перезагружаем список заказов и pending бронирований
     bookingsStore.fetchBookings();
+    bookingsStore.fetchPendingBookings();
     
-    // Убираем текущий заказ из списка pending
+    // Убираем текущий заказ из локального списка pending
     const updatedPending = pendingBookings.filter(
       (_uuid, idx) => idx !== currentPendingIndex
     );

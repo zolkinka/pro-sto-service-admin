@@ -52,7 +52,7 @@ const AppButton: React.FC<AppButtonProps> = ({
     >
       {loading && <div className="app-button__spinner" />}
       
-      {!loading && iconLeft && (
+      {!loading && !onlyIcon && iconLeft && (
         <span className="app-button__icon">
           {iconLeft}
         </span>
@@ -62,7 +62,7 @@ const AppButton: React.FC<AppButtonProps> = ({
         <span>{children}</span>
       )}
       
-      {!loading && iconRight && (
+      {!loading && !onlyIcon && iconRight && (
         <span className="app-button__icon">
           {iconRight}
         </span>

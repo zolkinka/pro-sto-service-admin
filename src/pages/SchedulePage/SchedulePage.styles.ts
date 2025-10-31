@@ -188,3 +188,66 @@ export const SkeletonTabs = styled(SkeletonBox)`
 export const SkeletonContent = styled(SkeletonBox)`
   height: 200px;
 `;
+
+// Новые стили для отображения графика работы
+export const ViewWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+`;
+
+export const ViewSection = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+`;
+
+export const ViewSectionContent = styled.div`
+  flex: 1;
+`;
+
+export const DayScheduleList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+export const DayScheduleItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+export const DayNameText = styled.p`
+  font-family: 'Onest', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #302F2D;
+  margin: 0;
+`;
+
+export const DayTimeText = styled.p`
+  font-family: 'Onest', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #888684;
+  margin: 0;
+`;
+
+export const EditButtonWrapper = styled.div`
+  flex-shrink: 0;
+  
+  .edit-button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+`;

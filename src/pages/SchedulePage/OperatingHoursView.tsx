@@ -1,7 +1,8 @@
 import React from 'react';
 import AppButton from '@/components/ui/AppButton/AppButton';
+import { EditIcon } from '@/components/ui/icons';
 import type { OperatingHoursResponseDto } from '../../../services/api-client/types.gen';
-import { hasUniformSchedule, formatTime, groupDaysBySchedule, formatDaysRange } from './utils';
+import { formatTime, DAY_NAMES, DAYS_ORDER } from './utils';
 import * as S from './SchedulePage.styles';
 
 interface OperatingHoursViewProps {
@@ -10,47 +11,78 @@ interface OperatingHoursViewProps {
 }
 
 const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ schedule, onEdit }) => {
-  const isUniform = hasUniformSchedule(schedule);
-
-  if (isUniform && schedule.length > 0) {
-    const firstDay = schedule[0];
-    const openTime = formatTime(firstDay.open_time);
-    const closeTime = formatTime(firstDay.close_time);
-
-    return (
-      <S.ViewContainer>
-        <S.HoursInfo>
-          <S.HoursPrimary>
-            {firstDay.is_closed ? 'Выходной' : `Пн—Вс ${openTime}—${closeTime}`}
-          </S.HoursPrimary>
-        </S.HoursInfo>
-        <AppButton size="M" variant="secondary" onClick={onEdit}>
-          Редактировать
-        </AppButton>
-      </S.ViewContainer>
-    );
-  }
-
-  const groups = groupDaysBySchedule(schedule);
+  // Создаем мапу дней для быстрого доступа
+  const scheduleMap = schedule.reduce((acc, day) => {
+    if (day.day_of_week) {
+      acc[day.day_of_week] = day;
+    }
+    return acc;
+  }, {} as Record<string, OperatingHoursResponseDto>);
 
   return (
-    <div>
-      <S.ViewContainer style={{ marginBottom: '16px' }}>
-        <S.HoursInfo>
-          {groups.map((group, index) => (
-            <div key={index} style={{ marginBottom: index < groups.length - 1 ? '8px' : '0' }}>
-              <S.HoursPrimary>
-                {formatDaysRange(group.days)}{' '}
-                {group.isClosed ? 'Выходной' : `${group.openTime}—${group.closeTime}`}
-              </S.HoursPrimary>
-            </div>
-          ))}
-        </S.HoursInfo>
-        <AppButton size="M" variant="secondary" onClick={onEdit}>
-          Редактировать
-        </AppButton>
-      </S.ViewContainer>
-    </div>
+    <S.ViewWrapper>
+      {/* Основное расписание */}
+      <S.ViewSection>
+        <S.ViewSectionContent>
+          <S.DayScheduleList>
+            {DAYS_ORDER.map(day => {
+              const daySchedule = scheduleMap[day];
+              const dayName = DAY_NAMES[day] || day;
+              
+              let timeDisplay = '';
+              if (daySchedule) {
+                if (daySchedule.is_closed) {
+                  timeDisplay = 'Выходной';
+                } else {
+                  const openTime = formatTime(daySchedule.open_time);
+                  const closeTime = formatTime(daySchedule.close_time);
+                  timeDisplay = `${openTime}—${closeTime}`;
+                }
+              }
+
+              return (
+                <S.DayScheduleItem key={day}>
+                  <S.DayNameText>{dayName}</S.DayNameText>
+                  <S.DayTimeText>{timeDisplay}</S.DayTimeText>
+                </S.DayScheduleItem>
+              );
+            })}
+          </S.DayScheduleList>
+        </S.ViewSectionContent>
+        <S.EditButtonWrapper>
+          <AppButton 
+            size="M" 
+            variant="secondary" 
+            onClick={onEdit}
+            className="edit-button"
+            onlyIcon
+            iconLeft={<EditIcon />}
+          />
+        </S.EditButtonWrapper>
+      </S.ViewSection>
+
+      {/* Выходные и праздники (пока пустой раздел) */}
+      <S.ViewSection>
+        <S.ViewSectionContent>
+          <S.DayScheduleList>
+            <S.DayScheduleItem>
+              <S.DayNameText>Выходные</S.DayNameText>
+              <S.DayTimeText>10 апреля, 8 ноября</S.DayTimeText>
+            </S.DayScheduleItem>
+          </S.DayScheduleList>
+        </S.ViewSectionContent>
+        <S.EditButtonWrapper>
+          <AppButton 
+            size="M" 
+            variant="secondary" 
+            onClick={() => {}}
+            className="edit-button"
+            onlyIcon
+            iconLeft={<EditIcon />}
+          />
+        </S.EditButtonWrapper>
+      </S.ViewSection>
+    </S.ViewWrapper>
   );
 };
 

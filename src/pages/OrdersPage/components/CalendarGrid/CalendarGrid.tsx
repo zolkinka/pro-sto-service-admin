@@ -8,6 +8,7 @@ export interface CalendarGridProps {
   bookings: AdminBookingResponseDto[];
   weekStart: Date;
   onBookingClick: (bookingUuid: string) => void;
+  onSlotClick?: (date: Date, hour: number) => void;
   workingHours: { start: number; end: number }; // например { start: 9, end: 18 }
   isLoading?: boolean;
 }
@@ -32,6 +33,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   bookings,
   weekStart,
   onBookingClick,
+  onSlotClick,
   workingHours,
   isLoading = false,
 }) => {
@@ -142,6 +144,39 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   <div key={dayIndex} className="calendar-grid__day-line" />
                 ))}
               </div>
+
+              {/* Кликабельные слоты для создания новых заказов */}
+              {onSlotClick && (
+                <div 
+                  className="calendar-grid__clickable-slots"
+                  style={{ height: `${bookingsHeight}px` }}
+                >
+                  {hours.map((hour, hourIndex) => (
+                    <React.Fragment key={hour}>
+                      {Array.from({ length: 7 }).map((_, dayIndex) => {
+                        const slotDate = addDays(weekStart, dayIndex);
+                        const top = hourIndex * PIXELS_PER_HOUR;
+                        const left = dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
+
+                        return (
+                          <div
+                            key={`${hour}-${dayIndex}`}
+                            className="calendar-grid__clickable-slot"
+                            style={{
+                              position: 'absolute',
+                              top: `${top}px`,
+                              left: `${left}px`,
+                              width: `${DAY_COLUMN_WIDTH}px`,
+                              height: `${PIXELS_PER_HOUR}px`,
+                            }}
+                            onClick={() => onSlotClick(slotDate, hour)}
+                          />
+                        );
+                      })}
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
 
               {/* Карточки заказов */}
               <div 

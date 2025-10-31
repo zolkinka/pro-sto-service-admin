@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { startOfWeek } from 'date-fns';
+import { startOfWeek, format } from 'date-fns';
 import { useStores } from '@/hooks';
 import CalendarHeader from './components/CalendarHeader/CalendarHeader';
 import CalendarGrid from './components/CalendarGrid/CalendarGrid';
 import ViewBookingModal from './components/ViewBookingModal/ViewBookingModal';
+import CreateBookingModal from './components/CreateBookingModal/CreateBookingModal';
 import './OrdersPage.css';
 
 const OrdersPage = observer(() => {
@@ -12,6 +13,11 @@ const OrdersPage = observer(() => {
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week'>('week');
+  
+  // State for create booking modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createBookingDate, setCreateBookingDate] = useState<Date | null>(null);
+  const [createBookingTime, setCreateBookingTime] = useState<string>('');
   
   // Состояния для автоматического показа pending заказов
   const [pendingBookings, setPendingBookings] = useState<string[]>([]);
@@ -138,6 +144,24 @@ const OrdersPage = observer(() => {
     }
   };
 
+  const handleSlotClick = (date: Date, hour: number) => {
+    // Устанавливаем дату и время для создания бронирования
+    setCreateBookingDate(date);
+    setCreateBookingTime(format(new Date(date).setHours(hour, 0, 0, 0), 'HH:mm'));
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCreateBookingSuccess = () => {
+    // Перезагружаем список заказов после успешного создания
+    bookingsStore.fetchBookings();
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+    setCreateBookingDate(null);
+    setCreateBookingTime('');
+  };
+
   // Вычисляем начало недели для передачи в WeekDaysRow и CalendarGrid
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
 
@@ -163,11 +187,22 @@ const OrdersPage = observer(() => {
           />
         )}
 
+        {isCreateModalOpen && (
+          <CreateBookingModal
+            isOpen={isCreateModalOpen}
+            onClose={handleCloseCreateModal}
+            onSuccess={handleCreateBookingSuccess}
+            initialDate={createBookingDate || undefined}
+            initialTime={createBookingTime}
+          />
+        )}
+
         <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden' }}>
           <CalendarGrid
             bookings={bookingsStore.bookings}
             weekStart={weekStart}
             onBookingClick={handleBookingClick}
+            onSlotClick={handleSlotClick}
             workingHours={workingHours}
             isLoading={bookingsStore.isLoading}
           />

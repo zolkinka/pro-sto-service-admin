@@ -62,6 +62,7 @@
   position: relative;
   flex: 1;
   min-width: calc(120px * 7 + 12px * 6); /* 7 дней + 6 промежутков */
+  isolation: isolate; /* Создаём новый контекст наложения */
 }
 
 .calendar-grid__horizontal-lines {
@@ -70,6 +71,7 @@
   left: 0;
   right: 0;
   pointer-events: none;
+  z-index: 1;
 }
 
 .calendar-grid__hour-line {
@@ -89,6 +91,7 @@
   display: flex;
   gap: 12px;
   pointer-events: none;
+  z-index: 1;
 }
 
 .calendar-grid__day-line {
@@ -114,12 +117,60 @@
 }
 
 .calendar-grid__bookings {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  pointer-events: none; /* Позволяем кликам проходить сквозь пустые области */
   /* Высота вычисляется автоматически на основе количества часов в компоненте */
 }
 
+.calendar-grid__clickable-slots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  pointer-events: auto; /* Слоты должны ловить клики */
+}
+
+.calendar-grid__clickable-slot {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  position: relative;
+}
+
+.calendar-grid__clickable-slot:hover {
+  background-color: #F4F3F0;
+}
+
+/* Плюсик при наведении */
+.calendar-grid__clickable-slot::after {
+  content: '+';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: 300;
+  color: #888684;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.calendar-grid__clickable-slot:hover::after {
+  opacity: 1;
+}
+
 .calendar-grid__booking-wrapper {
-  z-index: 1;
+  pointer-events: auto; /* Карточки ловят клики и блокируют слоты под собой */
+}
+
+.calendar-grid__booking-wrapper > * {
+  pointer-events: auto;
 }
 
 /* Skeleton loader */

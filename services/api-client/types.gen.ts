@@ -57,6 +57,213 @@ export type AdminBookingServiceDto = {
     price: number;
 };
 
+export type AdminCarResponseDto = {
+    /**
+     * UUID автомобиля
+     */
+    uuid: string;
+    /**
+     * UUID клиента
+     */
+    client_uuid: string;
+    /**
+     * Номерной знак
+     */
+    license_plate: {
+        [key: string]: unknown;
+    };
+    /**
+     * Марка автомобиля
+     */
+    make: string;
+    /**
+     * Модель автомобиля
+     */
+    model: string;
+    /**
+     * Класс автомобиля
+     */
+    class: string;
+    /**
+     * Флаг создания нового автомобиля
+     */
+    created: boolean;
+};
+
+export type AdminCreateBookingDto = {
+    /**
+     * UUID сервисного центра
+     */
+    service_center_uuid: string;
+    /**
+     * UUID клиента
+     */
+    client_uuid: string;
+    /**
+     * UUID автомобиля
+     */
+    car_uuid: string;
+    /**
+     * UUID основной услуги
+     */
+    service_uuid: string;
+    /**
+     * Время начала бронирования в формате ISO 8601 UTC
+     */
+    start_time: string;
+    /**
+     * Способ оплаты
+     */
+    payment_method: 'cash' | 'card' | 'sbp';
+    /**
+     * UUID дополнительных услуг
+     */
+    additional_service_uuids?: Array<string>;
+    /**
+     * Комментарий администратора
+     */
+    admin_comment?: string;
+};
+
+export namespace AdminCreateBookingDto {
+    /**
+     * Способ оплаты
+     */
+    export enum payment_method {
+        CASH = 'cash',
+        CARD = 'card',
+        SBP = 'sbp'
+    }
+}
+
+export type AdminCreateBookingResponseDto = {
+    /**
+     * UUID бронирования
+     */
+    uuid: string;
+    /**
+     * UUID клиента
+     */
+    client_uuid: string;
+    /**
+     * UUID автомобиля
+     */
+    car_uuid: string;
+    /**
+     * UUID сервисного центра
+     */
+    service_center_uuid: string;
+    /**
+     * UUID основной услуги
+     */
+    service_uuid: string;
+    /**
+     * Время начала
+     */
+    start_time: string;
+    /**
+     * Время окончания
+     */
+    end_time: string;
+    /**
+     * Статус бронирования
+     */
+    status: string;
+    /**
+     * Общая стоимость
+     */
+    total_cost: number;
+    /**
+     * Статус оплаты
+     */
+    payment_status: string;
+    /**
+     * Способ оплаты
+     */
+    payment_method: string;
+    /**
+     * Данные клиента
+     */
+    client: (AdminBookingClientDto);
+    /**
+     * Данные автомобиля
+     */
+    car: (AdminBookingCarDto);
+    /**
+     * Основная услуга
+     */
+    service: (AdminBookingServiceDto);
+    /**
+     * Дополнительные услуги
+     */
+    additionalServices: Array<AdminBookingServiceDto>;
+};
+
+export type AdminCreateOrUpdateCarDto = {
+    /**
+     * Номерной знак автомобиля
+     */
+    license_plate: string;
+    /**
+     * Марка автомобиля
+     */
+    make: string;
+    /**
+     * Модель автомобиля
+     */
+    model: string;
+    /**
+     * ID марки из справочника (опционально)
+     */
+    make_id?: string;
+    /**
+     * ID модели из справочника (опционально)
+     */
+    model_id?: string;
+    /**
+     * Цвет автомобиля
+     */
+    color?: string;
+    /**
+     * Класс автомобиля
+     */
+    class?: string;
+};
+
+export type AdminFindOrCreateClientDto = {
+    /**
+     * Телефон клиента в формате E.164 (+79991234567)
+     */
+    phone: string;
+};
+
+export type AdminFindOrCreateClientResponseDto = {
+    /**
+     * UUID клиента
+     */
+    uuid: string;
+    /**
+     * Телефон клиента
+     */
+    phone: string;
+    /**
+     * Имя клиента
+     */
+    name: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Email клиента
+     */
+    email: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Флаг создания нового клиента
+     */
+    created: boolean;
+};
+
 export type AdminLoginDto = {
     /**
      * Номер телефона в формате +79991234567
@@ -919,6 +1126,77 @@ export type LogoutResponseDto = {
     message: string;
 };
 
+export type NotificationResponseDto = {
+    /**
+     * UUID уведомления
+     */
+    uuid: string;
+    /**
+     * UUID пользователя
+     */
+    userUuid: string;
+    /**
+     * Тип пользователя
+     */
+    userType: 'admin' | 'client';
+    /**
+     * Заголовок уведомления
+     */
+    title: string;
+    /**
+     * Текст уведомления
+     */
+    body: string;
+    /**
+     * Тип уведомления
+     */
+    type: 'new_booking' | 'booking_cancelled' | 'status_change';
+    /**
+     * Ссылка на событие
+     */
+    link: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Дополнительные данные
+     */
+    data: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Прочитано ли уведомление
+     */
+    isRead: boolean;
+    /**
+     * Дата прочтения
+     */
+    readAt: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Дата создания
+     */
+    createdAt: string;
+};
+
+export namespace NotificationResponseDto {
+    /**
+     * Тип пользователя
+     */
+    export enum userType {
+        ADMIN = 'admin',
+        CLIENT = 'client'
+    }
+    /**
+     * Тип уведомления
+     */
+    export enum type {
+        NEW_BOOKING = 'new_booking',
+        BOOKING_CANCELLED = 'booking_cancelled',
+        STATUS_CHANGE = 'status_change'
+    }
+}
+
 export type NotificationSettingsDto = {
     /**
      * Получать push-уведомления о новых заказах
@@ -936,6 +1214,26 @@ export type NotificationSettingsDto = {
      * Получать push-уведомления о промо-акциях
      */
     promotions?: boolean;
+};
+
+export type NotificationsListResponseDto = {
+    items: Array<NotificationResponseDto>;
+    /**
+     * Общее количество уведомлений
+     */
+    total: number;
+    /**
+     * Текущая страница
+     */
+    page: number;
+    /**
+     * Количество элементов на странице
+     */
+    limit: number;
+    /**
+     * Всего страниц
+     */
+    totalPages: number;
 };
 
 export type OperatingHoursListResponseDto = {
@@ -1858,6 +2156,22 @@ export type ClientDeleteCarResponse = (void);
 
 export type ClientListBookingsResponse = (unknown);
 
+export type AdminFindOrCreateClientData = {
+    requestBody: AdminFindOrCreateClientDto;
+};
+
+export type AdminFindOrCreateClientResponse = (AdminFindOrCreateClientResponseDto);
+
+export type AdminCreateOrUpdateCarData = {
+    /**
+     * UUID клиента
+     */
+    clientUuid: string;
+    requestBody: AdminCreateOrUpdateCarDto;
+};
+
+export type AdminCreateOrUpdateCarResponse = (AdminCarResponseDto);
+
 export type ServiceCenterListData = {
     /**
      * Фильтр по типу бизнеса сервисного центра
@@ -2085,6 +2399,12 @@ export type AdminBookingsGetListData = {
 
 export type AdminBookingsGetListResponse = (AdminBookingListResponseDto);
 
+export type AdminCreateBookingData = {
+    requestBody: AdminCreateBookingDto;
+};
+
+export type AdminCreateBookingResponse = (AdminCreateBookingResponseDto);
+
 export type AdminBookingsGetOneData = {
     /**
      * UUID бронирования
@@ -2113,6 +2433,67 @@ export type AdminBookingsUpdateStatusData = {
 };
 
 export type AdminBookingsUpdateStatusResponse = (UpdateBookingStatusResponseDto);
+
+export type RegisterNotificationTokenData = {
+    requestBody: RegisterTokenDto;
+};
+
+export type RegisterNotificationTokenResponse = ({
+    success?: boolean;
+    message?: string;
+});
+
+export type UnregisterNotificationTokenData = {
+    requestBody: UnregisterTokenDto;
+};
+
+export type UnregisterNotificationTokenResponse = ({
+    success?: boolean;
+    message?: string;
+});
+
+export type GetNotificationSettingsResponse = (NotificationSettingsDto);
+
+export type UpdateNotificationSettingsData = {
+    requestBody: NotificationSettingsDto;
+};
+
+export type UpdateNotificationSettingsResponse = (NotificationSettingsDto);
+
+export type GetNotificationsData = {
+    /**
+     * Фильтр по прочитанным уведомлениям (true/false)
+     */
+    isRead?: boolean;
+    /**
+     * Количество элементов на странице
+     */
+    limit?: number;
+    /**
+     * Номер страницы (начиная с 1)
+     */
+    page?: number;
+    /**
+     * Фильтр по типу уведомления
+     */
+    type?: 'new_booking' | 'booking_cancelled' | 'status_change';
+};
+
+export type GetNotificationsResponse = (NotificationsListResponseDto);
+
+export type MarkNotificationAsReadData = {
+    uuid: string;
+};
+
+export type MarkNotificationAsReadResponse = (NotificationResponseDto);
+
+export type MarkAllNotificationsAsReadResponse = ({
+    updated?: number;
+});
+
+export type GetUnreadNotificationsCountResponse = ({
+    count?: number;
+});
 
 export type CarsControllerGetMakesData = {
     /**
@@ -2269,29 +2650,3 @@ export type AdminServicesDeleteData = {
 };
 
 export type AdminServicesDeleteResponse = (unknown);
-
-export type RegisterNotificationTokenData = {
-    requestBody: RegisterTokenDto;
-};
-
-export type RegisterNotificationTokenResponse = ({
-    success?: boolean;
-    message?: string;
-});
-
-export type UnregisterNotificationTokenData = {
-    requestBody: UnregisterTokenDto;
-};
-
-export type UnregisterNotificationTokenResponse = ({
-    success?: boolean;
-    message?: string;
-});
-
-export type GetNotificationSettingsResponse = (NotificationSettingsDto);
-
-export type UpdateNotificationSettingsData = {
-    requestBody: NotificationSettingsDto;
-};
-
-export type UpdateNotificationSettingsResponse = (NotificationSettingsDto);

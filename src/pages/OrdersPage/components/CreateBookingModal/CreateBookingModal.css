@@ -1,0 +1,129 @@
+.create-booking-modal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 420px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 20px;
+  box-shadow: 0px 1px 2px 0px rgba(30, 27, 21, 0.05);
+  z-index: 100;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: visible;
+  max-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.create-booking-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 20px 16px;
+  flex-shrink: 0;
+}
+
+.create-booking-modal__title {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #53514F;
+  margin: 0;
+}
+
+.create-booking-modal__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #888684;
+  cursor: pointer;
+  padding: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.create-booking-modal__close:hover {
+  color: #302F2D;
+}
+
+.create-booking-modal__close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Body */
+.create-booking-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Scrollbar styling */
+.create-booking-modal__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.create-booking-modal__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.create-booking-modal__body::-webkit-scrollbar-thumb {
+  background: #E5E4E1;
+  border-radius: 3px;
+}
+
+.create-booking-modal__body::-webkit-scrollbar-thumb:hover {
+  background: #D6D5D2;
+}
+
+/* Field */
+.create-booking-modal__field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Field row for two columns */
+.create-booking-modal__field-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.create-booking-modal__field-row .create-booking-modal__field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Time field label alignment */
+.create-booking-modal__time-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #53514F;
+  margin-bottom: 8px;
+  height: 15.6px; /* Высота одной строки текста */
+}
+
+/* Footer */
+.create-booking-modal__footer {
+  padding: 16px 20px 24px;
+  flex-shrink: 0;
+}
+
+.create-booking-modal__footer button {
+  width: 100%;
+}

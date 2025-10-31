@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterData, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, AdminBookingsGetListData, AdminBookingsGetListResponse, AdminBookingsGetOneData, AdminBookingsGetOneResponse, AdminBookingsUpdateData, AdminBookingsUpdateResponse, AdminBookingsUpdateStatusData, AdminBookingsUpdateStatusResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookData, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse, RegisterNotificationTokenData, RegisterNotificationTokenResponse, UnregisterNotificationTokenData, UnregisterNotificationTokenResponse, GetNotificationSettingsResponse, UpdateNotificationSettingsData, UpdateNotificationSettingsResponse } from './types.gen';
+import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterData, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, AdminFindOrCreateClientData, AdminFindOrCreateClientResponse, AdminCreateOrUpdateCarData, AdminCreateOrUpdateCarResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, AdminBookingsGetListData, AdminBookingsGetListResponse, AdminCreateBookingData, AdminCreateBookingResponse, AdminBookingsGetOneData, AdminBookingsGetOneResponse, AdminBookingsUpdateData, AdminBookingsUpdateResponse, AdminBookingsUpdateStatusData, AdminBookingsUpdateStatusResponse, RegisterNotificationTokenData, RegisterNotificationTokenResponse, UnregisterNotificationTokenData, UnregisterNotificationTokenResponse, GetNotificationSettingsResponse, UpdateNotificationSettingsData, UpdateNotificationSettingsResponse, GetNotificationsData, GetNotificationsResponse, MarkNotificationAsReadData, MarkNotificationAsReadResponse, MarkAllNotificationsAsReadResponse, GetUnreadNotificationsCountResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookData, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
 
 /**
  * Hello World
@@ -507,6 +507,55 @@ export const clientListBookings = (): CancelablePromise<ClientListBookingsRespon
 };
 
 /**
+ * Поиск или создание клиента по телефону
+ * Ищет клиента по номеру телефона. Если не найден - создает нового. Требуется аутентификация админа.
+ * @param data The data for the request.
+ * @param data.requestBody
+ * @returns AdminFindOrCreateClientResponseDto Клиент найден или создан
+ * @throws ApiError
+ */
+export const adminFindOrCreateClient = (data: AdminFindOrCreateClientData): CancelablePromise<AdminFindOrCreateClientResponse> => {
+    return __request(OpenAPI, {
+        method: 'POST',
+        url: '/api/admin/clients/find-or-create',
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Неверный формат телефона',
+            401: 'Не авторизован',
+            403: 'Недостаточно прав (не админ)'
+        }
+    });
+};
+
+/**
+ * Создание или обновление автомобиля клиента
+ * Ищет автомобиль клиента по номеру. Если найден - обновляет данные. Если не найден - создает новый. Требуется аутентификация админа.
+ * @param data The data for the request.
+ * @param data.clientUuid UUID клиента
+ * @param data.requestBody
+ * @returns AdminCarResponseDto Автомобиль создан или обновлен
+ * @throws ApiError
+ */
+export const adminCreateOrUpdateCar = (data: AdminCreateOrUpdateCarData): CancelablePromise<AdminCreateOrUpdateCarResponse> => {
+    return __request(OpenAPI, {
+        method: 'POST',
+        url: '/api/admin/clients/{client_uuid}/cars',
+        path: {
+            client_uuid: data.clientUuid
+        },
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Некорректные данные',
+            401: 'Не авторизован',
+            403: 'Недостаточно прав (не админ)',
+            404: 'Клиент не найден'
+        }
+    });
+};
+
+/**
  * Получить список сервисных центров
  * Возвращает список сервисных центров в указанном радиусе с возможностью фильтрации и сортировки
  * @param data The data for the request.
@@ -875,6 +924,30 @@ export const adminBookingsGetList = (data: AdminBookingsGetListData): Cancelable
 };
 
 /**
+ * Создание бронирования администратором
+ * Создает новое бронирование от имени администратора. Бронирование сразу создается со статусом 'confirmed'. Требуется аутентификация админа и доступ к указанному сервисному центру.
+ * @param data The data for the request.
+ * @param data.requestBody
+ * @returns AdminCreateBookingResponseDto Бронирование успешно создано
+ * @throws ApiError
+ */
+export const adminCreateBooking = (data: AdminCreateBookingData): CancelablePromise<AdminCreateBookingResponse> => {
+    return __request(OpenAPI, {
+        method: 'POST',
+        url: '/api/admin/bookings',
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Некорректные данные запроса',
+            401: 'Не авторизован',
+            403: 'Нет доступа к указанному сервисному центру',
+            404: 'Клиент, автомобиль, услуга или сервисный центр не найдены',
+            409: 'Временной слот уже занят'
+        }
+    });
+};
+
+/**
  * Получить детальную информацию о бронировании
  * Возвращает подробную информацию о конкретном бронировании. Требуется аутентификация админа и доступ к сервисному центру через projectUuid.
  * @param data The data for the request.
@@ -953,6 +1026,169 @@ export const adminBookingsUpdateStatus = (data: AdminBookingsUpdateStatusData): 
             401: 'Не авторизован',
             403: 'Нет доступа к этому бронированию',
             404: 'Бронирование не найдено'
+        }
+    });
+};
+
+/**
+ * Регистрация FCM токена
+ * Регистрирует FCM токен устройства для получения push-уведомлений
+ * @param data The data for the request.
+ * @param data.requestBody
+ * @returns unknown Токен успешно зарегистрирован
+ * @throws ApiError
+ */
+export const registerNotificationToken = (data: RegisterNotificationTokenData): CancelablePromise<RegisterNotificationTokenResponse> => {
+    return __request(OpenAPI, {
+        method: 'POST',
+        url: '/api/notifications/token',
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Некорректные данные',
+            401: 'Не авторизован',
+            404: 'Пользователь не найден'
+        }
+    });
+};
+
+/**
+ * Удаление FCM токена
+ * Удаляет FCM токен устройства
+ * @param data The data for the request.
+ * @param data.requestBody
+ * @returns unknown Токен успешно удален
+ * @throws ApiError
+ */
+export const unregisterNotificationToken = (data: UnregisterNotificationTokenData): CancelablePromise<UnregisterNotificationTokenResponse> => {
+    return __request(OpenAPI, {
+        method: 'DELETE',
+        url: '/api/notifications/token',
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            401: 'Не авторизован',
+            404: 'Токен не найден'
+        }
+    });
+};
+
+/**
+ * Получить настройки уведомлений
+ * Возвращает настройки push-уведомлений пользователя
+ * @returns NotificationSettingsDto Настройки успешно получены
+ * @throws ApiError
+ */
+export const getNotificationSettings = (): CancelablePromise<GetNotificationSettingsResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/notifications/settings',
+        errors: {
+            401: 'Не авторизован',
+            404: 'Пользователь не найден'
+        }
+    });
+};
+
+/**
+ * Обновить настройки уведомлений
+ * Обновляет настройки push-уведомлений пользователя
+ * @param data The data for the request.
+ * @param data.requestBody
+ * @returns NotificationSettingsDto Настройки успешно обновлены
+ * @throws ApiError
+ */
+export const updateNotificationSettings = (data: UpdateNotificationSettingsData): CancelablePromise<UpdateNotificationSettingsResponse> => {
+    return __request(OpenAPI, {
+        method: 'PUT',
+        url: '/api/notifications/settings',
+        body: data.requestBody,
+        mediaType: 'application/json',
+        errors: {
+            400: 'Некорректные данные',
+            401: 'Не авторизован',
+            404: 'Пользователь не найден'
+        }
+    });
+};
+
+/**
+ * Получить список уведомлений
+ * Возвращает список уведомлений текущего пользователя с пагинацией и фильтрами
+ * @param data The data for the request.
+ * @param data.page Номер страницы (начиная с 1)
+ * @param data.limit Количество элементов на странице
+ * @param data.isRead Фильтр по прочитанным уведомлениям (true/false)
+ * @param data.type Фильтр по типу уведомления
+ * @returns NotificationsListResponseDto Список уведомлений успешно получен
+ * @throws ApiError
+ */
+export const getNotifications = (data: GetNotificationsData = {}): CancelablePromise<GetNotificationsResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/notifications',
+        query: {
+            page: data.page,
+            limit: data.limit,
+            isRead: data.isRead,
+            type: data.type
+        },
+        errors: {
+            401: 'Не авторизован'
+        }
+    });
+};
+
+/**
+ * Пометить уведомление как прочитанное
+ * Помечает конкретное уведомление как прочитанное
+ * @param data The data for the request.
+ * @param data.uuid
+ * @returns NotificationResponseDto Уведомление успешно помечено как прочитанное
+ * @throws ApiError
+ */
+export const markNotificationAsRead = (data: MarkNotificationAsReadData): CancelablePromise<MarkNotificationAsReadResponse> => {
+    return __request(OpenAPI, {
+        method: 'PUT',
+        url: '/api/notifications/{uuid}/read',
+        path: {
+            uuid: data.uuid
+        },
+        errors: {
+            401: 'Не авторизован',
+            404: 'Уведомление не найдено'
+        }
+    });
+};
+
+/**
+ * Пометить все уведомления как прочитанные
+ * Помечает все уведомления пользователя как прочитанные
+ * @returns unknown Все уведомления успешно помечены как прочитанные
+ * @throws ApiError
+ */
+export const markAllNotificationsAsRead = (): CancelablePromise<MarkAllNotificationsAsReadResponse> => {
+    return __request(OpenAPI, {
+        method: 'PUT',
+        url: '/api/notifications/read-all',
+        errors: {
+            401: 'Не авторизован'
+        }
+    });
+};
+
+/**
+ * Получить количество непрочитанных уведомлений
+ * Возвращает количество непрочитанных уведомлений пользователя
+ * @returns unknown Количество непрочитанных уведомлений успешно получено
+ * @throws ApiError
+ */
+export const getUnreadNotificationsCount = (): CancelablePromise<GetUnreadNotificationsCountResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/notifications/unread-count',
+        errors: {
+            401: 'Не авторизован'
         }
     });
 };
@@ -1235,88 +1471,6 @@ export const adminServicesDelete = (data: AdminServicesDeleteData): CancelablePr
             401: 'Не авторизован',
             403: 'Нет доступа (только ADMIN)',
             404: 'Услуга не найдена'
-        }
-    });
-};
-
-/**
- * Регистрация FCM токена
- * Регистрирует FCM токен устройства для получения push-уведомлений
- * @param data The data for the request.
- * @param data.requestBody
- * @returns unknown Токен успешно зарегистрирован
- * @throws ApiError
- */
-export const registerNotificationToken = (data: RegisterNotificationTokenData): CancelablePromise<RegisterNotificationTokenResponse> => {
-    return __request(OpenAPI, {
-        method: 'POST',
-        url: '/api/notifications/token',
-        body: data.requestBody,
-        mediaType: 'application/json',
-        errors: {
-            400: 'Некорректные данные',
-            401: 'Не авторизован',
-            404: 'Клиент не найден'
-        }
-    });
-};
-
-/**
- * Удаление FCM токена
- * Удаляет FCM токен устройства
- * @param data The data for the request.
- * @param data.requestBody
- * @returns unknown Токен успешно удален
- * @throws ApiError
- */
-export const unregisterNotificationToken = (data: UnregisterNotificationTokenData): CancelablePromise<UnregisterNotificationTokenResponse> => {
-    return __request(OpenAPI, {
-        method: 'DELETE',
-        url: '/api/notifications/token',
-        body: data.requestBody,
-        mediaType: 'application/json',
-        errors: {
-            401: 'Не авторизован',
-            404: 'Токен не найден'
-        }
-    });
-};
-
-/**
- * Получить настройки уведомлений
- * Возвращает настройки push-уведомлений пользователя
- * @returns NotificationSettingsDto Настройки успешно получены
- * @throws ApiError
- */
-export const getNotificationSettings = (): CancelablePromise<GetNotificationSettingsResponse> => {
-    return __request(OpenAPI, {
-        method: 'GET',
-        url: '/api/notifications/settings',
-        errors: {
-            401: 'Не авторизован',
-            404: 'Клиент не найден'
-        }
-    });
-};
-
-/**
- * Обновить настройки уведомлений
- * Обновляет настройки push-уведомлений пользователя
- * @param data The data for the request.
- * @param data.requestBody
- * @returns NotificationSettingsDto Настройки успешно обновлены
- * @throws ApiError
- */
-export const updateNotificationSettings = (data: UpdateNotificationSettingsData): CancelablePromise<UpdateNotificationSettingsResponse> => {
-    return __request(OpenAPI, {
-        method: 'PUT',
-        url: '/api/notifications/settings',
-        body: data.requestBody,
-        mediaType: 'application/json',
-        errors: {
-            400: 'Некорректные данные',
-            401: 'Не авторизован',
-            404: 'Клиент не найден'
         }
     });
 };

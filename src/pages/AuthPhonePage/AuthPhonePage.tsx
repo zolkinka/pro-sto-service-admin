@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import { authStore } from '@/stores/AuthStore';
@@ -10,13 +10,14 @@ import { extractPhoneDigits } from '@/components/ui/AppPhoneInput/utils/phoneHel
 import './AuthPhonePage.css';
 
 const AuthPhonePage: React.FC = observer(() => {
-  const [phone, setPhone] = useState('+7');
+  const [phone, setPhone] = useState('');
   const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
+  const phoneInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhoneChange = (value: string) => {
-    // value приходит без +7, добавляем обратно для маски
-    setPhone(`+7${value}`);
+    // value приходит без +7, сохраняем для формирования финального номера
+    setPhone(value);
   };
 
   const handlePhoneValidate = (valid: boolean, cleanPhone: string) => {
@@ -27,7 +28,9 @@ const AuthPhonePage: React.FC = observer(() => {
     if (!isValid || authStore.isLoading) return;
 
     try {
-      const cleanPhone = extractPhoneDigits(phone);
+      // Получаем значение напрямую из input (с маской)
+      const inputValue = phoneInputRef.current?.value || '';
+      const cleanPhone = extractPhoneDigits(inputValue);
       const formattedPhone = `+7${cleanPhone}`;
       
       await authStore.sendCode(formattedPhone);
@@ -57,9 +60,9 @@ const AuthPhonePage: React.FC = observer(() => {
       <div className="auth-phone__form">
         <div onKeyPress={handleKeyPress}>
           <AppPhoneInput
+            ref={phoneInputRef}
             label="Номер телефона"
             placeholder="+7 (___) ___-__-__"
-            value={phone}
             onChange={handlePhoneChange}
             onValidate={handlePhoneValidate}
             disabled={authStore.isLoading}

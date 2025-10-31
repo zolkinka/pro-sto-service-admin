@@ -9,7 +9,7 @@ interface UseInputMaskOptions {
 }
 
 export const useInputMask = (
-  inputRef: React.RefObject<HTMLInputElement>,
+  inputRef: React.RefObject<HTMLInputElement | null>,
   options: UseInputMaskOptions
 ) => {
   const maskRef = useRef<InputMask<any> | null>(null);
@@ -28,7 +28,9 @@ export const useInputMask = (
 
     maskRef.current = IMask(inputRef.current, {
       mask: options.mask,
-      lazy: false,
+      lazy: false, // Маска всегда видна
+      placeholderChar: '_', // Символ для незаполненных позиций
+      overwrite: 'shift', // Режим перезаписи
     });
 
     maskRef.current.on('accept', () => {
@@ -48,12 +50,8 @@ export const useInputMask = (
     };
   }, [inputRef, options.mask]);
 
-  // Синхронизация внешнего value с маской
-  useEffect(() => {
-    if (maskRef.current && options.value !== undefined) {
-      maskRef.current.value = options.value;
-    }
-  }, [options.value]);
+  // Убираем синхронизацию value - пусть IMask полностью управляет значением
+  // useEffect для value больше не нужен, так как мы используем uncontrolled режим
 
   return maskRef;
 };

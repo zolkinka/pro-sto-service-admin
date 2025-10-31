@@ -187,6 +187,23 @@ export const Loading: Story = {
   },
 };
 
+// Story с комментарием клиента
+export const WithComment: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => console.log('Close modal'),
+    bookingUuid: mockBooking.uuid,
+    onUpdate: () => console.log('Update bookings'),
+  },
+  play: async () => {
+    bookingsStore.selectedBooking = {
+      ...mockBooking,
+      client_comment: 'Без воска, только стандартная мойка.' as unknown as { [key: string]: unknown },
+    };
+    bookingsStore.isLoadingDetails = false;
+  },
+};
+
 // Story для режима "Новая запись" (showAsNewBooking)
 export const NewBooking: Story = {
   args: {
@@ -200,6 +217,7 @@ export const NewBooking: Story = {
     bookingsStore.selectedBooking = {
       ...mockBooking,
       status: 'pending_confirmation',
+      client_comment: 'Без воска, только стандартная мойка.' as unknown as { [key: string]: unknown },
     };
     bookingsStore.isLoadingDetails = false;
   },

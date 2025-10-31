@@ -163,6 +163,9 @@ const ViewBookingModal = observer(({
     return remainingMinutes > 0 ? `${hours} ч ${remainingMinutes} мин` : `${hours} ч`;
   };
 
+  // Получаем комментарий как строку (client_comment может быть строкой или null, но типизирован как object | null)
+  const clientComment = typeof booking.client_comment === 'string' ? booking.client_comment : null;
+
   return (
     <div className="view-booking-modal">
       <div className="view-booking-modal__header">
@@ -257,6 +260,14 @@ const ViewBookingModal = observer(({
             )}
           </div>
         </div>
+
+        {/* Блок комментария к заказу */}
+        {clientComment && (
+          <div className="view-booking-modal__comment-section">
+            <div className="view-booking-modal__comment-label">Комментарий к заказу</div>
+            <div className="view-booking-modal__comment-text">{clientComment}</div>
+          </div>
+        )}
 
         {/* Футер с кнопками */}
         {booking.status !== 'cancelled' && booking.status !== 'completed' && (

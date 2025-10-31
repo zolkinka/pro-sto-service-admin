@@ -259,6 +259,34 @@
   white-space: nowrap;
 }
 
+/* Comment Section */
+.view-booking-modal__comment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 16px;
+  min-height: 70px;
+}
+
+.view-booking-modal__comment-label {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #B2B1AE;
+}
+
+.view-booking-modal__comment-text {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #302F2D;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
 /* Footer */
 .view-booking-modal__footer {
   display: flex;

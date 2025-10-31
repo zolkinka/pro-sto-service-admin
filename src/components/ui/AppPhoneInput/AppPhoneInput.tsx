@@ -1,12 +1,12 @@
-import React, { useState, useRef, forwardRef } from 'react';
-import AppInput from '../AppInput/AppInput';
+import React, { useState, forwardRef } from 'react';
+import { IMaskInput } from 'react-imask';
 import type { AppPhoneInputProps } from './AppPhoneInput.types';
 import { extractPhoneDigits, validatePhone } from './utils/phoneHelpers';
-import { useInputMask } from '../AppInput/hooks/useInputMask';
+import './AppPhoneInput.css';
 
 /**
  * Специализированный компонент для ввода номера телефона с автоматическим форматированием
- * Использует базовый AppInput с интеграцией IMask для маски телефона
+ * Использует react-imask для маски телефона
  * 
  * @example
  * ```tsx
@@ -18,7 +18,6 @@ import { useInputMask } from '../AppInput/hooks/useInputMask';
  * ```
  */
 const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
-  value,
   defaultValue,
   onChange,
   onBlur,
@@ -28,31 +27,25 @@ const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
   error,
   label = 'Номер телефона',
   placeholder = '+7 (___) ___-__-__',
+  disabled,
+  autoFocus,
   ...restProps
 }, ref) => {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [internalError, setInternalError] = useState<string>('');
+  const [maskValue, setMaskValue] = useState('');
   
-  // Используем ref переданный извне или создаем свой
-  const actualInputRef = (ref as React.RefObject<HTMLInputElement>) || inputRef;
+  const handleAccept = (value: string) => {
+    setMaskValue(value);
+    const cleanPhone = extractPhoneDigits(value);
+    onChange?.(cleanPhone, {} as React.ChangeEvent<HTMLInputElement>);
+  };
   
-  // Настройка маски через useInputMask
-  useInputMask(actualInputRef, {
-    mask: '+{7} (000) 000-00-00',
-    value: value || defaultValue,
-    onComplete: (value) => {
-      const cleanPhone = extractPhoneDigits(value);
-      onPhoneComplete?.(cleanPhone);
-      onValidate?.(true, cleanPhone);
-      setInternalError('');
-    },
-    onAccept: (value) => {
-      const cleanPhone = extractPhoneDigits(value);
-      
-      // Вызываем onChange с чистым номером (без +7)
-      onChange?.(cleanPhone, {} as React.ChangeEvent<HTMLInputElement>);
-    },
-  });
+  const handleComplete = (value: string) => {
+    const cleanPhone = extractPhoneDigits(value);
+    onPhoneComplete?.(cleanPhone);
+    onValidate?.(true, cleanPhone);
+    setInternalError('');
+  };
   
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     if (validateOnBlur) {
@@ -75,22 +68,27 @@ const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
   };
   
   return (
-    <AppInput
-      ref={actualInputRef}
-      value={value}
-      defaultValue={defaultValue}
-      label={label}
-      placeholder={placeholder}
-      size="L"
-      error={error || internalError}
-      onBlur={handleBlur}
-      inputProps={{
-        type: 'tel',
-        inputMode: 'tel',
-        autoComplete: 'tel',
-      }}
-      {...restProps}
-    />
+    <div className="app-phone-input">
+      {label && <label className="app-phone-input__label">{label}</label>}
+      <IMaskInput
+        mask="+{7} (000) 000-00-00"
+        lazy={false}
+        placeholderChar="_"
+        value={maskValue}
+        onAccept={handleAccept}
+        onComplete={handleComplete}
+        onBlur={handleBlur}
+        disabled={disabled}
+        autoFocus={autoFocus}
+        placeholder={placeholder}
+        inputRef={ref}
+        className={`app-phone-input__input ${error || internalError ? 'app-phone-input__input--error' : ''}`}
+        {...restProps}
+      />
+      {(error || internalError) && (
+        <div className="app-phone-input__error">{error || internalError}</div>
+      )}
+    </div>
   );
 });
 

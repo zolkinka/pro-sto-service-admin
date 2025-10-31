@@ -245,3 +245,64 @@ export const NewBookingSecondOfThree: Story = {
   },
 };
 
+// Story с изображением автомобиля
+export const WithCarImage: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => console.log('Close modal'),
+    bookingUuid: mockBooking.uuid,
+    onUpdate: () => console.log('Update bookings'),
+  },
+  play: async () => {
+    bookingsStore.selectedBooking = {
+      ...mockBooking,
+      car: {
+        ...mockBooking.car,
+        // Используем относительный путь - будет добавлен VITE_BASE_STATIC_PATH автоматически
+        generated_image: '/uploads/cars/toyota-camry-example.jpg',
+      } as unknown as typeof mockBooking.car,
+    };
+    bookingsStore.isLoadingDetails = false;
+  },
+};
+
+// Story без изображения автомобиля (по умолчанию показывает placeholder)
+export const WithoutCarImage: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => console.log('Close modal'),
+    bookingUuid: mockBooking.uuid,
+    onUpdate: () => console.log('Update bookings'),
+  },
+  play: async () => {
+    bookingsStore.selectedBooking = {
+      ...mockBooking,
+      car: {
+        ...mockBooking.car,
+        generated_image: null,
+      } as unknown as typeof mockBooking.car,
+    };
+    bookingsStore.isLoadingDetails = false;
+  },
+};
+
+// Story с номером автомобиля в строковом формате (как в AdminBookingCarDto)
+export const WithStringLicensePlate: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => console.log('Close modal'),
+    bookingUuid: mockBooking.uuid,
+    onUpdate: () => console.log('Update bookings'),
+  },
+  play: async () => {
+    bookingsStore.selectedBooking = {
+      ...mockBooking,
+      car: {
+        ...mockBooking.car,
+        license_plate: 'А123ВС 77',
+        generated_image: '/uploads/cars/toyota-camry.jpg',
+      } as unknown as typeof mockBooking.car,
+    };
+    bookingsStore.isLoadingDetails = false;
+  },
+};

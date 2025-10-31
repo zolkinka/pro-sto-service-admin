@@ -109,6 +109,14 @@
   flex-shrink: 0;
 }
 
+.view-booking-modal__car-photo {
+  width: 98px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+}
+
 .view-booking-modal__car-placeholder {
   width: 98px;
   height: 42px;

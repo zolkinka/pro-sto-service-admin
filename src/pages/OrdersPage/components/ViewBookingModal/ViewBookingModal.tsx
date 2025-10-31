@@ -129,8 +129,28 @@ const ViewBookingModal = observer(({
   const formattedDate = format(startDate, 'd MMMM', { locale: ru });
   const formattedTime = `${format(startDate, 'HH:mm')}-${format(endDate, 'HH:mm')}`;
 
-  // Форматирование госномера
-  const licensePlate = booking.car.license_plate as { number?: string; region?: string } | null;
+  // Форматирование госномера - может быть строкой или объектом
+  const licensePlateData = booking.car.license_plate;
+  let licensePlateNumber = 'Не указан';
+  let licensePlateRegion: string | null = null;
+
+  if (typeof licensePlateData === 'string') {
+    // Если license_plate это строка (AdminBookingCarDto)
+    licensePlateNumber = licensePlateData || 'Не указан';
+  } else if (licensePlateData && typeof licensePlateData === 'object') {
+    // Если license_plate это объект (BookingCarDto)
+    const plate = licensePlateData as { number?: string; region?: string };
+    licensePlateNumber = plate.number || 'Не указан';
+    licensePlateRegion = plate.region || null;
+  }
+
+  // Получаем изображение автомобиля (если есть) - поле generated_image может присутствовать в runtime
+  // но отсутствует в типе BookingCarDto, поэтому используем type assertion
+  const carImagePath = (booking.car as { generated_image?: string | null }).generated_image;
+  
+  // Формируем полный URL для изображения с учетом BASE_STATIC_PATH
+  const baseStaticPath = import.meta.env.VITE_BASE_STATIC_PATH || '';
+  const carImage = carImagePath ? `${baseStaticPath}${carImagePath}` : null;
 
   // Конфигурация статуса
   const statusConfig = STATUS_CONFIG[booking.status as BookingStatus] || STATUS_CONFIG.pending_confirmation;
@@ -150,9 +170,11 @@ const ViewBookingModal = observer(({
         <AppTag size="M" color={statusConfig.color}>
           {statusConfig.label}
         </AppTag>
-        <button className="view-booking-modal__close" onClick={handleClose} aria-label="Закрыть">
-          ×
-        </button>
+        {!showAsNewBooking && (
+          <button className="view-booking-modal__close" onClick={handleClose} aria-label="Закрыть">
+            ×
+          </button>
+        )}
       </div>
 
       <div className="view-booking-modal__content">
@@ -172,17 +194,25 @@ const ViewBookingModal = observer(({
         {/* Блок информации об автомобиле */}
         <div className="view-booking-modal__car-section">
           <div className="view-booking-modal__car-image">
-            {/* Placeholder для изображения автомобиля */}
-            <div className="view-booking-modal__car-placeholder" />
+            {/* Отображаем изображение автомобиля, если оно есть */}
+            {carImage ? (
+              <img 
+                src={carImage} 
+                alt={`${booking.car.make} ${booking.car.model}`}
+                className="view-booking-modal__car-photo"
+              />
+            ) : (
+              <div className="view-booking-modal__car-placeholder" />
+            )}
           </div>
           <div className="view-booking-modal__car-info">
             <div className="view-booking-modal__car-name">{booking.car.make} {booking.car.model}</div>
             <div className="view-booking-modal__car-plate-container">
-              <span className="view-booking-modal__car-plate-number">{licensePlate?.number || 'Не указан'}</span>
-              {licensePlate?.region && (
+              <span className="view-booking-modal__car-plate-number">{licensePlateNumber}</span>
+              {licensePlateRegion && (
                 <>
                   <span className="view-booking-modal__car-plate-divider">|</span>
-                  <span className="view-booking-modal__car-plate-region">{licensePlate.region}</span>
+                  <span className="view-booking-modal__car-plate-region">{licensePlateRegion}</span>
                 </>
               )}
             </div>

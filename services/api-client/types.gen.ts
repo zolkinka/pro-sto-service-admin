@@ -14,6 +14,7 @@ export type AdminBookingCarDto = {
     model: string;
     license_plate: string;
     class: string;
+    generated_image: (string) | null;
 };
 
 export type AdminBookingClientDto = {
@@ -398,6 +399,10 @@ export type ClientInfoDto = {
 export type ClientLoginDto = {
     phone: string;
     code: string;
+    /**
+     * Уникальный идентификатор устройства
+     */
+    device_id?: string;
 };
 
 export type ClientResponseDto = {
@@ -1141,6 +1146,10 @@ export type RefreshDto = {
      * Refresh токен
      */
     refreshToken: string;
+    /**
+     * Уникальный идентификатор устройства
+     */
+    device_id?: string;
 };
 
 export type RefreshResponseDto = {
@@ -1156,6 +1165,13 @@ export type RefreshResponseDto = {
      * Новый JWT токен доступа
      */
     accessToken: string;
+};
+
+export type RegisterDto = {
+    /**
+     * Уникальный идентификатор устройства
+     */
+    device_id?: string;
 };
 
 export type Role = {
@@ -1340,6 +1356,10 @@ export type SetPhoneDto = {
      * Код подтверждения из SMS
      */
     code: string;
+    /**
+     * Уникальный идентификатор устройства
+     */
+    device_id?: string;
 };
 
 export type UpdateAdminBookingDto = {
@@ -1596,6 +1616,10 @@ export type UserResponseDto = {
      */
     email: string;
     /**
+     * Телефон пользователя
+     */
+    phone?: string;
+    /**
      * Имя пользователя
      */
     name: string;
@@ -1717,6 +1741,10 @@ export type ClientAuthRefreshData = {
 };
 
 export type ClientAuthRefreshResponse = (ClientAuthResponseDto);
+
+export type ClientAuthRegisterData = {
+    requestBody: RegisterDto;
+};
 
 export type ClientAuthRegisterResponse = (ClientAuthResponseDto);
 

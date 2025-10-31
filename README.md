@@ -156,8 +156,17 @@ cp .env.example .env
 ```env
 VITE_API_BASE_URL=http://localhost:3000/api
 VITE_APP_TITLE=Pro-STO Admin Panel
+VITE_BASE_STATIC_PATH=https://dev.prosto-app.ru
 VITE_NODE_ENV=development
 ```
+
+**Переменные окружения:**
+- `VITE_API_BASE_URL` - URL API бэкенда
+- `VITE_APP_TITLE` - Название приложения
+- `VITE_BASE_STATIC_PATH` - Базовый путь для статических файлов (изображения автомобилей и т.д.)
+  - Development: `https://dev.prosto-app.ru`
+  - Production: пустая строка (файлы отдаются с того же домена)
+- `VITE_NODE_ENV` - Окружение (development/production)
 
 ## 📋 Доступные скрипты
 

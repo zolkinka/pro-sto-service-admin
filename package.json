@@ -21,6 +21,7 @@
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.18",
+    "firebase": "^12.5.0",
     "imask": "^7.6.1",
     "mobx": "^6.15.0",
     "mobx-react-lite": "^4.1.1",

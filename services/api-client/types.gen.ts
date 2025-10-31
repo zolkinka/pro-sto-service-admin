@@ -54,6 +54,7 @@ export type AdminBookingServiceDto = {
     uuid: string;
     name: string;
     duration_minutes: number;
+    price: number;
 };
 
 export type AdminLoginDto = {
@@ -918,6 +919,25 @@ export type LogoutResponseDto = {
     message: string;
 };
 
+export type NotificationSettingsDto = {
+    /**
+     * Получать push-уведомления о новых заказах
+     */
+    newBooking?: boolean;
+    /**
+     * Получать push-уведомления об изменении статуса заказа
+     */
+    statusChange?: boolean;
+    /**
+     * Получать push-уведомления о напоминаниях
+     */
+    reminders?: boolean;
+    /**
+     * Получать push-уведомления о промо-акциях
+     */
+    promotions?: boolean;
+};
+
 export type OperatingHoursListResponseDto = {
     /**
      * Регулярное расписание (по дням недели)
@@ -1174,6 +1194,25 @@ export type RegisterDto = {
     device_id?: string;
 };
 
+export type RegisterTokenDto = {
+    /**
+     * FCM токен устройства
+     */
+    token: string;
+    /**
+     * Уникальный ID устройства
+     */
+    deviceId: string;
+    /**
+     * Тип устройства
+     */
+    deviceType?: string;
+    /**
+     * Название устройства
+     */
+    deviceName?: string;
+};
+
 export type Role = {
     [key: string]: unknown;
 };
@@ -1360,6 +1399,13 @@ export type SetPhoneDto = {
      * Уникальный идентификатор устройства
      */
     device_id?: string;
+};
+
+export type UnregisterTokenDto = {
+    /**
+     * Уникальный ID устройства для удаления токена
+     */
+    deviceId: string;
 };
 
 export type UpdateAdminBookingDto = {
@@ -2223,3 +2269,29 @@ export type AdminServicesDeleteData = {
 };
 
 export type AdminServicesDeleteResponse = (unknown);
+
+export type RegisterNotificationTokenData = {
+    requestBody: RegisterTokenDto;
+};
+
+export type RegisterNotificationTokenResponse = ({
+    success?: boolean;
+    message?: string;
+});
+
+export type UnregisterNotificationTokenData = {
+    requestBody: UnregisterTokenDto;
+};
+
+export type UnregisterNotificationTokenResponse = ({
+    success?: boolean;
+    message?: string;
+});
+
+export type GetNotificationSettingsResponse = (NotificationSettingsDto);
+
+export type UpdateNotificationSettingsData = {
+    requestBody: NotificationSettingsDto;
+};
+
+export type UpdateNotificationSettingsResponse = (NotificationSettingsDto);

@@ -23,9 +23,19 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
   placeholder = 'Выберите время',
   label,
   className,
+  availableSlots,
 }) => {
-  // Генерация списка времени с шагом 15 минут
+  // Генерация списка времени с шагом 15 минут или использование доступных слотов
   const timeOptions: SelectOption[] = useMemo(() => {
+    // Если переданы доступные слоты, используем их
+    if (availableSlots && availableSlots.length > 0) {
+      return availableSlots.map(time => ({
+        value: time,
+        label: time,
+      }));
+    }
+
+    // Иначе генерируем все времена с шагом 15 минут
     const times: SelectOption[] = [];
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
@@ -39,7 +49,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
       }
     }
     return times;
-  }, []);
+  }, [availableSlots]);
 
   // Преобразуем строковое значение в SelectOption
   const selectedOption: SelectOption | null = useMemo(() => {

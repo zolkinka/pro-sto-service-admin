@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import { format } from 'date-fns';
 import { useStores } from '@/hooks';
 import { AppPhoneInput } from '@/components/ui/AppPhoneInput';
 import { AppInput } from '@/components/ui';
@@ -14,6 +15,7 @@ import {
   adminFindOrCreateClient,
   adminCreateOrUpdateCar,
   adminCreateBooking,
+  serviceCenterGetSlots,
 } from '../../../../../services/api-client';
 import type { SelectOption } from '@/components/ui/AppSingleSelect/AppSingleSelect.types';
 import type { SelectOption as MultiSelectOption } from '@/components/ui/AppMultiSelect/AppMultiSelect.types';
@@ -63,10 +65,17 @@ const CreateBookingModal = observer(({
   const [models, setModels] = useState<CarModel[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Available time slots state
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   // Validation state
   const [phoneError, setPhoneError] = useState('');
   const [isPhoneValid, setIsPhoneValid] = useState(false);
+
+  // Ref для отслеживания первой загрузки (чтобы не очищать initialTime)
+  const isFirstLoad = useRef(true);
 
   const loadMakes = useCallback(async () => {
     try {
@@ -91,12 +100,59 @@ const CreateBookingModal = observer(({
     }
   }, [toastStore]);
 
+  // Загрузка доступных слотов
+  const loadAvailableSlots = useCallback(async () => {
+    // Проверяем что есть все необходимые данные
+    if (!selectedDate || !selectedService || !authStore.user?.service_center_uuid) {
+      setAvailableTimeSlots([]);
+      setIsLoadingSlots(false);
+      return;
+    }
+
+    setIsLoadingSlots(true);
+    try {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const response = await serviceCenterGetSlots({
+        uuid: authStore.user.service_center_uuid,
+        serviceUuid: selectedService.value.toString(),
+        date: dateStr,
+      });
+
+      // Преобразуем ISO даты в формат "HH:mm" с интервалом в 1 час
+      const slots = response.map((timeSlot: string) => {
+        const slotDate = new Date(timeSlot);
+        const hours = slotDate.getHours().toString().padStart(2, '0');
+        const minutes = slotDate.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+      });
+
+      setAvailableTimeSlots(slots);
+    } catch (error) {
+      console.error('Failed to load available slots:', error);
+      toastStore.showError('Не удалось загрузить доступные слоты');
+      setAvailableTimeSlots([]);
+    } finally {
+      setIsLoadingSlots(false);
+    }
+  }, [selectedDate, selectedService, authStore.user, toastStore]);
+
   // Load services on mount
   useEffect(() => {
     if (isOpen && servicesStore.services.length === 0) {
       servicesStore.fetchServices();
     }
   }, [isOpen, servicesStore]);
+
+  // Auto-select first main service when services are loaded
+  useEffect(() => {
+    if (isOpen && servicesStore.mainServices.length > 0 && !selectedService) {
+      const firstService = servicesStore.mainServices[0];
+      setSelectedService({
+        label: firstService.name,
+        value: firstService.uuid,
+      });
+    }
+  }, [isOpen, servicesStore.mainServices, selectedService]);
 
   // Load car makes on mount
   useEffect(() => {
@@ -114,6 +170,20 @@ const CreateBookingModal = observer(({
       setSelectedModel(null);
     }
   }, [selectedMake, loadModels]);
+
+  // Load available slots when date or service changes
+  useEffect(() => {
+    loadAvailableSlots();
+    // Очищаем выбранное время когда меняется дата или сервис
+    // НО не очищаем при первой загрузке (чтобы сохранить initialTime)
+    if (selectedDate && selectedService) {
+      if (!isFirstLoad.current) {
+        setSelectedTime('');
+      } else {
+        isFirstLoad.current = false;
+      }
+    }
+  }, [loadAvailableSlots, selectedDate, selectedService]);
 
   // Block body scroll when modal is open
   useEffect(() => {
@@ -294,6 +364,9 @@ const CreateBookingModal = observer(({
     setPhoneError('');
     setIsPhoneValid(false);
     
+    // Сбрасываем флаг первой загрузки
+    isFirstLoad.current = true;
+    
     onClose();
   };
 
@@ -375,6 +448,8 @@ const CreateBookingModal = observer(({
               value={selectedTime}
               onChange={setSelectedTime}
               placeholder="09:00"
+              availableSlots={availableTimeSlots}
+              disabled={isLoadingSlots || !selectedDate || !selectedService}
             />
           </div>
         </div>

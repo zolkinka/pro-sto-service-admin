@@ -23,8 +23,9 @@ const PIXELS_PER_HOUR = TIME_ROW_HEIGHT + TIME_ROW_GAP; // 13 + 50 = 63px
 // Пикселей на минуту
 const PIXELS_PER_MINUTE = PIXELS_PER_HOUR / 60; // 63 / 60 = 1.05
 const DAY_COLUMN_WIDTH = 120; // ширина колонки для одного дня
-const DAY_COLUMN_GAP = 12; // отступ между колонками дней
+const DAY_COLUMN_GAP = 4; // отступ между колонками дней (уменьшен для большей плотности)
 const CARD_PADDING = 4; // отступ карточки от линий сетки в пикселях
+const SLOT_VERTICAL_PADDING = 4; // вертикальный отступ между слотами (2px сверху + 2px снизу = 4px)
 
 interface BookingWithPosition extends AdminBookingResponseDto {
   top: number;
@@ -211,10 +212,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                             className="calendar-grid__clickable-slot"
                             style={{
                               position: 'absolute',
-                              top: `${top}px`,
+                              top: `${top + SLOT_VERTICAL_PADDING / 2}px`,
                               left: `${left}px`,
                               width: `${DAY_COLUMN_WIDTH}px`,
-                              height: `${PIXELS_PER_HOUR}px`,
+                              height: `${PIXELS_PER_HOUR - SLOT_VERTICAL_PADDING}px`,
                             }}
                             onClick={() => onSlotClick(slotDate, hour)}
                           />

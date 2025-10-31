@@ -9,7 +9,7 @@ import CreateBookingModal from './components/CreateBookingModal/CreateBookingMod
 import './OrdersPage.css';
 
 const OrdersPage = observer(() => {
-  const { bookingsStore, authStore } = useStores();
+  const { bookingsStore, authStore, servicesStore } = useStores();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week'>('week');
@@ -69,8 +69,13 @@ const OrdersPage = observer(() => {
       
       // Загружаем данные
       bookingsStore.fetchBookings();
+      
+      // Загружаем сервисы если их еще нет
+      if (servicesStore.services.length === 0) {
+        servicesStore.fetchServices();
+      }
     }
-  }, [currentDate, authStore.user, bookingsStore]);
+  }, [currentDate, authStore.user, bookingsStore, servicesStore]);
 
   // Эффект для автоматического показа pending заказов
   useEffect(() => {
@@ -164,6 +169,10 @@ const OrdersPage = observer(() => {
 
   // Вычисляем начало недели для передачи в WeekDaysRow и CalendarGrid
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  
+  // Получаем первый доступный основной сервис для загрузки слотов
+  const selectedService = servicesStore.mainServices[0];
+  const serviceCenterUuid = authStore.user?.service_center_uuid;
 
   return (
     <div className="orders-page">
@@ -195,6 +204,8 @@ const OrdersPage = observer(() => {
             onSlotClick={handleSlotClick}
             workingHours={workingHours}
             isLoading={bookingsStore.isLoading}
+            serviceCenterUuid={serviceCenterUuid}
+            serviceUuid={selectedService?.uuid}
           />
         </div>
       </div>

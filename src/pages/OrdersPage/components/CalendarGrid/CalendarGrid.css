@@ -140,6 +140,10 @@
   transition: all 0.2s ease;
   border-radius: 8px;
   position: relative;
+  /* Добавляем рамку для пустых слотов */
+  border: 1px solid #f4f3f0;
+  /* Убираем фоновую заливку по умолчанию */
+  background-color: transparent;
 }
 
 .calendar-grid__clickable-slot:hover {

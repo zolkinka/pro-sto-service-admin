@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { differenceInMinutes, format, isSameDay, addDays } from 'date-fns';
 import type { AdminBookingResponseDto } from '../../../../../services/api-client';
+import { serviceCenterGetSlots } from '../../../../../services/api-client';
 import BookingCard from '../BookingCard/BookingCard';
 import './CalendarGrid.css';
 
@@ -11,6 +12,8 @@ export interface CalendarGridProps {
   onSlotClick?: (date: Date, hour: number) => void;
   workingHours: { start: number; end: number }; // например { start: 9, end: 18 }
   isLoading?: boolean;
+  serviceCenterUuid?: string;
+  serviceUuid?: string;
 }
 
 // Расстояние между часами в пикселях: gap (50px) + высота строки времени (13px)
@@ -29,6 +32,13 @@ interface BookingWithPosition extends AdminBookingResponseDto {
   dayIndex: number;
 }
 
+// Тип для хранения доступных слотов по дням и часам
+interface AvailableSlots {
+  [dayIndex: number]: {
+    [hour: number]: boolean;
+  };
+}
+
 const CalendarGrid: React.FC<CalendarGridProps> = ({
   bookings,
   weekStart,
@@ -36,12 +46,67 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   onSlotClick,
   workingHours,
   isLoading = false,
+  serviceCenterUuid,
+  serviceUuid,
 }) => {
+  // Состояние для хранения доступных слотов
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlots>({});
+
   // Генерируем массив часов для отображения
   const hours: number[] = [];
   for (let hour = workingHours.start; hour <= workingHours.end; hour++) {
     hours.push(hour);
   }
+
+  // Функция для загрузки слотов для всей недели
+  const loadAvailableSlots = useCallback(async () => {
+    if (!serviceCenterUuid || !serviceUuid) {
+      console.log('Missing serviceCenterUuid or serviceUuid, skipping slots loading');
+      return;
+    }
+
+    const slots: AvailableSlots = {};
+
+    try {
+      // Загружаем слоты для каждого дня недели
+      const promises = Array.from({ length: 7 }).map(async (_, dayIndex) => {
+        const date = addDays(weekStart, dayIndex);
+        const dateStr = format(date, 'yyyy-MM-dd');
+
+        try {
+          const response = await serviceCenterGetSlots({
+            uuid: serviceCenterUuid,
+            serviceUuid: serviceUuid,
+            date: dateStr,
+          });
+
+          // Парсим слоты и заполняем объект
+          slots[dayIndex] = {};
+          response.forEach((timeSlot: string) => {
+            // Формат времени ISO: "2025-11-03T10:00:00.000Z"
+            const slotDate = new Date(timeSlot);
+            const hour = slotDate.getHours();
+            if (!isNaN(hour)) {
+              slots[dayIndex][hour] = true;
+            }
+          });
+        } catch (error) {
+          console.error(`Failed to load slots for ${dateStr}:`, error);
+          // В случае ошибки просто не добавляем слоты для этого дня
+        }
+      });
+
+      await Promise.all(promises);
+      setAvailableSlots(slots);
+    } catch (error) {
+      console.error('Failed to load available slots:', error);
+    }
+  }, [weekStart, serviceCenterUuid, serviceUuid]);
+
+  // Загружаем слоты при изменении недели или сервиса
+  useEffect(() => {
+    loadAvailableSlots();
+  }, [loadAvailableSlots]);
 
   // Рассчитываем позиции для каждого заказа
   const bookingsWithPositions: BookingWithPosition[] = bookings.map((booking) => {
@@ -117,33 +182,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             />
           ) : (
             <>
-              {/* Горизонтальные линии для каждого часа */}
-              <div 
-                className="calendar-grid__horizontal-lines"
-                style={{ height: `${bookingsHeight}px` }}
-              >
-                {hours.map((hour, index) => {
-                  // Каждая линия располагается точно на расстоянии index * 63px от начала
-                  const top = index * PIXELS_PER_HOUR;
-                  return (
-                    <div 
-                      key={hour} 
-                      className="calendar-grid__hour-line"
-                      style={{ top: `${top}px` }}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Вертикальные линии для каждого дня */}
-              <div 
-                className="calendar-grid__vertical-lines"
-                style={{ height: `${bookingsHeight}px` }}
-              >
-                {Array.from({ length: 7 }).map((_, dayIndex) => (
-                  <div key={dayIndex} className="calendar-grid__day-line" />
-                ))}
-              </div>
+              {/* Горизонтальные и вертикальные линии скрыты - оставляем только карточки и слоты */}
 
               {/* Кликабельные слоты для создания новых заказов */}
               {onSlotClick && (
@@ -157,6 +196,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         const slotDate = addDays(weekStart, dayIndex);
                         const top = hourIndex * PIXELS_PER_HOUR;
                         const left = dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
+
+                        // Проверяем, доступен ли этот слот
+                        const isAvailable = availableSlots[dayIndex]?.[hour] === true;
+
+                        // Показываем слот только если он доступен
+                        if (!isAvailable) {
+                          return null;
+                        }
 
                         return (
                           <div

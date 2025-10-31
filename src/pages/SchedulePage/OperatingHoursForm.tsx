@@ -5,7 +5,7 @@ import AppTimePicker from '@/components/ui/AppTimePicker/AppTimePicker';
 import DayScheduleRow from './DayScheduleRow';
 import type { OperatingHoursResponseDto, UpdateRegularScheduleDto } from '../../../services/api-client/types.gen';
 import { DAY_NAMES, DAYS_ORDER, formatTime, parseTime, validateTimeRange } from './utils';
-import * as S from './SchedulePage.styles';
+import './SchedulePage.css';
 
 interface OperatingHoursFormProps {
   schedule: OperatingHoursResponseDto[];
@@ -166,32 +166,32 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
 
   return (
     <div>
-      <S.ToggleRow>
-        <S.ToggleLabel>Одинаковое время работы для всех дней</S.ToggleLabel>
+      <div className="schedule-page__toggle-row">
+        <span className="schedule-page__toggle-label">Одинаковое время работы для всех дней</span>
         <AppSwitch
           checked={formData.uniformSchedule}
           onChange={handleUniformScheduleToggle}
         />
-      </S.ToggleRow>
+      </div>
 
       {formData.uniformSchedule ? (
-        <S.UniformTimeContainer>
-          <S.TimeLabel>с</S.TimeLabel>
+        <div className="schedule-page__uniform-time-container">
+          <span className="schedule-page__time-label">с</span>
           <AppTimePicker
             value={formData.uniformTime.open}
             onChange={(value) => handleUniformTimeChange('open', value)}
             placeholder="Открытие"
           />
-          <S.TimeSeparator />
-          <S.TimeLabel>до</S.TimeLabel>
+          <div className="schedule-page__time-separator" />
+          <span className="schedule-page__time-label">до</span>
           <AppTimePicker
             value={formData.uniformTime.close}
             onChange={(value) => handleUniformTimeChange('close', value)}
             placeholder="Закрытие"
           />
-        </S.UniformTimeContainer>
+        </div>
       ) : (
-        <S.DayScheduleSection>
+        <div className="schedule-page__day-schedule-section">
           {DAYS_ORDER.map(day => (
             <DayScheduleRow
               key={day}
@@ -200,7 +200,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
               onChange={(value) => handleDayScheduleChange(day, value)}
             />
           ))}
-        </S.DayScheduleSection>
+        </div>
       )}
 
       {Object.keys(errors).length > 0 && (
@@ -214,7 +214,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
         </div>
       )}
 
-      <S.SaveButton>
+      <div className="schedule-page__save-button">
         <AppButton
           variant="primary"
           onClick={handleSubmit}
@@ -223,7 +223,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
         >
           Сохранить
         </AppButton>
-      </S.SaveButton>
+      </div>
     </div>
   );
 };

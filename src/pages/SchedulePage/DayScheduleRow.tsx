@@ -1,6 +1,6 @@
 import React from 'react';
 import AppTimePicker from '@/components/ui/AppTimePicker/AppTimePicker';
-import * as S from './SchedulePage.styles';
+import './SchedulePage.css';
 
 interface DayScheduleRowProps {
   dayName: string;
@@ -18,22 +18,22 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChang
   };
 
   return (
-    <S.DayRow>
-      <S.DayName>{dayName}</S.DayName>
-      <S.TimeRangeContainer>
+    <div className="schedule-page__day-row">
+      <span className="schedule-page__day-name">{dayName}</span>
+      <div className="schedule-page__time-range-container">
         <AppTimePicker
           value={value.open}
           onChange={handleOpenTimeChange}
           placeholder="Открытие"
         />
-        <S.TimeSeparator />
+        <div className="schedule-page__time-separator" />
         <AppTimePicker
           value={value.close}
           onChange={handleCloseTimeChange}
           placeholder="Закрытие"
         />
-      </S.TimeRangeContainer>
-    </S.DayRow>
+      </div>
+    </div>
   );
 };
 

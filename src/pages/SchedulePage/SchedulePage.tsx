@@ -4,7 +4,6 @@ import { useStores } from '@/hooks/useStores';
 import OperatingHoursView from './OperatingHoursView';
 import OperatingHoursForm from './OperatingHoursForm';
 import type { UpdateRegularScheduleDto } from '../../../services/api-client/types.gen';
-import * as S from './SchedulePage.styles';
 import './SchedulePage.css';
 
 const SchedulePage: React.FC = observer(() => {
@@ -46,10 +45,10 @@ const SchedulePage: React.FC = observer(() => {
   if (!serviceCenterUuid) {
     return (
       <div className="schedule-page">
-        <S.Container>
-          <S.Title>Время работы</S.Title>
+        <div className="schedule-page__container">
+          <h1 className="schedule-page__title">Время работы</h1>
           <p>Не удалось определить сервисный центр</p>
-        </S.Container>
+        </div>
       </div>
     );
   }
@@ -57,29 +56,29 @@ const SchedulePage: React.FC = observer(() => {
   if (operatingHoursStore.loading && operatingHoursStore.regularSchedule.length === 0) {
     return (
       <div className="schedule-page">
-        <S.Container>
-          <S.SkeletonTitle />
-          <S.SkeletonTabs />
-          <S.SkeletonContent />
-        </S.Container>
+        <div className="schedule-page__container">
+          <div className="schedule-page__skeleton schedule-page__skeleton-title" />
+          <div className="schedule-page__skeleton schedule-page__skeleton-tabs" />
+          <div className="schedule-page__skeleton schedule-page__skeleton-content" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="schedule-page">
-      <S.Container>
-        <S.Title>Время работы</S.Title>
-        
-        <S.TabsContainer>
-          <S.Tab $active={true}>
-            Основное расписание
-          </S.Tab>
-          <S.Tab $active={false} disabled>
-            Выходные и праздники
-          </S.Tab>
-        </S.TabsContainer>
+      <h1 className="schedule-page__title">Время работы</h1>
+      
+      <div className="schedule-page__tabs">
+        <button className="schedule-page__tab schedule-page__tab_active">
+          Основное расписание
+        </button>
+        <button className="schedule-page__tab" disabled>
+          Выходные и праздники
+        </button>
+      </div>
 
+      <div className="schedule-page__container">
         {isEditing ? (
           <OperatingHoursForm
             schedule={operatingHoursStore.regularSchedule}
@@ -91,7 +90,7 @@ const SchedulePage: React.FC = observer(() => {
             onEdit={handleEdit}
           />
         )}
-      </S.Container>
+      </div>
     </div>
   );
 });

@@ -3,7 +3,6 @@ import AppButton from '@/components/ui/AppButton/AppButton';
 import { EditIcon } from '@/components/ui/icons';
 import type { OperatingHoursResponseDto } from '../../../services/api-client/types.gen';
 import { formatTime, DAY_NAMES, DAYS_ORDER } from './utils';
-import * as S from './SchedulePage.styles';
 
 interface OperatingHoursViewProps {
   schedule: OperatingHoursResponseDto[];
@@ -20,11 +19,11 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ schedule, onEdi
   }, {} as Record<string, OperatingHoursResponseDto>);
 
   return (
-    <S.ViewWrapper>
+    <div className="schedule-page__view-wrapper">
       {/* Основное расписание */}
-      <S.ViewSection>
-        <S.ViewSectionContent>
-          <S.DayScheduleList>
+      <div className="schedule-page__view-section">
+        <div className="schedule-page__view-section-content">
+          <div className="schedule-page__day-schedule-list">
             {DAYS_ORDER.map(day => {
               const daySchedule = scheduleMap[day];
               const dayName = DAY_NAMES[day] || day;
@@ -41,48 +40,48 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ schedule, onEdi
               }
 
               return (
-                <S.DayScheduleItem key={day}>
-                  <S.DayNameText>{dayName}</S.DayNameText>
-                  <S.DayTimeText>{timeDisplay}</S.DayTimeText>
-                </S.DayScheduleItem>
+                <div key={day} className="schedule-page__day-schedule-item">
+                  <p className="schedule-page__day-name">{dayName}</p>
+                  <p className="schedule-page__day-time">{timeDisplay}</p>
+                </div>
               );
             })}
-          </S.DayScheduleList>
-        </S.ViewSectionContent>
-        <S.EditButtonWrapper>
+          </div>
+        </div>
+        <div className="schedule-page__edit-button-wrapper">
           <AppButton 
             size="M" 
             variant="secondary" 
             onClick={onEdit}
-            className="edit-button"
+            className="schedule-page__edit-button"
             onlyIcon
             iconLeft={<EditIcon />}
           />
-        </S.EditButtonWrapper>
-      </S.ViewSection>
+        </div>
+      </div>
 
       {/* Выходные и праздники (пока пустой раздел) */}
-      <S.ViewSection>
-        <S.ViewSectionContent>
-          <S.DayScheduleList>
-            <S.DayScheduleItem>
-              <S.DayNameText>Выходные</S.DayNameText>
-              <S.DayTimeText>10 апреля, 8 ноября</S.DayTimeText>
-            </S.DayScheduleItem>
-          </S.DayScheduleList>
-        </S.ViewSectionContent>
-        <S.EditButtonWrapper>
+      <div className="schedule-page__view-section">
+        <div className="schedule-page__view-section-content">
+          <div className="schedule-page__day-schedule-list">
+            <div className="schedule-page__day-schedule-item">
+              <p className="schedule-page__day-name">Выходные</p>
+              <p className="schedule-page__day-time">10 апреля, 8 ноября</p>
+            </div>
+          </div>
+        </div>
+        <div className="schedule-page__edit-button-wrapper">
           <AppButton 
             size="M" 
             variant="secondary" 
             onClick={() => {}}
-            className="edit-button"
+            className="schedule-page__edit-button"
             onlyIcon
             iconLeft={<EditIcon />}
           />
-        </S.EditButtonWrapper>
-      </S.ViewSection>
-    </S.ViewWrapper>
+        </div>
+      </div>
+    </div>
   );
 };
 

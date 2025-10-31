@@ -169,6 +169,7 @@ const OrdersPage = observer(() => {
             weekStart={weekStart}
             onBookingClick={handleBookingClick}
             workingHours={workingHours}
+            isLoading={bookingsStore.isLoading}
           />
         </div>
       </div>

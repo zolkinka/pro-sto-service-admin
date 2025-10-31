@@ -142,6 +142,18 @@ export const EmptyCalendar: Story = {
   },
 };
 
+export const Loading: Story = {
+  args: {
+    bookings: [],
+    weekStart: startOfWeek(new Date(), { weekStartsOn: 1 }),
+    onBookingClick: (bookingUuid: string) => {
+      console.log('Clicked booking:', bookingUuid);
+    },
+    workingHours: { start: 9, end: 18 },
+    isLoading: true,
+  },
+};
+
 export const BusyDay: Story = {
   args: {
     bookings: [

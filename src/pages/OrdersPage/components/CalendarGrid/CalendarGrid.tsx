@@ -9,6 +9,7 @@ export interface CalendarGridProps {
   weekStart: Date;
   onBookingClick: (bookingUuid: string) => void;
   workingHours: { start: number; end: number }; // например { start: 9, end: 18 }
+  isLoading?: boolean;
 }
 
 // Расстояние между часами в пикселях: gap (50px) + высота строки времени (13px)
@@ -32,6 +33,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   weekStart,
   onBookingClick,
   workingHours,
+  isLoading = false,
 }) => {
   // Генерируем массив часов для отображения
   const hours: number[] = [];
@@ -90,7 +92,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const bookingsHeight = totalHours * PIXELS_PER_HOUR;
 
   return (
-    <div className="calendar-grid">
+    <div className={`calendar-grid ${isLoading ? 'calendar-grid--loading' : ''}`}>
       <div className="calendar-grid__content">
         {/* Колонка с временными метками */}
         <div className="calendar-grid__time-column">
@@ -105,62 +107,72 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
         {/* Сетка с днями */}
         <div className="calendar-grid__days-container">
-          {/* Горизонтальные линии для каждого часа */}
-          <div 
-            className="calendar-grid__horizontal-lines"
-            style={{ height: `${bookingsHeight}px` }}
-          >
-            {hours.map((hour, index) => {
-              // Каждая линия располагается точно на расстоянии index * 63px от начала
-              const top = index * PIXELS_PER_HOUR;
-              return (
-                <div 
-                  key={hour} 
-                  className="calendar-grid__hour-line"
-                  style={{ top: `${top}px` }}
-                />
-              );
-            })}
-          </div>
+          {isLoading ? (
+            /* Показываем скелетон на время загрузки */
+            <div 
+              className="calendar-grid__skeleton"
+              style={{ height: `${bookingsHeight}px` }}
+            />
+          ) : (
+            <>
+              {/* Горизонтальные линии для каждого часа */}
+              <div 
+                className="calendar-grid__horizontal-lines"
+                style={{ height: `${bookingsHeight}px` }}
+              >
+                {hours.map((hour, index) => {
+                  // Каждая линия располагается точно на расстоянии index * 63px от начала
+                  const top = index * PIXELS_PER_HOUR;
+                  return (
+                    <div 
+                      key={hour} 
+                      className="calendar-grid__hour-line"
+                      style={{ top: `${top}px` }}
+                    />
+                  );
+                })}
+              </div>
 
-          {/* Вертикальные линии для каждого дня */}
-          <div 
-            className="calendar-grid__vertical-lines"
-            style={{ height: `${bookingsHeight}px` }}
-          >
-            {Array.from({ length: 7 }).map((_, dayIndex) => (
-              <div key={dayIndex} className="calendar-grid__day-line" />
-            ))}
-          </div>
+              {/* Вертикальные линии для каждого дня */}
+              <div 
+                className="calendar-grid__vertical-lines"
+                style={{ height: `${bookingsHeight}px` }}
+              >
+                {Array.from({ length: 7 }).map((_, dayIndex) => (
+                  <div key={dayIndex} className="calendar-grid__day-line" />
+                ))}
+              </div>
 
-          {/* Карточки заказов */}
-          <div 
-            className="calendar-grid__bookings"
-            style={{ height: `${bookingsHeight}px` }}
-          >
-            {bookingsWithPositions.map((booking) => {
-              const left = booking.dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
-              
-              return (
-                <div
-                  key={booking.uuid}
-                  className="calendar-grid__booking-wrapper"
-                  style={{
-                    position: 'absolute',
-                    top: `${booking.top}px`,
-                    left: `${left}px`,
-                    width: `${DAY_COLUMN_WIDTH}px`,
-                  }}
-                >
-                  <BookingCard
-                    booking={booking}
-                    onClick={() => onBookingClick(booking.uuid)}
-                    style={{ height: `${booking.height}px` }}
-                  />
-                </div>
-              );
-            })}
-          </div>
+              {/* Карточки заказов */}
+              <div 
+                className="calendar-grid__bookings"
+                style={{ height: `${bookingsHeight}px` }}
+              >
+                {bookingsWithPositions.map((booking) => {
+                  const left = booking.dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
+                  
+                  return (
+                    <div
+                      key={booking.uuid}
+                      className="calendar-grid__booking-wrapper"
+                      style={{
+                        position: 'absolute',
+                        top: `${booking.top}px`,
+                        left: `${left}px`,
+                        width: `${DAY_COLUMN_WIDTH}px`,
+                      }}
+                    >
+                      <BookingCard
+                        booking={booking}
+                        onClick={() => onBookingClick(booking.uuid)}
+                        style={{ height: `${booking.height}px` }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

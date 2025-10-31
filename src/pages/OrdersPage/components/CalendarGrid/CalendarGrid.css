@@ -7,6 +7,11 @@
   font-family: var(--font-onest);
 }
 
+/* Блокируем скролл во время загрузки */
+.calendar-grid--loading {
+  overflow: hidden;
+}
+
 /* Webkit scrollbar styling */
 .calendar-grid::-webkit-scrollbar {
   width: 6px;
@@ -115,4 +120,32 @@
 
 .calendar-grid__booking-wrapper {
   z-index: 1;
+}
+
+/* Skeleton loader */
+.calendar-grid__skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    90deg,
+    #F0F0F0 0%,
+    #E8E8E8 20%,
+    #E8E8E8 40%,
+    #F0F0F0 60%,
+    #F0F0F0 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

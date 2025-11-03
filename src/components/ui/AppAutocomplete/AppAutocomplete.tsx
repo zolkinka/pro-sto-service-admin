@@ -77,7 +77,12 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
 
   // Определяем активный список опций
   const activeOptions = useMemo(() => {
-    return onSearch ? asyncOptions : options;
+    // Если есть onSearch и есть asyncOptions - используем их
+    if (onSearch && asyncOptions.length > 0) {
+      return asyncOptions;
+    }
+    // Иначе используем переданные options (статические опции)
+    return options;
   }, [onSearch, asyncOptions, options]);
 
   // Фильтрация опций

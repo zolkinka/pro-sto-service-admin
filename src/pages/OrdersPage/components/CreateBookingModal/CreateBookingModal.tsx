@@ -2,13 +2,13 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
-import { AppPhoneInput } from '@/components/ui/AppPhoneInput';
 import { AppInput } from '@/components/ui';
 import { AppSingleSelect } from '@/components/ui/AppSingleSelect';
 import { AppMultiSelect } from '@/components/ui/AppMultiSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
 import AppTimePicker from '@/components/ui/AppTimePicker/AppTimePicker';
 import { AppButton } from '@/components/ui';
+import { AppAutocomplete } from '@/components/ui/AppAutocomplete';
 import { 
   carsControllerGetMakes, 
   carsControllerGetModelsByMakeId,
@@ -16,9 +16,13 @@ import {
   adminCreateOrUpdateCar,
   adminCreateBooking,
   serviceCenterGetSlots,
+  adminSearchClients,
+  adminSearchCars,
 } from '../../../../../services/api-client';
 import type { SelectOption } from '@/components/ui/AppSingleSelect/AppSingleSelect.types';
 import type { SelectOption as MultiSelectOption } from '@/components/ui/AppMultiSelect/AppMultiSelect.types';
+import type { SelectOption as AutocompleteOption } from '@/components/ui/AppAutocomplete/AppAutocomplete.types';
+import type { ClientSearchResultDto, CarSearchResultDto } from '../../../../../services/api-client/types.gen';
 import './CreateBookingModal.css';
 
 interface CreateBookingModalProps {
@@ -50,7 +54,7 @@ const CreateBookingModal = observer(({
   const { servicesStore, toastStore, authStore } = useStores();
 
   // Form state
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(''); // Храним введенный телефон
   const [licensePlate, setLicensePlate] = useState('');
   const [selectedMake, setSelectedMake] = useState<SelectOption | null>(null);
   const [selectedModel, setSelectedModel] = useState<SelectOption | null>(null);
@@ -59,6 +63,14 @@ const CreateBookingModal = observer(({
   const [selectedService, setSelectedService] = useState<SelectOption | null>(null);
   const [selectedAdditionalServices, setSelectedAdditionalServices] = useState<MultiSelectOption[]>([]);
   const [comment, setComment] = useState('');
+  
+  // Client and car autocomplete state
+  const [selectedClient, setSelectedClient] = useState<ClientSearchResultDto | null>(null);
+  const [clientName, setClientName] = useState<string>('');
+  const [selectedCar, setSelectedCar] = useState<CarSearchResultDto | null>(null);
+  const [phoneAutocompleteValue, setPhoneAutocompleteValue] = useState<AutocompleteOption | undefined>();
+  const [carAutocompleteValue, setCarAutocompleteValue] = useState<AutocompleteOption | undefined>();
+  const [clientCarsOptions, setClientCarsOptions] = useState<AutocompleteOption[]>([]); // Опции автомобилей выбранного клиента
   
   // Data state
   const [makes, setMakes] = useState<CarMake[]>([]);
@@ -69,10 +81,6 @@ const CreateBookingModal = observer(({
   // Available time slots state
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
-
-  // Validation state
-  const [phoneError, setPhoneError] = useState('');
-  const [isPhoneValid, setIsPhoneValid] = useState(false);
 
   // Ref для отслеживания первой загрузки (чтобы не очищать initialTime)
   const isFirstLoad = useRef(true);
@@ -171,6 +179,20 @@ const CreateBookingModal = observer(({
     }
   }, [selectedMake, loadModels]);
 
+  // Предзаполнение модели при выборе автомобиля из автокомплита
+  useEffect(() => {
+    if (selectedCar && models.length > 0) {
+      const modelOption = models
+        .filter(m => m.id && m.name)
+        .map(m => ({ label: m.name!, value: m.id! }))
+        .find(m => m.label === selectedCar.model);
+      
+      if (modelOption) {
+        setSelectedModel(modelOption);
+      }
+    }
+  }, [selectedCar, models]);
+
   // Load available slots when date or service changes
   useEffect(() => {
     loadAvailableSlots();
@@ -235,23 +257,136 @@ const CreateBookingModal = observer(({
       }));
   }, [servicesStore.services]);
 
-  const handlePhoneChange = (cleanPhone: string) => {
-    setPhone(cleanPhone);
-  };
-
-  const handlePhoneValidate = (isValid: boolean, cleanPhone: string) => {
-    setIsPhoneValid(isValid);
-    if (!isValid && cleanPhone.length > 0) {
-      setPhoneError('Введите корректный номер телефона');
-    } else {
-      setPhoneError('');
+  // Функция поиска клиентов по номеру телефона
+  const searchClients = useCallback(async (phoneQuery: string): Promise<AutocompleteOption[]> => {
+    // Извлекаем только цифры из введенного телефона
+    const digits = phoneQuery.replace(/\D/g, '');
+    
+    // Минимум 3 цифры для поиска (по требованиям)
+    if (digits.length < 3) {
+      return [];
     }
-  };
+
+    try {
+      const results = await adminSearchClients({ phone: digits, limit: 10 });
+      
+      return results.map((client: ClientSearchResultDto) => ({
+        label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
+        value: client.uuid,
+        isCustom: false,
+        // Сохраняем оригинальные данные для последующего использования
+        rawData: client,
+      } as AutocompleteOption & { rawData: ClientSearchResultDto }));
+    } catch (error) {
+      console.error('Failed to search clients:', error);
+      toastStore.showError('Не удалось выполнить поиск клиентов');
+      return [];
+    }
+  }, [toastStore]);
+
+  // Обработчик выбора клиента из автокомплита
+  const handleClientSelect = useCallback(async (option: AutocompleteOption) => {
+    setPhoneAutocompleteValue(option);
+    
+    if (option.isCustom || !option.value) {
+      // Пользователь ввел новый номер (не из списка)
+      setSelectedClient(null);
+      setClientName('');
+      setClientCarsOptions([]); // Очищаем список автомобилей
+      // Сохраняем введенный телефон для последующего использования
+      setPhone(option.label);
+      return;
+    }
+
+    // Пользователь выбрал существующего клиента
+    const clientData = (option as AutocompleteOption & { rawData: ClientSearchResultDto }).rawData;
+    if (clientData) {
+      setSelectedClient(clientData);
+      setClientName(clientData.name ? String(clientData.name) : '');
+      setPhone(clientData.phone);
+      
+      // Сразу загружаем автомобили выбранного клиента
+      try {
+        const cars = await adminSearchCars({
+          licensePlate: '', // Пустой запрос вернет все авто клиента
+          clientUuid: clientData.uuid,
+          limit: 50,
+        });
+        
+        const carsOptions = cars.map((car: CarSearchResultDto) => ({
+          label: `${car.license_plate} (${car.make} ${car.model})`,
+          value: car.uuid,
+          isCustom: false,
+          rawData: car,
+        } as AutocompleteOption & { rawData: CarSearchResultDto }));
+        
+        setClientCarsOptions(carsOptions);
+      } catch (error) {
+        console.error('Failed to load client cars:', error);
+        setClientCarsOptions([]);
+      }
+    }
+  }, []);
+
+  // Функция поиска автомобилей по номеру
+  const searchCars = useCallback(async (plateQuery: string): Promise<AutocompleteOption[]> => {
+    // Минимум 2 символа для поиска (по требованиям)
+    if (plateQuery.length < 2) {
+      return []; // Возвращаем пустой массив, компонент покажет options
+    }
+
+    try {
+      const results = await adminSearchCars({
+        licensePlate: plateQuery,
+        clientUuid: selectedClient?.uuid, // Фильтруем по клиенту, если выбран
+        limit: 10,
+      });
+      
+      return results.map((car: CarSearchResultDto) => ({
+        label: `${car.license_plate} (${car.make} ${car.model})`,
+        value: car.uuid,
+        isCustom: false,
+        rawData: car,
+      } as AutocompleteOption & { rawData: CarSearchResultDto }));
+    } catch (error) {
+      console.error('Failed to search cars:', error);
+      toastStore.showError('Не удалось выполнить поиск автомобилей');
+      return [];
+    }
+  }, [selectedClient?.uuid, toastStore]);
+
+  // Обработчик выбора автомобиля из автокомплита
+  const handleCarSelect = useCallback((option: AutocompleteOption) => {
+    setCarAutocompleteValue(option);
+    
+    if (option.isCustom || !option.value) {
+      // Пользователь ввел новый номер
+      setSelectedCar(null);
+      setLicensePlate(option.label);
+      return;
+    }
+
+    // Пользователь выбрал существующий автомобиль
+    const carData = (option as AutocompleteOption & { rawData: CarSearchResultDto }).rawData;
+    if (carData) {
+      setSelectedCar(carData);
+      setLicensePlate(carData.license_plate);
+      
+      // Предзаполняем марку и модель, если они еще не выбраны или если они совпадают
+      const makeOption = makeOptions.find(m => m.label === carData.make);
+      if (makeOption) {
+        setSelectedMake(makeOption);
+        
+        // Модели будут загружены в useEffect
+        // Установим модель после загрузки моделей через useEffect
+      }
+    }
+  }, [makeOptions]);
 
   const handleSubmit = async () => {
     // Validation
-    if (!isPhoneValid) {
-      toastStore.showError('Введите корректный номер телефона');
+    if (!phone || phone.trim() === '') {
+      toastStore.showError('Введите номер телефона');
       return;
     }
 
@@ -288,26 +423,45 @@ const CreateBookingModal = observer(({
     setIsSubmitting(true);
 
     try {
-      // Формируем телефон в формате +7XXXXXXXXXX
-      // phone уже содержит только цифры без +7 (из extractPhoneDigits)
-      const cleanPhone = `+7${phone.replace(/\D/g, '')}`;
+      let clientUuid: string;
       
-      // 1. Найти или создать клиента
-      const clientResponse = await adminFindOrCreateClient({
-        requestBody: { phone: cleanPhone }
-      });
-
-      // 2. Создать или обновить автомобиль
-      const carResponse = await adminCreateOrUpdateCar({
-        clientUuid: clientResponse.uuid,
-        requestBody: {
-          license_plate: licensePlate,
-          make: selectedMake.label,
-          model: selectedModel.label,
-          make_id: String(selectedMake.value),
-          model_id: String(selectedModel.value),
+      // Если клиент был выбран из автокомплита - используем его UUID
+      if (selectedClient) {
+        clientUuid = selectedClient.uuid;
+      } else {
+        // Иначе создаем нового клиента
+        // Нормализуем телефон: убираем все кроме цифр и добавляем +7 если нужно
+        let cleanPhone = phone.replace(/\D/g, '');
+        if (!cleanPhone.startsWith('7') && cleanPhone.length === 10) {
+          cleanPhone = '7' + cleanPhone;
         }
-      });
+        cleanPhone = '+' + cleanPhone;
+        
+        const clientResponse = await adminFindOrCreateClient({
+          requestBody: { phone: cleanPhone }
+        });
+        clientUuid = clientResponse.uuid;
+      }
+
+      let carUuid: string;
+      
+      // Если автомобиль был выбран из автокомплита - используем его UUID
+      if (selectedCar) {
+        carUuid = selectedCar.uuid;
+      } else {
+        // Иначе создаем новый автомобиль
+        const carResponse = await adminCreateOrUpdateCar({
+          clientUuid: clientUuid,
+          requestBody: {
+            license_plate: licensePlate,
+            make: selectedMake.label,
+            model: selectedModel.label,
+            make_id: String(selectedMake.value),
+            model_id: String(selectedModel.value),
+          }
+        });
+        carUuid = carResponse.uuid;
+      }
 
       // 3. Формируем дату и время начала бронирования
       const [hours, minutes] = selectedTime.split(':').map(Number);
@@ -318,8 +472,8 @@ const CreateBookingModal = observer(({
       await adminCreateBooking({
         requestBody: {
           service_center_uuid: authStore.user.service_center_uuid,
-          client_uuid: clientResponse.uuid,
-          car_uuid: carResponse.uuid,
+          client_uuid: clientUuid,
+          car_uuid: carUuid,
           service_uuid: String(selectedService.value),
           start_time: startTime.toISOString(),
           payment_method: 'cash', // По умолчанию наличные
@@ -361,8 +515,14 @@ const CreateBookingModal = observer(({
     setSelectedService(null);
     setSelectedAdditionalServices([]);
     setComment('');
-    setPhoneError('');
-    setIsPhoneValid(false);
+    
+    // Reset client and car autocomplete state
+    setSelectedClient(null);
+    setClientName('');
+    setSelectedCar(null);
+    setPhoneAutocompleteValue(undefined);
+    setCarAutocompleteValue(undefined);
+    setClientCarsOptions([]); // Очищаем список автомобилей клиента
     
     // Сбрасываем флаг первой загрузки
     isFirstLoad.current = true;
@@ -388,22 +548,41 @@ const CreateBookingModal = observer(({
         </div>
 
       <div className="create-booking-modal__body">
-        <div className="create-booking-modal__field">
-          <AppPhoneInput
-            label="Введите номер телефона"
-            placeholder="+7 999 888 77 66"
-            onChange={handlePhoneChange}
-            onValidate={handlePhoneValidate}
-            error={phoneError}
-          />
+        {/* Поля телефона и имени клиента */}
+        <div className="create-booking-modal__field-row">
+          <div className="create-booking-modal__field">
+            <AppAutocomplete
+              label="Поиск по телефону"
+              placeholder="+7 999 888 77 66"
+              value={phoneAutocompleteValue}
+              onSearch={searchClients}
+              onChange={handleClientSelect}
+              minSearchLength={3}
+              searchDebounce={300}
+            />
+          </div>
+
+          <div className="create-booking-modal__field">
+            <AppInput
+              label="Имя клиента"
+              placeholder="Имя клиента"
+              value={clientName}
+              onChange={(value) => setClientName(value)}
+            />
+          </div>
         </div>
 
+        {/* Номер автомобиля */}
         <div className="create-booking-modal__field">
-          <AppInput
-            label="Введите номер"
+          <AppAutocomplete
+            label="Номер автомобиля"
             placeholder="A000AA 111"
-            value={licensePlate}
-            onChange={(value) => setLicensePlate(value)}
+            value={carAutocompleteValue}
+            options={clientCarsOptions} // Передаем загруженные автомобили клиента
+            onSearch={searchCars}
+            onChange={handleCarSelect}
+            minSearchLength={2}
+            searchDebounce={300}
           />
         </div>
 

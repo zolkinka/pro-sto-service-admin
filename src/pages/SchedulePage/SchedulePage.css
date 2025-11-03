@@ -154,11 +154,13 @@
   gap: 8px;
   align-items: center;
   flex: 1;
+  min-width: 0;
 }
 
-.schedule-page__time-range-container .app-time-picker {
+.schedule-page__time-range-container .app-time-picker,
+.schedule-page__time-range-container .app-single-select {
   flex: 1;
-  max-width: 140px;
+  min-width: 50px;
 }
 
 .schedule-page__uniform-time-container {
@@ -203,11 +205,11 @@
 
 .schedule-page__day-name {
   font-family: 'Onest', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 400;
   color: #302F2D;
-  width: 120px;
-  min-width: 120px;
+  width: 90px;
+  min-width: 90px;
   margin: 0;
   flex-shrink: 0;
 }

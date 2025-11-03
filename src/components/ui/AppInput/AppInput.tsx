@@ -11,7 +11,12 @@ import {
 } from './utils/inputHelpers';
 import './AppInput.css';
 
-const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
+// Расширяем тип ref для поддержки метода updateMaskKey
+export interface AppInputRef extends HTMLInputElement {
+  updateMaskKey: () => void;
+}
+
+const AppInput = forwardRef<AppInputRef, AppInputProps>(({
   // Основные пропсы
   value,
   defaultValue,
@@ -66,11 +71,22 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
 }, ref) => {
   const [isFocused, setIsFocused] = useState(false);
   const [internalValue, setInternalValue] = useState(defaultValue || '');
+  // Состояние для key - обновляется только при программном изменении (blur)
+  const [maskKey, setMaskKey] = useState(0);
+  // Запоминаем последнее значение для сравнения
+  const lastValueRef = useRef(value);
   
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Forwarding ref to internal input ref
-  useImperativeHandle(ref, () => inputRef.current!);
+  // Forwarding ref to internal input ref + добавляем метод updateMaskKey
+  useImperativeHandle(ref, () => ({
+    ...inputRef.current!,
+    updateMaskKey: () => {
+      console.log('🔄 AppInput: updateMaskKey called');
+      lastValueRef.current = value;
+      setMaskKey(prev => prev + 1);
+    },
+  }));
   
   // Определяем, является ли компонент controlled или uncontrolled
   const isControlled = value !== undefined;
@@ -93,6 +109,13 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
   
   const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
+    
+    // Если значение изменилось извне (программно), обновляем maskKey
+    if (mask && value !== undefined && value !== lastValueRef.current) {
+      lastValueRef.current = value;
+      setMaskKey(prev => prev + 1);
+    }
+    
     onBlur?.(event);
   };
   
@@ -176,23 +199,24 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
         
         {/* Input - с маской или без */}
         {mask ? (
+          // @ts-expect-error - inputProps type conflict with IMask
           <IMaskInput
+            key={`mask-${maskKey}`}
             mask={mask}
             unmask={unmask}
             lazy={lazy}
             placeholderChar={placeholderChar}
-            // @ts-expect-error - IMaskInput expects string, but we ensure it's a string
-            value={inputValue ? String(inputValue) : ''}
-            onAccept={(value, maskRef) => {
-              const newValue = unmask ? maskRef.unmaskedValue : value;
+            defaultValue={inputValue ? String(inputValue) : ''}
+            onAccept={(value, maskRefInstance) => {
+              const newValue = unmask ? maskRefInstance.unmaskedValue : value;
               if (!isControlled) {
                 setInternalValue(newValue);
               }
               onChange?.(newValue, {} as React.ChangeEvent<HTMLInputElement>);
-              onAccept?.(value, maskRef);
+              onAccept?.(value, maskRefInstance);
             }}
-            onComplete={(value, maskRef) => {
-              onComplete?.(value, maskRef);
+            onComplete={(value, maskRefInstance) => {
+              onComplete?.(value, maskRefInstance);
             }}
             onFocus={handleFocus}
             onBlur={handleBlur}

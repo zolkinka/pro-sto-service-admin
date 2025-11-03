@@ -348,3 +348,167 @@ export const Interactive: Story = {
     );
   },
 };
+
+// Mock данные клиентов для тестирования
+const mockClients = [
+  { phone: '+79991234567', name: 'Иван Иванов', uuid: '1' },
+  { phone: '+79991234568', name: 'Петр Петров', uuid: '2' },
+  { phone: '+79991234569', name: 'Сергей Сергеев', uuid: '3' },
+  { phone: '+79995555555', name: 'Мария Сидорова', uuid: '4' },
+  { phone: '+79996666666', name: 'Анна Кузнецова', uuid: '5' },
+  { phone: '+79997777777', name: null, uuid: '6' },
+];
+
+/**
+ * С маской телефона (unmask="typed") - ТЕСТИРОВАНИЕ ПРОБЛЕМЫ
+ */
+export const PhoneMaskUnmaskTyped: Story = {
+  render: function PhoneMaskUnmaskTypedStory() {
+    const [value, setValue] = useState<SelectOption | undefined>(undefined);
+    
+    // Функция для поиска клиентов (имитирует API)
+    const searchClientsMock = async (phoneQuery: string): Promise<SelectOption[]> => {
+      console.log('🔍 Mock searchClients called:', { phoneQuery, type: typeof phoneQuery });
+      
+      // Извлекаем только цифры
+      const digits = phoneQuery.replace(/\D/g, '');
+      console.log('🔍 Mock extracted digits:', { digits, length: digits.length });
+      
+      // Убираем префикс "7" если он есть (код страны)
+      const searchDigits = digits.startsWith('7') ? digits.substring(1) : digits;
+      console.log('🔍 Mock search digits (without country code):', { searchDigits, length: searchDigits.length });
+      
+      // Минимум 3 цифры для поиска
+      if (searchDigits.length < 3) {
+        console.log('❌ Mock: not enough digits');
+        return [];
+      }
+
+      // Имитируем задержку API
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Фильтруем клиентов по введенным цифрам
+      const results = mockClients.filter(client => {
+        const clientDigits = client.phone.replace(/\D/g, '').substring(1); // убираем +7
+        return clientDigits.includes(searchDigits);
+      });
+      
+      console.log('📡 Mock: returning results:', results.length, 'clients');
+      
+      return results.map(client => ({
+        label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
+        value: client.uuid,
+        isCustom: false,
+      }));
+    };
+    
+    return (
+      <div style={{ width: '500px' }}>
+        <AppAutocomplete
+          label="Поиск по телефону (unmask=typed)"
+          placeholder="+7 (999) 888-77-66"
+          value={value}
+          onSearch={searchClientsMock}
+          onChange={(option) => {
+            console.log('✅ Story: onChange called:', option);
+            setValue(option);
+          }}
+          minSearchLength={3}
+          searchDebounce={300}
+          mask="+{7} (000) 000-00-00"
+          unmask="typed"
+          lazy={false}
+        />
+        
+        <div style={{ marginTop: '20px', padding: '12px', background: '#f5f5f5', borderRadius: '8px' }}>
+          <h4 style={{ margin: '0 0 10px 0' }}>Текущее значение:</h4>
+          <pre style={{ margin: 0, fontSize: '12px' }}>{JSON.stringify(value, null, 2)}</pre>
+        </div>
+        
+        <div style={{ marginTop: '10px', padding: '12px', background: '#fff3cd', borderRadius: '8px' }}>
+          <strong>🧪 Инструкция по тестированию:</strong>
+          <ol style={{ marginTop: '10px', paddingLeft: '20px', fontSize: '14px' }}>
+            <li>Откройте консоль браузера (F12 → Console)</li>
+            <li>Введите <code>+7999</code> (или любые 3+ цифры после +7)</li>
+            <li>Смотрите логи в консоли - должны быть вызовы searchClients</li>
+            <li>Дождитесь появления выпадающего списка (300ms задержка)</li>
+            <li>Выберите клиента из списка кликом</li>
+            <li>Проверьте, что в поле остался номер с маской</li>
+          </ol>
+          <div style={{ marginTop: '10px', padding: '8px', background: '#fff', borderRadius: '4px', fontSize: '12px' }}>
+            <strong>Ожидаемое поведение:</strong>
+            <ul style={{ margin: '5px 0', paddingLeft: '20px' }}>
+              <li>При вводе: логи показывают <code>handleInputChange</code></li>
+              <li>После debounce: вызов <code>searchClients</code> с цифрами</li>
+              <li>Список появляется с найденными клиентами</li>
+              <li>После выбора: поле заполняется номером телефона</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  },
+};
+
+/**
+ * С маской телефона (unmask=false) - альтернативный подход
+ */
+export const PhoneMaskUnmaskFalse: Story = {
+  render: function PhoneMaskUnmaskFalseStory() {
+    const [value, setValue] = useState<SelectOption | undefined>(undefined);
+    
+    const searchClientsMock = async (phoneQuery: string): Promise<SelectOption[]> => {
+      console.log('🔍 Mock (unmask=false) searchClients called:', { phoneQuery });
+      
+      // В этом случае phoneQuery содержит маскированное значение
+      // Извлекаем цифры
+      const digits = phoneQuery.replace(/\D/g, '');
+      console.log('🔍 Mock (unmask=false) extracted digits:', { digits, length: digits.length });
+      
+      if (digits.length < 3) {
+        console.log('❌ Mock (unmask=false): not enough digits');
+        return [];
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const results = mockClients.filter(client => {
+        const clientDigits = client.phone.replace(/\D/g, '');
+        return clientDigits.includes(digits);
+      });
+      
+      console.log('📡 Mock (unmask=false): returning results:', results.length);
+      
+      return results.map(client => ({
+        label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
+        value: client.uuid,
+        isCustom: false,
+      }));
+    };
+    
+    return (
+      <div style={{ width: '500px' }}>
+        <AppAutocomplete
+          label="Поиск по телефону (unmask=false)"
+          placeholder="+7 (999) 888-77-66"
+          value={value}
+          onSearch={searchClientsMock}
+          onChange={(option) => {
+            console.log('✅ Story (unmask=false): onChange called:', option);
+            setValue(option);
+          }}
+          minSearchLength={3}
+          searchDebounce={300}
+          mask="+{7} (000) 000-00-00"
+          unmask={false}
+          lazy={false}
+        />
+        
+        <div style={{ marginTop: '20px', padding: '12px', background: '#f5f5f5', borderRadius: '8px' }}>
+          <h4 style={{ margin: '0 0 10px 0' }}>Текущее значение:</h4>
+          <pre style={{ margin: 0, fontSize: '12px' }}>{JSON.stringify(value, null, 2)}</pre>
+        </div>
+      </div>
+    );
+  },
+};

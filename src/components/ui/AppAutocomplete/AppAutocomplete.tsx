@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import { AppBaseDropdown } from '../AppBaseDropdown';
-import { AppInput } from '../AppInput';
+import { AppInput, type AppInputRef } from '../AppInput';
 import type { AppAutocompleteProps, SelectOption } from './AppAutocomplete.types';
 import { ChevronDownIcon } from '../AppSingleSelect/ChevronDownIcon';
 import { useDebounce } from '../../../hooks';
@@ -67,10 +67,19 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [asyncOptions, setAsyncOptions] = useState<SelectOption[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<AppInputRef>(null);
+  // Флаг для предотвращения повторного вызова onChange в handleBlur после выбора
+  const justSelectedRef = useRef(false);
 
   // Debounced input value для асинхронного поиска
   const debouncedInputValue = useDebounce(inputValue, searchDebounce);
+  
+  // Логируем debouncedInputValue когда он меняется
+  useEffect(() => {
+    if (onSearch && debouncedInputValue) {
+      console.log('⏱️ AppAutocomplete: debouncedInputValue changed:', { debouncedInputValue, minSearchLength });
+    }
+  }, [debouncedInputValue, onSearch, minSearchLength]);
 
   // Синхронизация внутреннего состояния с внешним value
   useEffect(() => {
@@ -79,7 +88,14 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
       return;
     }
 
-    setInputValue(value.label);
+    // Используем displayLabel если он есть (для масок), иначе label
+    const valueToDisplay = (value as SelectOption & { displayLabel?: string }).displayLabel || value.label;
+    console.log('🔄 AppAutocomplete: syncing value to inputValue', {
+      valueLabel: value.label,
+      displayLabel: (value as SelectOption & { displayLabel?: string }).displayLabel,
+      valueToDisplay,
+    });
+    setInputValue(valueToDisplay);
   }, [value]);
 
   // Определяем активный список опций
@@ -134,7 +150,12 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
 
   // Обработчик изменения инпута
   const handleInputChange = useCallback((newValue: string) => {
-    setInputValue(newValue);
+    console.log('⌨️ AppAutocomplete: handleInputChange called:', { newValue });
+    // Если используется маска, не обновляем inputValue здесь
+    // т.к. это будет сделано в handleMaskAccept
+    if (!mask) {
+      setInputValue(newValue);
+    }
     setHighlightedIndex(-1);
     
     // Открываем dropdown при вводе
@@ -146,15 +167,50 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     if (newValue === '') {
       onChange?.({ label: '', value: null, isCustom: true });
     }
-  }, [isOpen, onChange]);
+  }, [isOpen, onChange, mask]);
+  
+  // Обработчик onAccept для маски
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleMaskAccept = useCallback((maskedValue: string, maskRef: any) => {
+    console.log('🎭 AppAutocomplete: handleMaskAccept called:', { maskedValue });
+    // Обновляем inputValue с masked значением
+    setInputValue(maskedValue);
+    setHighlightedIndex(-1);
+    
+    // Открываем dropdown при вводе
+    if (!isOpen && maskedValue.length > 0) {
+      setIsOpen(true);
+    }
+    
+    // Вызываем оригинальный onAccept если он передан
+    onAccept?.(maskedValue, maskRef);
+  }, [isOpen, onAccept]);
 
   // Обработчик выбора опции
   const handleSelect = useCallback((selectedOption: SelectOption) => {
-    setInputValue(selectedOption.label);
+    // Используем displayLabel если он есть (для масок), иначе label
+    const valueToDisplay = (selectedOption as SelectOption & { displayLabel?: string }).displayLabel || selectedOption.label;
+    console.log('✅ AppAutocomplete: handleSelect', {
+      optionLabel: selectedOption.label,
+      displayLabel: (selectedOption as SelectOption & { displayLabel?: string }).displayLabel,
+      valueToDisplay,
+    });
+    setInputValue(valueToDisplay);
     onChange?.(selectedOption);
     setIsOpen(false);
     setHighlightedIndex(-1);
-  }, [onChange]);
+    
+    // Устанавливаем флаг что только что выбрали опцию
+    justSelectedRef.current = true;
+    
+    // Если используется маска, обновляем maskKey в AppInput
+    if (mask && inputRef.current) {
+      // Используем setTimeout чтобы дать время React обновить value в AppInput
+      setTimeout(() => {
+        inputRef.current?.updateMaskKey();
+      }, 0);
+    }
+  }, [onChange, mask]);
 
   // Обработчик фокуса
   const handleFocus = useCallback(() => {
@@ -165,6 +221,12 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
 
   // Обработчик потери фокуса
   const handleBlur = useCallback(() => {
+    // Если только что выбрали опцию, не вызываем onChange снова
+    if (justSelectedRef.current) {
+      justSelectedRef.current = false;
+      return;
+    }
+    
     // Сохраняем текущее значение инпута
     if (inputValue !== '') {
       // Проверяем, есть ли точное совпадение в опциях
@@ -302,7 +364,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
             unmask={unmask}
             placeholderChar={placeholderChar}
             lazy={lazy}
-            onAccept={onAccept}
+            onAccept={handleMaskAccept}
             onComplete={onComplete}
           />
           <div className={arrowClassName} aria-hidden="true">

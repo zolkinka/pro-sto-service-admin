@@ -259,24 +259,38 @@ const CreateBookingModal = observer(({
 
   // Функция поиска клиентов по номеру телефона
   const searchClients = useCallback(async (phoneQuery: string): Promise<AutocompleteOption[]> => {
+    console.log('🔍 searchClients called:', { phoneQuery });
+    
     // Извлекаем только цифры из введенного телефона
     const digits = phoneQuery.replace(/\D/g, '');
     
+    console.log('🔍 searchClients extracted digits:', { digits, length: digits.length });
+    
+    // Убираем префикс "7" если он есть в начале (это код страны)
+    const searchDigits = digits.startsWith('7') ? digits.substring(1) : digits;
+    
+    console.log('🔍 searchClients search digits (without country code):', { searchDigits, length: searchDigits.length });
+    
     // Минимум 3 цифры для поиска (по требованиям)
-    if (digits.length < 3) {
+    if (searchDigits.length < 3) {
+      console.log('❌ searchClients: not enough digits, returning empty');
       return [];
     }
 
     try {
-      const results = await adminSearchClients({ phone: digits, limit: 10 });
+      console.log('📡 searchClients: calling API with:', { phone: searchDigits });
+      const results = await adminSearchClients({ phone: searchDigits, limit: 10 });
       
       return results.map((client: ClientSearchResultDto) => ({
+        // label для отображения в списке - с именем
         label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
+        // displayLabel для инпута после выбора - только телефон
+        displayLabel: client.phone,
         value: client.uuid,
         isCustom: false,
         // Сохраняем оригинальные данные для последующего использования
         rawData: client,
-      } as AutocompleteOption & { rawData: ClientSearchResultDto }));
+      } as AutocompleteOption & { rawData: ClientSearchResultDto; displayLabel?: string }));
     } catch (error) {
       console.error('Failed to search clients:', error);
       toastStore.showError('Не удалось выполнить поиск клиентов');
@@ -286,6 +300,7 @@ const CreateBookingModal = observer(({
 
   // Обработчик выбора клиента из автокомплита
   const handleClientSelect = useCallback(async (option: AutocompleteOption) => {
+    console.log('👤 handleClientSelect called:', { option });
     setPhoneAutocompleteValue(option);
     
     if (option.isCustom || !option.value) {
@@ -300,7 +315,10 @@ const CreateBookingModal = observer(({
 
     // Пользователь выбрал существующего клиента
     const clientData = (option as AutocompleteOption & { rawData: ClientSearchResultDto }).rawData;
+    console.log('👤 handleClientSelect clientData:', { clientData, hasRawData: !!clientData });
+    
     if (clientData) {
+      console.log('👤 Setting client name to:', clientData.name);
       setSelectedClient(clientData);
       setClientName(clientData.name ? String(clientData.name) : '');
       setPhone(clientData.phone);

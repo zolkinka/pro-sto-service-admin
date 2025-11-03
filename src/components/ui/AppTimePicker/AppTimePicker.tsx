@@ -146,7 +146,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
   };
 
   // Рендер dropdown
-  const renderDropdown = () => {
+  const renderDropdown = useCallback(() => {
     return (
       <div className="app-time-picker__dropdown" role="listbox">
         <div className="app-time-picker__options-container" ref={optionsContainerRef}>
@@ -170,7 +170,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
         </div>
       </div>
     );
-  };
+  }, [timeOptions, value, handleSelect]);
 
   const wrapperClassName = classNames('app-time-picker', {
     'app-time-picker_disabled': disabled,

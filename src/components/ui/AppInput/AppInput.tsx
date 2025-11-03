@@ -199,14 +199,14 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
         
         {/* Input - с маской или без */}
         {mask ? (
-          // @ts-expect-error - inputProps type conflict with IMask
+          // @ts-expect-error - value prop type mismatch with IMaskInput
           <IMaskInput
             key={`mask-${maskKey}`}
             mask={mask}
             unmask={unmask}
             lazy={lazy}
             placeholderChar={placeholderChar}
-            defaultValue={inputValue ? String(inputValue) : ''}
+            value={inputValue != null ? String(inputValue) : ''}
             onAccept={(value, maskRefInstance) => {
               const newValue = unmask ? maskRefInstance.unmaskedValue : value;
               if (!isControlled) {

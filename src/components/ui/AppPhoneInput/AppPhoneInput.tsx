@@ -1,12 +1,11 @@
 import React, { useState, forwardRef } from 'react';
-import { IMaskInput } from 'react-imask';
+import { AppInput } from '../AppInput';
 import type { AppPhoneInputProps } from './AppPhoneInput.types';
 import { extractPhoneDigits, validatePhone } from './utils/phoneHelpers';
-import './AppPhoneInput.css';
 
 /**
  * Специализированный компонент для ввода номера телефона с автоматическим форматированием
- * Использует react-imask для маски телефона
+ * Использует AppInput с маской для удобного ввода
  * 
  * @example
  * ```tsx
@@ -18,7 +17,7 @@ import './AppPhoneInput.css';
  * ```
  */
 const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
-  defaultValue,
+  value,
   onChange,
   onBlur,
   onPhoneComplete,
@@ -29,19 +28,18 @@ const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
   placeholder = '+7 (___) ___-__-__',
   disabled,
   autoFocus,
+  // countryCode - зарезервировано для будущего использования
   ...restProps
 }, ref) => {
   const [internalError, setInternalError] = useState<string>('');
-  const [maskValue, setMaskValue] = useState('');
   
-  const handleAccept = (value: string) => {
-    setMaskValue(value);
-    const cleanPhone = extractPhoneDigits(value);
+  const handleAccept = (maskedValue: string) => {
+    const cleanPhone = extractPhoneDigits(maskedValue);
     onChange?.(cleanPhone, {} as React.ChangeEvent<HTMLInputElement>);
   };
   
-  const handleComplete = (value: string) => {
-    const cleanPhone = extractPhoneDigits(value);
+  const handleComplete = (maskedValue: string) => {
+    const cleanPhone = extractPhoneDigits(maskedValue);
     onPhoneComplete?.(cleanPhone);
     onValidate?.(true, cleanPhone);
     setInternalError('');
@@ -68,27 +66,23 @@ const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
   };
   
   return (
-    <div className="app-phone-input">
-      {label && <label className="app-phone-input__label">{label}</label>}
-      <IMaskInput
-        mask="+{7} (000) 000-00-00"
-        lazy={false}
-        placeholderChar="_"
-        value={maskValue}
-        onAccept={handleAccept}
-        onComplete={handleComplete}
-        onBlur={handleBlur}
-        disabled={disabled}
-        autoFocus={autoFocus}
-        placeholder={placeholder}
-        inputRef={ref}
-        className={`app-phone-input__input ${error || internalError ? 'app-phone-input__input--error' : ''}`}
-        {...restProps}
-      />
-      {(error || internalError) && (
-        <div className="app-phone-input__error">{error || internalError}</div>
-      )}
-    </div>
+    <AppInput
+      ref={ref}
+      value={value}
+      label={label}
+      placeholder={placeholder}
+      disabled={disabled}
+      autoFocus={autoFocus}
+      error={error || internalError}
+      onBlur={handleBlur}
+      // Маска для телефона
+      mask="+{7} (000) 000-00-00"
+      lazy={false}
+      placeholderChar="_"
+      onAccept={handleAccept}
+      onComplete={handleComplete}
+      {...restProps}
+    />
   );
 });
 

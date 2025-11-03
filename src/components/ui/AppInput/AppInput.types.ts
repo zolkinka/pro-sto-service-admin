@@ -1,4 +1,5 @@
 import React from 'react';
+import type { InputMask } from 'imask';
 
 export interface AppInputProps {
   // Основные пропсы
@@ -44,6 +45,22 @@ export interface AppInputProps {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   
   'data-testid'?: string;
+  
+  // Поддержка маски ввода (например, для телефонов)
+  /** Маска для форматирования ввода (например, "+{7} (000) 000-00-00") */
+  mask?: string;
+  /** Возвращать ли размаскированное значение (true/false/'typed') */
+  unmask?: boolean | 'typed';
+  /** Символ-заполнитель для незаполненных позиций маски */
+  placeholderChar?: string;
+  /** Ленивое отображение маски (показывать только при фокусе) */
+  lazy?: boolean;
+  /** Callback при изменении значения маски */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onAccept?: (value: string, maskRef: InputMask<any>) => void;
+  /** Callback при завершении ввода маски */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onComplete?: (value: string, maskRef: InputMask<any>) => void;
 }
 
 // Типы для Styled Components

@@ -54,6 +54,13 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   filterOption,
   className,
   baseDropdownProps = {},
+  // Пропсы для маски (прокидываются в AppInput)
+  mask,
+  unmask,
+  placeholderChar,
+  lazy,
+  onAccept,
+  onComplete,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -290,6 +297,13 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
             inputProps={{
               onKeyDown: handleKeyDown,
             }}
+            // Пропсы для маски
+            mask={mask}
+            unmask={unmask}
+            placeholderChar={placeholderChar}
+            lazy={lazy}
+            onAccept={onAccept}
+            onComplete={onComplete}
           />
           <div className={arrowClassName} aria-hidden="true">
             <ChevronDownIcon color="#B2B1AE" size={20} />

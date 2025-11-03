@@ -1,5 +1,6 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import classNames from 'classnames';
+import { IMaskInput } from 'react-imask';
 import type { AppInputProps } from './AppInput.types';
 import {
   generateInputId,
@@ -52,6 +53,14 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
   
   // Для расширения специализированными компонентами
   inputProps,
+  
+  // Пропсы для маски
+  mask,
+  unmask,
+  placeholderChar = '_',
+  lazy = false,
+  onAccept,
+  onComplete,
   
   'data-testid': dataTestId,
 }, ref) => {
@@ -165,26 +174,62 @@ const AppInput = forwardRef<HTMLInputElement, AppInputProps>(({
           </span>
         )}
         
-        {/* Input */}
-        <input
-          ref={inputRef}
-          id={inputId}
-          name={name}
-          value={inputValue}
-          placeholder={placeholder}
-          disabled={disabled}
-          readOnly={readOnly}
-          autoComplete={autoComplete}
-          autoFocus={autoFocus}
-          className={fieldClasses}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onChange={handleChange}
-          aria-invalid={hasError}
-          aria-describedby={hasError ? errorId : undefined}
-          data-filled={isFilled}
-          {...inputProps}
-        />
+        {/* Input - с маской или без */}
+        {mask ? (
+          <IMaskInput
+            mask={mask}
+            unmask={unmask}
+            lazy={lazy}
+            placeholderChar={placeholderChar}
+            // @ts-expect-error - IMaskInput expects string, but we ensure it's a string
+            value={inputValue ? String(inputValue) : ''}
+            onAccept={(value, maskRef) => {
+              const newValue = unmask ? maskRef.unmaskedValue : value;
+              if (!isControlled) {
+                setInternalValue(newValue);
+              }
+              onChange?.(newValue, {} as React.ChangeEvent<HTMLInputElement>);
+              onAccept?.(value, maskRef);
+            }}
+            onComplete={(value, maskRef) => {
+              onComplete?.(value, maskRef);
+            }}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            disabled={disabled}
+            readOnly={readOnly}
+            autoComplete={autoComplete}
+            placeholder={placeholder}
+            inputRef={inputRef}
+            id={inputId}
+            name={name}
+            className={fieldClasses}
+            aria-invalid={hasError}
+            aria-describedby={hasError ? errorId : undefined}
+            data-filled={isFilled}
+            {...inputProps}
+          />
+        ) : (
+          <input
+            ref={inputRef}
+            id={inputId}
+            name={name}
+            value={inputValue}
+            placeholder={placeholder}
+            disabled={disabled}
+            readOnly={readOnly}
+            autoComplete={autoComplete}
+            autoFocus={autoFocus}
+            className={fieldClasses}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onChange={handleChange}
+            aria-invalid={hasError}
+            aria-describedby={hasError ? errorId : undefined}
+            data-filled={isFilled}
+            {...inputProps}
+          />
+        )}
         
         {/* Suffix */}
         {suffix && (

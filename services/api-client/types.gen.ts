@@ -591,6 +591,31 @@ export namespace CarResponseDto {
     }
 }
 
+export type CarSearchResultDto = {
+    /**
+     * UUID автомобиля
+     */
+    uuid: string;
+    /**
+     * Номер автомобиля
+     */
+    license_plate: string;
+    /**
+     * Марка автомобиля
+     */
+    make: string;
+    /**
+     * Модель автомобиля
+     */
+    model: string;
+    /**
+     * Информация о владельце автомобиля
+     */
+    client: {
+        [key: string]: unknown;
+    };
+};
+
 export type ClientAuthResponseDto = {
     accessToken: string;
     refreshToken: string;
@@ -648,6 +673,23 @@ export type ClientResponseDto = {
      * Дата последнего обновления записи
      */
     updated_at: string;
+};
+
+export type ClientSearchResultDto = {
+    /**
+     * UUID клиента
+     */
+    uuid: string;
+    /**
+     * Номер телефона клиента
+     */
+    phone: string;
+    /**
+     * Имя клиента
+     */
+    name?: {
+        [key: string]: unknown;
+    };
 };
 
 export type CreateBookingDto = {
@@ -2156,6 +2198,19 @@ export type ClientDeleteCarResponse = (void);
 
 export type ClientListBookingsResponse = (unknown);
 
+export type AdminSearchClientsData = {
+    /**
+     * Количество результатов
+     */
+    limit?: number;
+    /**
+     * Частичный или полный номер телефона для поиска (минимум 3 цифры)
+     */
+    phone: string;
+};
+
+export type AdminSearchClientsResponse = (Array<ClientSearchResultDto>);
+
 export type AdminFindOrCreateClientData = {
     requestBody: AdminFindOrCreateClientDto;
 };
@@ -2572,6 +2627,23 @@ export type CarsControllerGetModelsByMakeIdResponse = ({
         hasPrevPage?: boolean;
     };
 });
+
+export type AdminSearchCarsData = {
+    /**
+     * UUID клиента для фильтрации по конкретному клиенту
+     */
+    clientUuid?: string;
+    /**
+     * Частичный или полный номер автомобиля (минимум 2 символа)
+     */
+    licensePlate: string;
+    /**
+     * Количество результатов
+     */
+    limit?: number;
+};
+
+export type AdminSearchCarsResponse = (Array<CarSearchResultDto>);
 
 export type PaymentsControllerCreatePaymentData = {
     requestBody: CreatePaymentDto;

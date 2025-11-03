@@ -5,6 +5,7 @@ export type XDirectionMode = 'right' | 'left' | 'free-space' | 'right-priority' 
 
 export const DROPDOWN_CONTAINER_CLASS = 'dropdown-container';
 const MIN_SAFE_PADDING = 8;
+const DROPDOWN_GAP = 8; // Gap between toggle and dropdown
 
 export function getYDirection({ yDirectionMode, toggleRect, containerRect, dropdownHeight }: {
   yDirectionMode: YDirectionMode;
@@ -123,8 +124,8 @@ export function getYDirectionStyle({ toggleRect, yDirection, windowHeight }: {
   yDirection: YDirection;
   windowHeight: number;
 }) {
-  if (yDirection === 'top') return { bottom: `${windowHeight - toggleRect.top}px` } as const;
-  return { top: `${toggleRect.bottom}px` } as const;
+  if (yDirection === 'top') return { bottom: `${windowHeight - toggleRect.top + DROPDOWN_GAP}px` } as const;
+  return { top: `${toggleRect.bottom + DROPDOWN_GAP}px` } as const;
 }
 
 export function getDropdownDirectionStyles({

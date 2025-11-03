@@ -112,14 +112,14 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
       <div className="app-multi-select__input-container">
         <div className="app-multi-select__input-wrapper" onClick={handleInputClick}>
           <AppInput
-            value=""
+            value={value.length > 0 ? `Выбрано: ${value.length}` : ''}
             label={label}
-            placeholder={value.length > 0 ? '' : placeholder}
+            placeholder={placeholder}
             disabled={disabled}
             error={error}
             required={required}
             readOnly
-            roundedBottom={!isOpen}
+            inputProps={{ style: { cursor: 'pointer' } }}
           />
           
           {/* Теги поверх input */}

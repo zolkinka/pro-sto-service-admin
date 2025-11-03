@@ -127,7 +127,6 @@ export const AppDatePicker: React.FC<AppDatePickerProps> = ({
           error={error}
           required={required}
           readOnly
-          roundedBottom={!isOpen}
           iconLeft={<CalendarIcon color="#302F2D" size={20} />}
         />
       </div>

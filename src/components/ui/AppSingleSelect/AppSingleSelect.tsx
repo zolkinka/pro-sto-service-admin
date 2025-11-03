@@ -91,14 +91,14 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
       <div className="app-single-select__input-container">
         <div className="app-single-select__input-wrapper" onClick={handleInputClick}>
           <AppInput
-            value={value?.label || ''}
+            value={value?.label ?? ''}
             label={label}
             placeholder={placeholder}
             disabled={disabled}
             error={error}
             required={required}
             readOnly
-            roundedBottom={!isOpen}
+            inputProps={{ style: { cursor: 'pointer' } }}
           />
           {clearable && value && !disabled && (
             <button

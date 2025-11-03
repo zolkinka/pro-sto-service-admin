@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterData, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, AdminFindOrCreateClientData, AdminFindOrCreateClientResponse, AdminCreateOrUpdateCarData, AdminCreateOrUpdateCarResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, AdminBookingsGetListData, AdminBookingsGetListResponse, AdminCreateBookingData, AdminCreateBookingResponse, AdminBookingsGetPendingData, AdminBookingsGetPendingResponse, AdminBookingsGetOneData, AdminBookingsGetOneResponse, AdminBookingsUpdateData, AdminBookingsUpdateResponse, AdminBookingsUpdateStatusData, AdminBookingsUpdateStatusResponse, RegisterNotificationTokenData, RegisterNotificationTokenResponse, UnregisterNotificationTokenData, UnregisterNotificationTokenResponse, GetNotificationSettingsResponse, UpdateNotificationSettingsData, UpdateNotificationSettingsResponse, GetNotificationsData, GetNotificationsResponse, MarkNotificationAsReadData, MarkNotificationAsReadResponse, MarkAllNotificationsAsReadResponse, GetUnreadNotificationsCountResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookData, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
+import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterData, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, AdminSearchClientsData, AdminSearchClientsResponse, AdminFindOrCreateClientData, AdminFindOrCreateClientResponse, AdminCreateOrUpdateCarData, AdminCreateOrUpdateCarResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, AdminBookingsGetListData, AdminBookingsGetListResponse, AdminCreateBookingData, AdminCreateBookingResponse, AdminBookingsGetPendingData, AdminBookingsGetPendingResponse, AdminBookingsGetOneData, AdminBookingsGetOneResponse, AdminBookingsUpdateData, AdminBookingsUpdateResponse, AdminBookingsUpdateStatusData, AdminBookingsUpdateStatusResponse, RegisterNotificationTokenData, RegisterNotificationTokenResponse, UnregisterNotificationTokenData, UnregisterNotificationTokenResponse, GetNotificationSettingsResponse, UpdateNotificationSettingsData, UpdateNotificationSettingsResponse, GetNotificationsData, GetNotificationsResponse, MarkNotificationAsReadData, MarkNotificationAsReadResponse, MarkAllNotificationsAsReadResponse, GetUnreadNotificationsCountResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, AdminSearchCarsData, AdminSearchCarsResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookData, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
 
 /**
  * Hello World
@@ -502,6 +502,31 @@ export const clientListBookings = (): CancelablePromise<ClientListBookingsRespon
         url: '/api/clients/me/bookings',
         errors: {
             401: 'Не авторизован'
+        }
+    });
+};
+
+/**
+ * Поиск клиентов по номеру телефона
+ * Ищет клиентов по частичному или полному номеру телефона. Поиск регистронезависимый, без учета форматирования (только цифры). Требуется аутентификация админа.
+ * @param data The data for the request.
+ * @param data.phone Частичный или полный номер телефона для поиска (минимум 3 цифры)
+ * @param data.limit Количество результатов
+ * @returns ClientSearchResultDto Список найденных клиентов
+ * @throws ApiError
+ */
+export const adminSearchClients = (data: AdminSearchClientsData): CancelablePromise<AdminSearchClientsResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/clients/search',
+        query: {
+            phone: data.phone,
+            limit: data.limit
+        },
+        errors: {
+            400: 'Неверные параметры запроса',
+            401: 'Не авторизован',
+            403: 'Недостаточно прав (не админ)'
         }
     });
 };
@@ -1259,6 +1284,33 @@ export const carsControllerGetModelsByMakeId = (data: CarsControllerGetModelsByM
         },
         errors: {
             404: 'Марка автомобиля не найдена'
+        }
+    });
+};
+
+/**
+ * Поиск автомобилей по номеру
+ * Ищет автомобили по частичному или полному номеру. Поиск регистронезависимый, без учета пробелов. Опционально можно фильтровать по клиенту. Требуется аутентификация админа.
+ * @param data The data for the request.
+ * @param data.licensePlate Частичный или полный номер автомобиля (минимум 2 символа)
+ * @param data.clientUuid UUID клиента для фильтрации по конкретному клиенту
+ * @param data.limit Количество результатов
+ * @returns CarSearchResultDto Список найденных автомобилей
+ * @throws ApiError
+ */
+export const adminSearchCars = (data: AdminSearchCarsData): CancelablePromise<AdminSearchCarsResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/cars/search',
+        query: {
+            license_plate: data.licensePlate,
+            client_uuid: data.clientUuid,
+            limit: data.limit
+        },
+        errors: {
+            400: 'Неверные параметры запроса',
+            401: 'Не авторизован',
+            403: 'Недостаточно прав (не админ)'
         }
     });
 };

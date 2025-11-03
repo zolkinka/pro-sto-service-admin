@@ -3,70 +3,67 @@
   width: 100%;
 }
 
-.app-time-picker__input {
-  width: 100%;
-  height: 52px;
-  padding: 14px 12px;
-  font-family: 'Onest', sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  color: #302F2D;
-  background: #F9F8F5;
-  border: 1px solid #F4F3F0;
-  border-radius: 12px;
-  outline: none;
+.app-time-picker_disabled {
+  opacity: 0.6;
+}
+
+.app-time-picker__input-container {
+  position: relative;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.app-time-picker__input::placeholder {
-  color: #B2B1AE;
+.app-time-picker__input-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-.app-time-picker__input:hover:not(.app-time-picker__input_disabled) {
-  border-color: #D4D2CF;
+.app-time-picker__arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: transform 0.2s;
+  z-index: 1;
 }
 
-.app-time-picker__input:focus {
-  border-color: #302F2D;
-}
-
-.app-time-picker__input_disabled {
-  background: #F9F8F5;
-  color: #B5B3B0;
-  cursor: not-allowed;
-  border-color: #E8E6E3;
+.app-time-picker__arrow_open {
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .app-time-picker__dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  max-height: 240px;
-  overflow-y: auto;
+  position: relative;
+  width: 100%;
   background: #FFFFFF;
   border: 1px solid #E8E6E3;
   border-radius: 12px;
   box-shadow: 0px 4px 12px rgba(30, 27, 21, 0.08);
-  z-index: 1000;
+  overflow: hidden;
+}
+
+.app-time-picker__options-container {
+  max-height: 280px;
+  overflow-y: auto;
   padding: 4px;
 }
 
-.app-time-picker__dropdown::-webkit-scrollbar {
+.app-time-picker__options-container::-webkit-scrollbar {
   width: 6px;
 }
 
-.app-time-picker__dropdown::-webkit-scrollbar-track {
+.app-time-picker__options-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.app-time-picker__dropdown::-webkit-scrollbar-thumb {
+.app-time-picker__options-container::-webkit-scrollbar-thumb {
   background: #D4D2CF;
   border-radius: 3px;
 }
 
-.app-time-picker__dropdown::-webkit-scrollbar-thumb:hover {
+.app-time-picker__options-container::-webkit-scrollbar-thumb:hover {
   background: #B5B3B0;
 }
 
@@ -87,8 +84,4 @@
 .app-time-picker__option_selected {
   background: #F4F3F0;
   font-weight: 500;
-}
-
-.app-time-picker_disabled {
-  cursor: not-allowed;
 }

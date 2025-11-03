@@ -687,9 +687,7 @@ export type ClientSearchResultDto = {
     /**
      * Имя клиента
      */
-    name?: {
-        [key: string]: unknown;
-    };
+    name?: string;
 };
 
 export type CreateBookingDto = {
@@ -1522,9 +1520,13 @@ export type RefreshResponseDto = {
      */
     message: string;
     /**
-     * Новый JWT токен доступа
+     * Новый JWT access токен
      */
     accessToken: string;
+    /**
+     * Новый JWT refresh токен
+     */
+    refreshToken: string;
 };
 
 export type RegisterDto = {
@@ -2634,9 +2636,9 @@ export type AdminSearchCarsData = {
      */
     clientUuid?: string;
     /**
-     * Частичный или полный номер автомобиля (минимум 2 символа)
+     * Частичный или полный номер автомобиля (минимум 2 символа). Опционально, если передан client_uuid
      */
-    licensePlate: string;
+    licensePlate?: string;
     /**
      * Количество результатов
      */

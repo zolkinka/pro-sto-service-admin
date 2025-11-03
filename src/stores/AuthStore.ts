@@ -142,6 +142,8 @@ export class AuthStore {
         // authRefresh возвращает только новый accessToken
         this.accessToken = response.accessToken;
         localStorage.setItem('accessToken', response.accessToken);
+        this.refreshToken = response.refreshToken;
+        localStorage.setItem('refreshToken', response.refreshToken);
       });
 
       // Обновляем токен в OpenAPI на новый access token

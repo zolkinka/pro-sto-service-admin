@@ -86,9 +86,9 @@ export const authGetCurrentUser = (): CancelablePromise<AuthGetCurrentUserRespon
 };
 
 /**
- * Обновление токена
- * Обновляет JWT токен при активности пользователя. Старый токен добавляется в blacklist.
- * @returns RefreshResponseDto Токен успешно обновлен
+ * Обновление токенов
+ * Обновляет пару токенов (accessToken и refreshToken) используя действующий refreshToken. Старый refreshToken добавляется в blacklist.
+ * @returns RefreshResponseDto Токены успешно обновлены
  * @throws ApiError
  */
 export const authRefresh = (): CancelablePromise<AuthRefreshResponse> => {
@@ -96,7 +96,7 @@ export const authRefresh = (): CancelablePromise<AuthRefreshResponse> => {
         method: 'POST',
         url: '/api/auth/refresh',
         errors: {
-            401: 'Токен недействителен или отсутствует'
+            401: 'RefreshToken недействителен или истёк'
         }
     });
 };
@@ -1292,13 +1292,13 @@ export const carsControllerGetModelsByMakeId = (data: CarsControllerGetModelsByM
  * Поиск автомобилей по номеру
  * Ищет автомобили по частичному или полному номеру. Поиск регистронезависимый, без учета пробелов. Опционально можно фильтровать по клиенту. Требуется аутентификация админа.
  * @param data The data for the request.
- * @param data.licensePlate Частичный или полный номер автомобиля (минимум 2 символа)
+ * @param data.licensePlate Частичный или полный номер автомобиля (минимум 2 символа). Опционально, если передан client_uuid
  * @param data.clientUuid UUID клиента для фильтрации по конкретному клиенту
  * @param data.limit Количество результатов
  * @returns CarSearchResultDto Список найденных автомобилей
  * @throws ApiError
  */
-export const adminSearchCars = (data: AdminSearchCarsData): CancelablePromise<AdminSearchCarsResponse> => {
+export const adminSearchCars = (data: AdminSearchCarsData = {}): CancelablePromise<AdminSearchCarsResponse> => {
     return __request(OpenAPI, {
         method: 'GET',
         url: '/api/admin/cars/search',

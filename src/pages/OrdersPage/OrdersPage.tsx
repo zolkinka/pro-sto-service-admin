@@ -169,8 +169,10 @@ const OrdersPage = observer(() => {
     setCreateBookingTime('');
   };
 
-  // Вычисляем начало недели для передачи в WeekDaysRow и CalendarGrid
-  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  // Мемоизируем начало недели, чтобы избежать лишних ререндеров
+  const weekStart = useMemo(() => {
+    return startOfWeek(currentDate, { weekStartsOn: 1 });
+  }, [currentDate]);
   
   // Получаем первый доступный основной сервис для загрузки слотов
   const selectedService = servicesStore.mainServices[0];

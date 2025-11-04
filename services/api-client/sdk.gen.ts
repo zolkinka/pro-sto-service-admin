@@ -651,8 +651,10 @@ export const serviceCenterGetOne = (data: ServiceCenterGetOneData): CancelablePr
  * Возвращает список доступных временных слотов для записи на указанную дату и услугу
  * @param data The data for the request.
  * @param data.uuid Уникальный идентификатор сервисного центра
- * @param data.date Дата для поиска доступных слотов
  * @param data.serviceUuid Уникальный идентификатор услуги
+ * @param data.date Дата для поиска доступных слотов (используется если не указаны dateFrom/dateTo)
+ * @param data.dateFrom Начальная дата диапазона для поиска слотов
+ * @param data.dateTo Конечная дата диапазона для поиска слотов
  * @returns string Список доступных слотов успешно получен
  * @throws ApiError
  */
@@ -665,6 +667,8 @@ export const serviceCenterGetSlots = (data: ServiceCenterGetSlotsData): Cancelab
         },
         query: {
             date: data.date,
+            dateFrom: data.dateFrom,
+            dateTo: data.dateTo,
             service_uuid: data.serviceUuid
         },
         errors: {

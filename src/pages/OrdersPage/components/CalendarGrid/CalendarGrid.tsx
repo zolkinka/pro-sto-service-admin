@@ -52,6 +52,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 }) => {
   // Состояние для хранения доступных слотов
   const [availableSlots, setAvailableSlots] = useState<AvailableSlots>({});
+  // Используем useRef вместо useState для отслеживания загрузки, чтобы не вызывать ререндер
+  const isLoadingSlotsRef = React.useRef(false);
 
   // Генерируем массив часов для отображения
   const hours: number[] = [];
@@ -61,11 +63,18 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   // Функция для загрузки слотов для всей недели
   const loadAvailableSlots = useCallback(async () => {
+    // Предотвращаем повторную загрузку, если уже идет загрузка
+    if (isLoadingSlotsRef.current) {
+      console.log('Slots are already loading, skipping duplicate request');
+      return;
+    }
+
     if (!serviceCenterUuid || !serviceUuid) {
       console.log('Missing serviceCenterUuid or serviceUuid, skipping slots loading');
       return;
     }
 
+    isLoadingSlotsRef.current = true;
     const slots: AvailableSlots = {};
 
     try {
@@ -101,6 +110,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       setAvailableSlots(slots);
     } catch (error) {
       console.error('Failed to load available slots:', error);
+    } finally {
+      isLoadingSlotsRef.current = false;
     }
   }, [weekStart, serviceCenterUuid, serviceUuid]);
 

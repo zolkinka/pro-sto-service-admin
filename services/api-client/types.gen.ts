@@ -2297,9 +2297,17 @@ export type ServiceCenterGetOneResponse = (DetailedServiceCenterResponseDto);
 
 export type ServiceCenterGetSlotsData = {
     /**
-     * Дата для поиска доступных слотов
+     * Дата для поиска доступных слотов (используется если не указаны dateFrom/dateTo)
      */
-    date: string;
+    date?: string;
+    /**
+     * Начальная дата диапазона для поиска слотов
+     */
+    dateFrom?: string;
+    /**
+     * Конечная дата диапазона для поиска слотов
+     */
+    dateTo?: string;
     /**
      * Уникальный идентификатор услуги
      */

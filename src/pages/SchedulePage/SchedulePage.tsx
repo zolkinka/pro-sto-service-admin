@@ -67,17 +67,6 @@ const SchedulePage: React.FC = observer(() => {
 
   return (
     <div className="schedule-page">
-      <h1 className="schedule-page__title">Время работы</h1>
-      
-      <div className="schedule-page__tabs">
-        <button className="schedule-page__tab schedule-page__tab_active">
-          Основное расписание
-        </button>
-        <button className="schedule-page__tab" disabled>
-          Выходные и праздники
-        </button>
-      </div>
-
       <div className="schedule-page__container">
         {isEditing ? (
           <OperatingHoursForm

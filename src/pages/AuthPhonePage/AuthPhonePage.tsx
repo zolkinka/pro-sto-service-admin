@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import { authStore } from '@/stores/AuthStore';
 import AppPhoneInput from '@/components/ui/AppPhoneInput';
+import type { AppInputRef } from '@/components/ui/AppInput';
 import { AppButton } from '@/components/ui/AppButton';
 import AppLogo from '@/components/ui/AppLogo';
 import { ROUTES } from '@/constants/routes';
@@ -12,7 +13,7 @@ import './AuthPhonePage.css';
 const AuthPhonePage: React.FC = observer(() => {
   const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
-  const phoneInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<AppInputRef>(null);
 
   const handlePhoneChange = () => {
     // Телефон берётся напрямую из ref, параметр value не нужен

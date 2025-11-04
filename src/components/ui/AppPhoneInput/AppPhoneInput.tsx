@@ -1,5 +1,6 @@
 import React, { useState, forwardRef } from 'react';
 import { AppInput } from '../AppInput';
+import type { AppInputRef } from '../AppInput';
 import type { AppPhoneInputProps } from './AppPhoneInput.types';
 import { extractPhoneDigits, validatePhone } from './utils/phoneHelpers';
 
@@ -16,7 +17,7 @@ import { extractPhoneDigits, validatePhone } from './utils/phoneHelpers';
  * />
  * ```
  */
-const AppPhoneInput = forwardRef<HTMLInputElement, AppPhoneInputProps>(({
+const AppPhoneInput = forwardRef<AppInputRef, AppPhoneInputProps>(({
   value,
   onChange,
   onBlur,

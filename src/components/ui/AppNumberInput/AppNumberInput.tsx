@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback } from 'react';
 import AppInput from '../AppInput';
+import type { AppInputRef } from '../AppInput';
 import type { AppNumberInputProps } from './AppNumberInput.types';
 
 /**
@@ -12,7 +13,7 @@ import type { AppNumberInputProps } from './AppNumberInput.types';
  * - Поддержка min/max ограничений
  * - Все возможности AppInput (label, error, suffix и т.д.)
  */
-const AppNumberInput = forwardRef<HTMLInputElement, AppNumberInputProps>(({
+const AppNumberInput = forwardRef<AppInputRef, AppNumberInputProps>(({
   value,
   defaultValue,
   onChange,

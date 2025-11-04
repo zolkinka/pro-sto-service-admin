@@ -10,6 +10,7 @@ import './SchedulePage.css';
 interface OperatingHoursFormProps {
   schedule: OperatingHoursResponseDto[];
   onSave: (data: UpdateRegularScheduleDto) => Promise<void>;
+  onOpenHolidayModal: () => void;
 }
 
 interface DayScheduleFormData {
@@ -23,7 +24,11 @@ interface FormData {
   weekSchedule: Record<string, DayScheduleFormData>;
 }
 
-const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSave }) => {
+const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ 
+  schedule, 
+  onSave,
+  onOpenHolidayModal 
+}) => {
   const [formData, setFormData] = useState<FormData>(() => {
     const initialWeekSchedule: Record<string, DayScheduleFormData> = {};
     
@@ -213,7 +218,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({ schedule, onSav
           variant="secondary"
           onlyIcon
           iconLeft={<span style={{ fontSize: '20px' }}>+</span>}
-          onClick={() => console.log('Отметить выходной день')}
+          onClick={onOpenHolidayModal}
         />
       </div>
 

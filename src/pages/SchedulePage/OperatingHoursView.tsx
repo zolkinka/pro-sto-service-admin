@@ -1,4 +1,6 @@
 import React from 'react';
+import { format, parseISO } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import AppButton from '@/components/ui/AppButton/AppButton';
 import { EditIcon } from '@/components/ui/icons';
 import type { OperatingHoursResponseDto } from '../../../services/api-client/types.gen';
@@ -6,10 +8,17 @@ import { formatTime, DAY_NAMES, DAYS_ORDER } from './utils';
 
 interface OperatingHoursViewProps {
   schedule: OperatingHoursResponseDto[];
+  specialDates: OperatingHoursResponseDto[];
   onEdit: () => void;
+  onOpenHolidayModal: () => void;
 }
 
-const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ schedule, onEdit }) => {
+const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ 
+  schedule, 
+  specialDates,
+  onEdit,
+  onOpenHolidayModal 
+}) => {
   // Создаем мапу дней для быстрого доступа
   const scheduleMap = schedule.reduce((acc, day) => {
     if (day.day_of_week) {
@@ -17,6 +26,26 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ schedule, onEdi
     }
     return acc;
   }, {} as Record<string, OperatingHoursResponseDto>);
+
+  // Форматируем специальные даты для отображения
+  const formatSpecialDates = () => {
+    if (!specialDates || specialDates.length === 0) {
+      return 'Не указаны';
+    }
+
+    return specialDates
+      .filter(d => d.specific_date && d.is_closed)
+      .map(d => {
+        try {
+          const date = parseISO(d.specific_date!);
+          return format(date, 'd MMMM', { locale: ru });
+        } catch (error) {
+          console.error('Error parsing date:', error);
+          return d.specific_date;
+        }
+      })
+      .join(', ');
+  };
 
   return (
     <div className="schedule-page__view-wrapper">
@@ -60,13 +89,13 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ schedule, onEdi
         </div>
       </div>
 
-      {/* Выходные и праздники (пока пустой раздел) */}
+      {/* Выходные и праздники */}
       <div className="schedule-page__view-section">
         <div className="schedule-page__view-section-content">
           <div className="schedule-page__day-schedule-list">
             <div className="schedule-page__day-schedule-item">
               <p className="schedule-page__day-name">Выходные</p>
-              <p className="schedule-page__day-time">10 апреля, 8 ноября</p>
+              <p className="schedule-page__day-time">{formatSpecialDates()}</p>
             </div>
           </div>
         </div>
@@ -74,7 +103,7 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ schedule, onEdi
           <AppButton 
             size="M" 
             variant="secondary" 
-            onClick={() => {}}
+            onClick={onOpenHolidayModal}
             className="schedule-page__edit-button"
             onlyIcon
             iconLeft={<EditIcon />}

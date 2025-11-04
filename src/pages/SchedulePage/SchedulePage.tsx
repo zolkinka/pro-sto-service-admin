@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { format } from 'date-fns';
 import { useStores } from '@/hooks/useStores';
 import OperatingHoursView from './OperatingHoursView';
 import OperatingHoursForm from './OperatingHoursForm';
+import HolidayPickerModal from './HolidayPickerModal';
 import type { UpdateRegularScheduleDto } from '../../../services/api-client/types.gen';
 import './SchedulePage.css';
 
 const SchedulePage: React.FC = observer(() => {
   const { operatingHoursStore, authStore } = useStores();
   const [isEditing, setIsEditing] = useState(false);
+  const [isHolidayModalOpen, setIsHolidayModalOpen] = useState(false);
   
   const serviceCenterUuid = authStore.user?.service_center_uuid;
 
@@ -42,6 +45,43 @@ const SchedulePage: React.FC = observer(() => {
     }
   };
 
+  const handleOpenHolidayModal = () => {
+    setIsHolidayModalOpen(true);
+  };
+
+  const handleCloseHolidayModal = () => {
+    setIsHolidayModalOpen(false);
+  };
+
+  const handleSaveHolidays = async (dates: Date[]) => {
+    if (!serviceCenterUuid) {
+      return;
+    }
+
+    try {
+      // Создаем специальные даты для каждой выбранной даты
+      for (const date of dates) {
+        const formattedDate = format(date, 'yyyy-MM-dd');
+        
+        // Проверяем, существует ли уже эта дата в specialDates
+        const existingDate = operatingHoursStore.specialDates.find(
+          d => d.specific_date === formattedDate
+        );
+        
+        // Если дата не существует, создаем её
+        if (!existingDate) {
+          await operatingHoursStore.createSpecialDate(serviceCenterUuid, {
+            specific_date: formattedDate,
+            is_closed: true,
+            timezone: operatingHoursStore.timezone,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save holidays:', error);
+    }
+  };
+
   if (!serviceCenterUuid) {
     return (
       <div className="schedule-page">
@@ -72,14 +112,26 @@ const SchedulePage: React.FC = observer(() => {
           <OperatingHoursForm
             schedule={operatingHoursStore.regularSchedule}
             onSave={handleSave}
+            onOpenHolidayModal={handleOpenHolidayModal}
           />
         ) : (
           <OperatingHoursView
             schedule={operatingHoursStore.regularSchedule}
+            specialDates={operatingHoursStore.specialDates}
             onEdit={handleEdit}
+            onOpenHolidayModal={handleOpenHolidayModal}
           />
         )}
       </div>
+      
+      <HolidayPickerModal
+        isOpen={isHolidayModalOpen}
+        onClose={handleCloseHolidayModal}
+        onSave={handleSaveHolidays}
+        existingHolidays={operatingHoursStore.specialDates
+          .filter(d => d.specific_date)
+          .map(d => new Date(d.specific_date!))}
+      />
     </div>
   );
 });

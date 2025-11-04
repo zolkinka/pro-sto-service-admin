@@ -1,0 +1,195 @@
+.holiday-picker-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-modal, 1000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.holiday-picker-modal__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(48, 47, 45, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.holiday-picker-modal__content {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0px 2px 4px 0px rgba(30, 27, 21, 0.05);
+  max-width: 455px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.holiday-picker-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 48px 24px;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.holiday-picker-modal__title {
+  font-family: var(--font-family-main);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.holiday-picker-modal__close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-gray-800);
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0;
+}
+
+.holiday-picker-modal__close:hover {
+  color: var(--color-gray-900);
+}
+
+.holiday-picker-modal__body {
+  padding: 24px 48px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.holiday-picker-modal__footer {
+  display: flex;
+  gap: 12px;
+  padding: 24px 48px 48px;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.holiday-picker-modal__footer button {
+  flex: 1;
+}
+
+/* Calendar Styles */
+.holiday-picker-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.holiday-picker-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.holiday-picker-calendar__nav-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-200);
+  border: none;
+  border-radius: 20px;
+  color: var(--color-gray-900);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.holiday-picker-calendar__nav-button:hover {
+  background: var(--color-gray-300);
+}
+
+.holiday-picker-calendar__month {
+  font-family: var(--font-family-main);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-gray-800);
+  text-transform: capitalize;
+}
+
+.holiday-picker-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.holiday-picker-calendar__weekday {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-main);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-800);
+}
+
+.holiday-picker-calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.holiday-picker-calendar__day {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-main);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+  background: transparent;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.holiday-picker-calendar__day:hover:not(.holiday-picker-calendar__day_empty):not(.holiday-picker-calendar__day_selected) {
+  background: var(--color-gray-100);
+}
+
+.holiday-picker-calendar__day_selected {
+  background: var(--color-gray-900);
+  color: #FFFFFF;
+}
+
+.holiday-picker-calendar__day_selected:hover {
+  background: var(--color-gray-800);
+}
+
+.holiday-picker-calendar__day_other-month {
+  color: var(--color-gray-500);
+}
+
+.holiday-picker-calendar__day_empty {
+  cursor: default;
+  pointer-events: none;
+}

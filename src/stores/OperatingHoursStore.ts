@@ -1,9 +1,15 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import type { RootStore } from './RootStore';
-import { operatingHoursGetAll, operatingHoursUpdateRegular } from '../../services/api-client';
+import { 
+  operatingHoursGetAll, 
+  operatingHoursUpdateRegular,
+  operatingHoursCreateSpecial,
+  operatingHoursDelete
+} from '../../services/api-client';
 import type { 
   OperatingHoursResponseDto, 
-  UpdateRegularScheduleDto 
+  UpdateRegularScheduleDto,
+  CreateSpecialDateDto
 } from '../../services/api-client/types.gen';
 
 export class OperatingHoursStore {
@@ -81,6 +87,68 @@ export class OperatingHoursStore {
       this.rootStore?.toastStore.showError('Не удалось сохранить расписание');
       
       console.error('Error updating regular schedule:', error);
+      throw error;
+    }
+  }
+
+  async createSpecialDate(serviceCenterUuid: string, data: CreateSpecialDateDto) {
+    this.loading = true;
+    this.error = null;
+    
+    try {
+      await operatingHoursCreateSpecial({ 
+        serviceCenterUuid, 
+        requestBody: data 
+      });
+      
+      this.rootStore?.toastStore.showSuccess('Выходной день добавлен');
+      
+      // Перезагружаем данные после добавления
+      await this.loadOperatingHours(serviceCenterUuid);
+      
+      runInAction(() => {
+        this.loading = false;
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.error = 'Ошибка добавления выходного дня';
+        this.loading = false;
+      });
+      
+      this.rootStore?.toastStore.showError('Не удалось добавить выходной день');
+      
+      console.error('Error creating special date:', error);
+      throw error;
+    }
+  }
+
+  async deleteSpecialDate(serviceCenterUuid: string, uuid: string) {
+    this.loading = true;
+    this.error = null;
+    
+    try {
+      await operatingHoursDelete({ 
+        serviceCenterUuid, 
+        uuid 
+      });
+      
+      this.rootStore?.toastStore.showSuccess('Выходной день удален');
+      
+      // Перезагружаем данные после удаления
+      await this.loadOperatingHours(serviceCenterUuid);
+      
+      runInAction(() => {
+        this.loading = false;
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.error = 'Ошибка удаления выходного дня';
+        this.loading = false;
+      });
+      
+      this.rootStore?.toastStore.showError('Не удалось удалить выходной день');
+      
+      console.error('Error deleting special date:', error);
       throw error;
     }
   }

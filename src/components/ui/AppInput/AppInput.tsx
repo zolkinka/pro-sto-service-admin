@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect, useMemo } from 'react';
 import classNames from 'classnames';
 import { IMaskInput } from 'react-imask';
 import type { AppInputProps } from './AppInput.types';
@@ -75,6 +75,10 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
   const [maskKey, setMaskKey] = useState(0);
   // Запоминаем последнее значение для сравнения
   const lastValueRef = useRef(value);
+  // Флаг для отслеживания программных обновлений (из props)
+  const isProgrammaticUpdateRef = useRef(false);
+  // Ссылка на IMask instance для принудительного обновления значения
+  const maskInstanceRef = useRef<any>(null);
   
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -82,15 +86,42 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
   useImperativeHandle(ref, () => ({
     ...inputRef.current!,
     updateMaskKey: () => {
-      console.log('🔄 AppInput: updateMaskKey called');
+      console.log('🔄 AppInput: updateMaskKey called', { value, maskInstance: !!maskInstanceRef.current });
+      isProgrammaticUpdateRef.current = true;
       lastValueRef.current = value;
-      setMaskKey(prev => prev + 1);
+      
+      // Если есть maskInstance, используем updateValue() для обновления
+      if (maskInstanceRef.current && value !== undefined) {
+        console.log('🔄 AppInput: calling maskInstance.value = ...', { value });
+        // IMask instance имеет свойство value, которое нужно установить напрямую
+        maskInstanceRef.current.value = String(value);
+        console.log('🔄 AppInput: after setting, maskInstance.value =', maskInstanceRef.current.value);
+      } else {
+        // Иначе перерисовываем компонент через изменение key
+        setMaskKey(prev => prev + 1);
+      }
     },
   }));
   
+  // Отслеживаем изменения value из props для маски
+  useEffect(() => {
+    if (mask && value !== undefined && value !== lastValueRef.current) {
+      console.log('🔄 AppInput: value changed from props', { from: lastValueRef.current, to: value });
+      isProgrammaticUpdateRef.current = true;
+      lastValueRef.current = value;
+    }
+  }, [value, mask]);
+  
   // Определяем, является ли компонент controlled или uncontrolled
   const isControlled = value !== undefined;
-  const inputValue = isControlled ? value : internalValue;
+  const inputValue = isControlled ? (value as string) : internalValue;
+  
+  // Prepare masked input value
+  const maskedInputValue = useMemo<string | undefined>(() => {
+    if (!inputValue) return undefined;
+    // Explicit type assertion since we know inputValue is a string from our props
+    return String(inputValue) as string;
+  }, [inputValue]);
   
   // Генерируем ID если не предоставлен
   const inputId = id || generateInputId('app-input');
@@ -199,16 +230,28 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
         
         {/* Input - с маской или без */}
         {mask ? (
-          // @ts-expect-error - value prop type mismatch with IMaskInput
           <IMaskInput
             key={`mask-${maskKey}`}
             mask={mask}
             unmask={unmask}
             lazy={lazy}
             placeholderChar={placeholderChar}
-            value={inputValue != null ? String(inputValue) : ''}
+            // @ts-expect-error - type mismatch between inputValue and IMaskInput value prop
+            value={maskedInputValue}
             onAccept={(value, maskRefInstance) => {
+              // Сохраняем ссылку на maskInstance для использования в updateMaskKey
+              maskInstanceRef.current = maskRefInstance;
+              
+              // Если это программное обновление (из props), не вызываем onChange
+              if (isProgrammaticUpdateRef.current) {
+                console.log('🔄 AppInput: skipping onChange due to programmatic update');
+                isProgrammaticUpdateRef.current = false;
+                onAccept?.(value, maskRefInstance);
+                return;
+              }
+              
               const newValue = unmask ? maskRefInstance.unmaskedValue : value;
+              console.log('⌨️ AppInput: user typed, calling onChange', { value, newValue, unmask });
               if (!isControlled) {
                 setInternalValue(newValue);
               }

@@ -70,6 +70,8 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   const inputRef = useRef<AppInputRef>(null);
   // Флаг для предотвращения повторного вызова onChange в handleBlur после выбора
   const justSelectedRef = useRef(false);
+  // Флаг для предотвращения поиска после выбора опции
+  const isSelectingRef = useRef(false);
 
   // Debounced input value для асинхронного поиска
   const debouncedInputValue = useDebounce(inputValue, searchDebounce);
@@ -126,6 +128,28 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   // Асинхронный поиск
   useEffect(() => {
     if (!onSearch) return;
+    
+    // Если сейчас происходит выбор опции, пропускаем поиск
+    if (isSelectingRef.current) {
+      console.log('🚫 AppAutocomplete: skipping search during option selection');
+      isSelectingRef.current = false; // Сбрасываем флаг
+      return;
+    }
+    
+    // Если debouncedInputValue совпадает с displayLabel выбранного value,
+    // значит это результат синхронизации после выбора, а не пользовательский ввод
+    if (value && (value as SelectOption & { displayLabel?: string }).displayLabel) {
+      const displayLabel = (value as SelectOption & { displayLabel?: string }).displayLabel!;
+      // Убираем все символы кроме цифр и +
+      const normalizedDebounced = debouncedInputValue.replace(/[^\d+]/g, '');
+      const normalizedDisplay = displayLabel.replace(/[^\d+]/g, '');
+      
+      if (normalizedDebounced === normalizedDisplay) {
+        console.log('🚫 AppAutocomplete: skipping search - inputValue matches selected value displayLabel');
+        return;
+      }
+    }
+    
     if (debouncedInputValue.length < minSearchLength) {
       setAsyncOptions([]);
       setIsLoading(false);
@@ -146,16 +170,19 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     };
 
     fetchOptions();
-  }, [debouncedInputValue, onSearch, minSearchLength]);
+  }, [debouncedInputValue, onSearch, minSearchLength, value]);
 
   // Обработчик изменения инпута
   const handleInputChange = useCallback((newValue: string) => {
-    console.log('⌨️ AppAutocomplete: handleInputChange called:', { newValue });
-    // Если используется маска, не обновляем inputValue здесь
-    // т.к. это будет сделано в handleMaskAccept
-    if (!mask) {
-      setInputValue(newValue);
+    console.log('⌨️ AppAutocomplete: handleInputChange called:', { newValue, mask });
+    // Если используется маска, ПОЛНОСТЬЮ ИГНОРИРУЕМ это событие
+    // т.к. всё будет обработано в handleMaskAccept
+    if (mask) {
+      console.log('⌨️ AppAutocomplete: ignoring onChange because mask is used');
+      return;
     }
+    
+    setInputValue(newValue);
     setHighlightedIndex(-1);
     
     // Открываем dropdown при вводе
@@ -172,9 +199,11 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   // Обработчик onAccept для маски
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMaskAccept = useCallback((maskedValue: string, maskRef: any) => {
-    console.log('🎭 AppAutocomplete: handleMaskAccept called:', { maskedValue });
-    // Обновляем inputValue с masked значением
-    setInputValue(maskedValue);
+    console.log('🎭 AppAutocomplete: handleMaskAccept called:', { maskedValue, currentInputValue: inputValue });
+    // Обновляем inputValue только если значение изменилось
+    if (maskedValue !== inputValue) {
+      setInputValue(maskedValue);
+    }
     setHighlightedIndex(-1);
     
     // Открываем dropdown при вводе
@@ -184,10 +213,13 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     
     // Вызываем оригинальный onAccept если он передан
     onAccept?.(maskedValue, maskRef);
-  }, [isOpen, onAccept]);
+  }, [isOpen, onAccept, inputValue]);
 
   // Обработчик выбора опции
   const handleSelect = useCallback((selectedOption: SelectOption) => {
+    // Устанавливаем флаг что сейчас происходит выбор (предотвращаем поиск)
+    isSelectingRef.current = true;
+    
     // Используем displayLabel если он есть (для масок), иначе label
     const valueToDisplay = (selectedOption as SelectOption & { displayLabel?: string }).displayLabel || selectedOption.label;
     console.log('✅ AppAutocomplete: handleSelect', {
@@ -195,7 +227,11 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
       displayLabel: (selectedOption as SelectOption & { displayLabel?: string }).displayLabel,
       valueToDisplay,
     });
+    
+    // Устанавливаем inputValue немедленно для отзывчивости UI
     setInputValue(valueToDisplay);
+    
+    // Вызываем onChange чтобы родитель обновил value prop
     onChange?.(selectedOption);
     setIsOpen(false);
     setHighlightedIndex(-1);
@@ -204,11 +240,13 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     justSelectedRef.current = true;
     
     // Если используется маска, обновляем maskKey в AppInput
+    // после того как React обновит value prop
     if (mask && inputRef.current) {
-      // Используем setTimeout чтобы дать время React обновить value в AppInput
+      console.log('📍 AppAutocomplete: scheduling updateMaskKey call');
       setTimeout(() => {
+        console.log('🔄 AppAutocomplete: calling updateMaskKey');
         inputRef.current?.updateMaskKey();
-      }, 0);
+      }, 50); // Задержка для обновления props
     }
   }, [onChange, mask]);
 

@@ -397,6 +397,7 @@ export const PhoneMaskUnmaskTyped: Story = {
       
       return results.map(client => ({
         label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
+        displayLabel: client.phone, // Только телефон для инпута после выбора
         value: client.uuid,
         isCustom: false,
       }));

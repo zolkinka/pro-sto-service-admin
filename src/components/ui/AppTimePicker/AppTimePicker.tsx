@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import classNames from 'classnames';
 import { AppBaseDropdown } from '../AppBaseDropdown';
-import { AppInput } from '../AppInput';
+import { AppInput, type AppInputRef } from '../AppInput';
 import { ChevronDownIcon } from '../AppSingleSelect/ChevronDownIcon';
 import type { AppTimePickerProps } from './AppTimePicker.types';
 import './AppTimePicker.css';
@@ -30,6 +30,8 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const optionsContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<AppInputRef>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Генерация списка времени с шагом 15 минут или использование доступных слотов
   const timeOptions: string[] = useMemo(() => {
@@ -68,6 +70,11 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
     e.preventDefault();
     if (!disabled) {
       setIsOpen(prev => !prev);
+      // Фокусируем input через DOM
+      setTimeout(() => {
+        const input = containerRef.current?.querySelector('input');
+        input?.focus();
+      }, 0);
     }
   }, [disabled]);
 
@@ -75,6 +82,18 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
   const handleInputFocus = useCallback(() => {
     if (!disabled && !isOpen) {
       setIsOpen(true);
+    }
+  }, [disabled, isOpen]);
+
+  // Обработчик клика на контейнер input (открытие dropdown)
+  const handleContainerClick = useCallback(() => {
+    if (!disabled && !isOpen) {
+      setIsOpen(true);
+      // Фокусируем input через DOM
+      setTimeout(() => {
+        const input = containerRef.current?.querySelector('input');
+        input?.focus();
+      }, 0);
     }
   }, [disabled, isOpen]);
 
@@ -120,9 +139,10 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
     });
 
     return (
-      <div className="app-time-picker__input-container">
+      <div className="app-time-picker__input-container" onClick={handleContainerClick} ref={containerRef}>
         <div className="app-time-picker__input-wrapper">
           <AppInput
+            ref={inputRef}
             value={value}
             label={label}
             placeholder={placeholder}

@@ -16,6 +16,7 @@ interface OperatingHoursFormProps {
 interface DayScheduleFormData {
   open: string;
   close: string;
+  isClosed: boolean;
 }
 
 interface FormData {
@@ -37,6 +38,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
       initialWeekSchedule[day] = {
         open: dayData ? formatTime(dayData.open_time) : '09:00',
         close: dayData ? formatTime(dayData.close_time) : '18:00',
+        isClosed: dayData ? dayData.is_closed : false,
       };
     });
 
@@ -105,6 +107,12 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
     } else {
       DAYS_ORDER.forEach(day => {
         const daySchedule = formData.weekSchedule[day];
+        
+        // Пропускаем валидацию для выходных дней
+        if (daySchedule.isClosed) {
+          return;
+        }
+        
         if (!daySchedule.open) {
           newErrors[day] = 'Укажите время открытия';
         } else if (!daySchedule.close) {
@@ -130,7 +138,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
       // Получаем timezone из schedule (все дни имеют одинаковый timezone)
       const timezone = schedule[0]?.timezone || 'Europe/Moscow';
       
-      const updateData: Partial<Record<string, { open_time: string; close_time: string; is_closed: boolean }>> = {};
+      const updateData: Partial<Record<string, { open_time?: string; close_time?: string; is_closed: boolean }>> = {};
 
       if (formData.uniformSchedule) {
         const openTime = parseTime(formData.uniformTime.open);
@@ -146,14 +154,23 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
       } else {
         DAYS_ORDER.forEach(day => {
           const daySchedule = formData.weekSchedule[day];
-          const openTime = parseTime(daySchedule.open);
-          const closeTime = parseTime(daySchedule.close);
+          
+          if (daySchedule.isClosed) {
+            // Для выходных дней отправляем только is_closed: true
+            updateData[day] = {
+              is_closed: true,
+            };
+          } else {
+            // Для рабочих дней устанавливаем время работы
+            const openTime = parseTime(daySchedule.open);
+            const closeTime = parseTime(daySchedule.close);
 
-          updateData[day] = {
-            open_time: openTime ? `${openTime.hour.toString().padStart(2, '0')}:${openTime.minute.toString().padStart(2, '0')}` : '00:00',
-            close_time: closeTime ? `${closeTime.hour.toString().padStart(2, '0')}:${closeTime.minute.toString().padStart(2, '0')}` : '00:00',
-            is_closed: false,
-          };
+            updateData[day] = {
+              open_time: openTime ? `${openTime.hour.toString().padStart(2, '0')}:${openTime.minute.toString().padStart(2, '0')}` : '00:00',
+              close_time: closeTime ? `${closeTime.hour.toString().padStart(2, '0')}:${closeTime.minute.toString().padStart(2, '0')}` : '00:00',
+              is_closed: false,
+            };
+          }
         });
       }
 
@@ -222,7 +239,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
         />
       </div>
 
-      <div className="schedule-page__action-row">
+      {/* <div className="schedule-page__action-row">
         <span className="schedule-page__action-label">Добавить сокращенный день</span>
         <AppButton
           variant="secondary"
@@ -230,7 +247,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
           iconLeft={<span style={{ fontSize: '20px' }}>+</span>}
           onClick={() => console.log('Добавить сокращенный день')}
         />
-      </div>
+      </div> */}
 
       {Object.keys(errors).length > 0 && (
         <div style={{ marginTop: '16px', color: '#E53E3E', fontSize: '14px' }}>

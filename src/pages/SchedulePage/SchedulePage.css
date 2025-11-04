@@ -6,7 +6,7 @@
   justify-content: flex-start;
   min-height: 400px;
   padding: var(--spacing-xl);
-  max-width: 455px;
+  max-width: 500px;
   margin: 0 auto;
   width: 100%;
 }
@@ -143,6 +143,27 @@
   min-width: 90px;
   margin: 0;
   flex-shrink: 0;
+}
+
+.schedule-page__day-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-page__day-controls .app-checkbox {
+  flex-shrink: 0;
+}
+
+.schedule-page__day-closed-label {
+  font-family: 'Onest', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #888684;
+  flex: 1;
 }
 
 /* View */

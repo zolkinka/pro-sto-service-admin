@@ -52,7 +52,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 }) => {
   // Состояние для хранения доступных слотов
   const [availableSlots, setAvailableSlots] = useState<AvailableSlots>({});
-  // Используем useRef вместо useState для отслеживания загрузки, чтобы не вызывать ререндер
+  // Состояние загрузки слотов для отображения скелетона
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  // Используем useRef для предотвращения дублирования запросов
   const isLoadingSlotsRef = React.useRef(false);
 
   // Генерируем массив часов для отображения
@@ -75,43 +77,51 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     }
 
     isLoadingSlotsRef.current = true;
+    setIsLoadingSlots(true);
     const slots: AvailableSlots = {};
 
     try {
-      // Загружаем слоты для каждого дня недели
-      const promises = Array.from({ length: 7 }).map(async (_, dayIndex) => {
-        const date = addDays(weekStart, dayIndex);
-        const dateStr = format(date, 'yyyy-MM-dd');
+      // Вычисляем начало и конец недели
+      const weekEnd = addDays(weekStart, 6);
+      const dateFrom = format(weekStart, 'yyyy-MM-dd');
+      const dateTo = format(weekEnd, 'yyyy-MM-dd');
 
-        try {
-          const response = await serviceCenterGetSlots({
-            uuid: serviceCenterUuid,
-            serviceUuid: serviceUuid,
-            date: dateStr,
-          });
+      // Делаем один запрос на всю неделю
+      const response = await serviceCenterGetSlots({
+        uuid: serviceCenterUuid,
+        serviceUuid: serviceUuid,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      });
 
-          // Парсим слоты и заполняем объект
-          slots[dayIndex] = {};
-          response.forEach((timeSlot: string) => {
-            // Формат времени ISO: "2025-11-03T10:00:00.000Z"
-            const slotDate = new Date(timeSlot);
-            const hour = slotDate.getHours();
-            if (!isNaN(hour)) {
-              slots[dayIndex][hour] = true;
-            }
-          });
-        } catch (error) {
-          console.error(`Failed to load slots for ${dateStr}:`, error);
-          // В случае ошибки просто не добавляем слоты для этого дня
+      // Парсим слоты и группируем их по дням недели
+      response.forEach((timeSlot: string) => {
+        const slotDate = new Date(timeSlot);
+        const hour = slotDate.getHours();
+        
+        // Определяем индекс дня недели (0-6)
+        let dayIndex = -1;
+        for (let i = 0; i < 7; i++) {
+          if (isSameDay(slotDate, addDays(weekStart, i))) {
+            dayIndex = i;
+            break;
+          }
+        }
+
+        if (dayIndex !== -1 && !isNaN(hour)) {
+          if (!slots[dayIndex]) {
+            slots[dayIndex] = {};
+          }
+          slots[dayIndex][hour] = true;
         }
       });
 
-      await Promise.all(promises);
       setAvailableSlots(slots);
     } catch (error) {
       console.error('Failed to load available slots:', error);
     } finally {
       isLoadingSlotsRef.current = false;
+      setIsLoadingSlots(false);
     }
   }, [weekStart, serviceCenterUuid, serviceUuid]);
 
@@ -186,8 +196,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
         {/* Сетка с днями */}
         <div className="calendar-grid__days-container">
-          {isLoading ? (
-            /* Показываем скелетон на время загрузки */
+          {isLoading || isLoadingSlots ? (
+            /* Показываем скелетон на время загрузки заказов или слотов */
             <div 
               className="calendar-grid__skeleton"
               style={{ height: `${bookingsHeight}px` }}

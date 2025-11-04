@@ -132,7 +132,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     // Если сейчас происходит выбор опции, пропускаем поиск
     if (isSelectingRef.current) {
       console.log('🚫 AppAutocomplete: skipping search during option selection');
-      isSelectingRef.current = false; // Сбрасываем флаг
+      // НЕ сбрасываем флаг здесь - он будет сброшен в следующем цикле
       return;
     }
     
@@ -199,7 +199,18 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   // Обработчик onAccept для маски
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMaskAccept = useCallback((maskedValue: string, maskRef: any) => {
-    console.log('🎭 AppAutocomplete: handleMaskAccept called:', { maskedValue, currentInputValue: inputValue });
+    console.log('🎭 AppAutocomplete: handleMaskAccept called:', { maskedValue, currentInputValue: inputValue, isSelecting: isSelectingRef.current });
+    
+    // Если сейчас происходит выбор опции, пропускаем обновление inputValue
+    // Это предотвращает открытие dropdown после программного обновления маски
+    if (isSelectingRef.current) {
+      console.log('🚫 AppAutocomplete: skipping inputValue update during selection');
+      // НЕ сбрасываем флаг здесь - он будет сброшен через setTimeout в handleSelect
+      // Вызываем оригинальный onAccept если он передан
+      onAccept?.(maskedValue, maskRef);
+      return;
+    }
+    
     // Обновляем inputValue только если значение изменилось
     if (maskedValue !== inputValue) {
       setInputValue(maskedValue);
@@ -213,7 +224,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     
     // Вызываем оригинальный onAccept если он передан
     onAccept?.(maskedValue, maskRef);
-  }, [isOpen, onAccept, inputValue]);
+  }, [inputValue, isOpen, onAccept]);
 
   // Обработчик выбора опции
   const handleSelect = useCallback((selectedOption: SelectOption) => {
@@ -238,6 +249,13 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     
     // Устанавливаем флаг что только что выбрали опцию
     justSelectedRef.current = true;
+    
+    // Сбрасываем isSelectingRef через 500ms после того как все useEffect отработают
+    // (больше чем searchDebounce, чтобы гарантировать что debounced значение не вызовет поиск)
+    setTimeout(() => {
+      console.log('🔓 AppAutocomplete: resetting isSelectingRef flag');
+      isSelectingRef.current = false;
+    }, 500);
     
     // Если используется маска, обновляем maskKey в AppInput
     // после того как React обновит value prop

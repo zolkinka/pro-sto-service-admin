@@ -90,11 +90,22 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
       isProgrammaticUpdateRef.current = true;
       lastValueRef.current = value;
       
-      // Если есть maskInstance, используем updateValue() для обновления
+      // Если есть maskInstance, устанавливаем unmaskedValue
       if (maskInstanceRef.current && value !== undefined) {
-        console.log('🔄 AppInput: calling maskInstance.value = ...', { value });
-        // IMask instance имеет свойство value, которое нужно установить напрямую
-        maskInstanceRef.current.value = String(value);
+        const valueStr = String(value);
+        // Для unmask="typed" нужно установить именно те символы, которые пользователь ввел бы
+        // Убираем все НЕ-цифровые символы, кроме +
+        let unmaskedValue = valueStr.replace(/[^\d+]/g, '');
+        
+        // Если unmask="typed", убираем +7 в начале (это фиксированная часть маски)
+        if (unmask === 'typed' && unmaskedValue.startsWith('+7')) {
+          unmaskedValue = unmaskedValue.substring(2);
+        } else if (unmaskedValue.startsWith('+')) {
+          unmaskedValue = unmaskedValue.substring(1);
+        }
+        
+        console.log('🔄 AppInput: setting maskInstance.unmaskedValue =', unmaskedValue);
+        maskInstanceRef.current.unmaskedValue = unmaskedValue;
         console.log('🔄 AppInput: after setting, maskInstance.value =', maskInstanceRef.current.value);
       } else {
         // Иначе перерисовываем компонент через изменение key
@@ -245,7 +256,11 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
               // Если это программное обновление (из props), не вызываем onChange
               if (isProgrammaticUpdateRef.current) {
                 console.log('🔄 AppInput: skipping onChange due to programmatic update');
-                isProgrammaticUpdateRef.current = false;
+                // НЕ сбрасываем флаг сразу - отложим на следующий тик
+                // чтобы перехватить ВСЕ события от IMask
+                setTimeout(() => {
+                  isProgrammaticUpdateRef.current = false;
+                }, 0);
                 onAccept?.(value, maskRefInstance);
                 return;
               }

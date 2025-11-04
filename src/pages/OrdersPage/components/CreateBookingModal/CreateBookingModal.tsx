@@ -571,15 +571,12 @@ const CreateBookingModal = observer(({
           <div className="create-booking-modal__field">
             <AppAutocomplete
               label="Поиск по телефону"
-              placeholder="+7 (999) 888-77-66"
+              placeholder="+7"
               value={phoneAutocompleteValue}
               onSearch={searchClients}
               onChange={handleClientSelect}
               minSearchLength={3}
               searchDebounce={300}
-              mask="+{7} (000) 000-00-00"
-              unmask="typed"
-              lazy={false}
             />
           </div>
 

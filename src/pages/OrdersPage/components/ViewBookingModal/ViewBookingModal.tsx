@@ -94,11 +94,17 @@ const ViewBookingModal = observer(({
   if (bookingsStore.isLoadingDetails) {
     return (
       <div className="view-booking-modal">
-        <div className="view-booking-modal__header">
-          <h2 className="view-booking-modal__title">Загрузка...</h2>
-          <button className="view-booking-modal__close" onClick={handleClose} aria-label="Закрыть">
-            ×
-          </button>
+        <div className="view-booking-modal__skeleton-header">
+          <div className="view-booking-modal__skeleton view-booking-modal__skeleton-title" />
+          <div className="view-booking-modal__skeleton view-booking-modal__skeleton-tag" />
+        </div>
+        <div className="view-booking-modal__skeleton-content">
+          <div className="view-booking-modal__skeleton view-booking-modal__skeleton-car-section" />
+          <div className="view-booking-modal__skeleton view-booking-modal__skeleton-service-section" />
+          <div className="view-booking-modal__skeleton-footer">
+            <div className="view-booking-modal__skeleton view-booking-modal__skeleton-button" />
+            <div className="view-booking-modal__skeleton view-booking-modal__skeleton-button" />
+          </div>
         </div>
       </div>
     );

@@ -355,3 +355,72 @@
 .view-booking-modal__cancel-button:active {
   background: #DDDCD8;
 }
+
+/* Skeleton Loading */
+.view-booking-modal__skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: view-booking-modal-skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes view-booking-modal-skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.view-booking-modal__skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px 16px;
+}
+
+.view-booking-modal__skeleton-title {
+  height: 24px;
+  width: 80px;
+  border-radius: 8px;
+}
+
+.view-booking-modal__skeleton-tag {
+  height: 28px;
+  width: 100px;
+  border-radius: 14px;
+}
+
+.view-booking-modal__skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 20px 24px;
+}
+
+.view-booking-modal__skeleton-car-section {
+  height: 66px;
+  border-radius: 20px;
+}
+
+.view-booking-modal__skeleton-service-section {
+  height: 160px;
+  border-radius: 20px;
+}
+
+.view-booking-modal__skeleton-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.view-booking-modal__skeleton-button {
+  height: 50px;
+  border-radius: 20px;
+}

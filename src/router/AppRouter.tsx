@@ -32,6 +32,9 @@ const PrivateRoute = observer(({ children }: { children: React.ReactNode }) => {
 const AppRouter = observer(() => {
   return (
     <Routes>
+      {/* Редирект с корня на /orders */}
+      <Route path="/" element={<Navigate to={ROUTES.ORDERS} replace />} />
+      
       {/* Публичные маршруты авторизации (без MainLayout) */}
       <Route path={ROUTES.AUTH_PHONE} element={<AuthPhonePage />} />
       <Route path={ROUTES.AUTH_CODE} element={<AuthCodePage />} />

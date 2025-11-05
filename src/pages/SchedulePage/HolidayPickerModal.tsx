@@ -86,7 +86,7 @@ const HolidayPickerModal: React.FC<HolidayPickerModalProps> = ({
       <div className="holiday-picker-modal__backdrop" onClick={handleClose} />
       <div className="holiday-picker-modal__content">
         <div className="holiday-picker-modal__header">
-          <h2 className="holiday-picker-modal__title">Отметить выходные дни</h2>
+          <h2 className="holiday-picker-modal__title">Выбор выходных дней</h2>
           <button 
             className="holiday-picker-modal__close" 
             onClick={handleClose}
@@ -171,7 +171,7 @@ const HolidayPickerModal: React.FC<HolidayPickerModalProps> = ({
             loading={isSaving}
             disabled={isSaving}
           >
-            Добавить
+            Сохранить
           </AppButton>
         </div>
       </div>

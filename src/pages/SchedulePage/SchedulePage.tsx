@@ -59,6 +59,23 @@ const SchedulePage: React.FC = observer(() => {
     }
 
     try {
+      // Форматируем выбранные даты
+      const selectedFormattedDates = dates.map(date => format(date, 'yyyy-MM-dd'));
+      
+      // Находим даты, которые нужно удалить (были в списке, но больше не выбраны)
+      const datesToDelete = operatingHoursStore.specialDates.filter(
+        specialDate => specialDate.specific_date && 
+                      specialDate.is_closed && 
+                      !selectedFormattedDates.includes(specialDate.specific_date)
+      );
+      
+      // Удаляем снятые с выбора даты
+      for (const dateToDelete of datesToDelete) {
+        if (dateToDelete.uuid) {
+          await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, dateToDelete.uuid);
+        }
+      }
+      
       // Создаем специальные даты для каждой выбранной даты
       for (const date of dates) {
         const formattedDate = format(date, 'yyyy-MM-dd');

@@ -150,6 +150,9 @@ export class BookingsStore {
    * Загрузка детальной информации о бронировании
    */
   async fetchBookingDetails(uuid: string): Promise<void> {
+    // Очищаем предыдущие данные перед загрузкой новых
+    // чтобы избежать показа данных предыдущего заказа
+    this.selectedBooking = null;
     this.isLoadingDetails = true;
     this.error = null;
 

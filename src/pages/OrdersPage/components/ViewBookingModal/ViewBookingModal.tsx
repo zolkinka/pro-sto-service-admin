@@ -41,7 +41,8 @@ const ViewBookingModal = observer(({
     if (isOpen && bookingUuid) {
       bookingsStore.fetchBookingDetails(bookingUuid);
     }
-  }, [isOpen, bookingUuid, bookingsStore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, bookingUuid]);
 
   useEffect(() => {
     // Блокируем скролл при открытии модалки
@@ -130,10 +131,27 @@ const ViewBookingModal = observer(({
   if (!booking) return null;
 
   // Форматирование даты и времени
-  const startDate = parseISO(booking.start_time);
-  const endDate = parseISO(booking.end_time);
-  const formattedDate = format(startDate, 'd MMMM', { locale: ru });
-  const formattedTime = `${format(startDate, 'HH:mm')}-${format(endDate, 'HH:mm')}`;
+  let formattedDate = '';
+  let formattedTime = '';
+  
+  try {
+    const startDate = parseISO(booking.start_time);
+    const endDate = parseISO(booking.end_time);
+    
+    // Проверяем, что даты валидны
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      console.error('Invalid dates in booking:', booking);
+      formattedDate = 'Неверная дата';
+      formattedTime = 'Неверное время';
+    } else {
+      formattedDate = format(startDate, 'd MMMM', { locale: ru });
+      formattedTime = `${format(startDate, 'HH:mm')}-${format(endDate, 'HH:mm')}`;
+    }
+  } catch (error) {
+    console.error('Error formatting dates:', error);
+    formattedDate = 'Ошибка форматирования';
+    formattedTime = 'Ошибка форматирования';
+  }
 
   // Форматирование госномера - может быть строкой или объектом
   const licensePlateData = booking.car.license_plate;

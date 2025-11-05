@@ -4,13 +4,30 @@ import {
   operatingHoursGetAll, 
   operatingHoursUpdateRegular,
   operatingHoursCreateSpecial,
-  operatingHoursDelete
+  operatingHoursDelete,
+  ApiError
 } from '../../services/api-client';
 import type { 
   OperatingHoursResponseDto, 
   UpdateRegularScheduleDto,
   CreateSpecialDateDto
 } from '../../services/api-client/types.gen';
+
+/**
+ * Извлекает человекочитаемое сообщение об ошибке из ApiError
+ */
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof ApiError) {
+    // Проверяем наличие message в body
+    if (error.body && typeof error.body === 'object' && 'message' in error.body) {
+      const message = (error.body as { message?: string }).message;
+      if (typeof message === 'string' && message.length > 0) {
+        return message;
+      }
+    }
+  }
+  return 'Произошла ошибка';
+};
 
 export class OperatingHoursStore {
   regularSchedule: OperatingHoursResponseDto[] = [];
@@ -79,12 +96,14 @@ export class OperatingHoursStore {
         this.loading = false;
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      
       runInAction(() => {
-        this.error = 'Ошибка сохранения расписания';
+        this.error = errorMessage;
         this.loading = false;
       });
       
-      this.rootStore?.toastStore.showError('Не удалось сохранить расписание');
+      this.rootStore?.toastStore.showError(errorMessage);
       
       console.error('Error updating regular schedule:', error);
       throw error;
@@ -110,12 +129,14 @@ export class OperatingHoursStore {
         this.loading = false;
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      
       runInAction(() => {
-        this.error = 'Ошибка добавления выходного дня';
+        this.error = errorMessage;
         this.loading = false;
       });
       
-      this.rootStore?.toastStore.showError('Не удалось добавить выходной день');
+      this.rootStore?.toastStore.showError(errorMessage);
       
       console.error('Error creating special date:', error);
       throw error;
@@ -141,12 +162,14 @@ export class OperatingHoursStore {
         this.loading = false;
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      
       runInAction(() => {
-        this.error = 'Ошибка удаления выходного дня';
+        this.error = errorMessage;
         this.loading = false;
       });
       
-      this.rootStore?.toastStore.showError('Не удалось удалить выходной день');
+      this.rootStore?.toastStore.showError(errorMessage);
       
       console.error('Error deleting special date:', error);
       throw error;

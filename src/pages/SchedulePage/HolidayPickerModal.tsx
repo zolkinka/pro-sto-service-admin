@@ -68,8 +68,11 @@ const HolidayPickerModal: React.FC<HolidayPickerModalProps> = ({
     setIsSaving(true);
     try {
       await onSave(selectedDates);
+      // Закрываем модалку только при успешном сохранении
       onClose();
     } catch (error) {
+      // Ошибка уже обработана в store и показана пользователю
+      // Модалка остается открытой
       console.error('Failed to save holidays:', error);
     } finally {
       setIsSaving(false);

@@ -38,9 +38,11 @@ const SchedulePage: React.FC = observer(() => {
     
     try {
       await operatingHoursStore.updateRegularSchedule(serviceCenterUuid as string, data);
+      // Закрываем форму только при успешном сохранении
       setIsEditing(false);
     } catch (error) {
-      // Ошибка уже обработана в store
+      // Ошибка уже обработана в store и показана пользователю
+      // Форма остается открытой
       console.error('Failed to save operating hours:', error);
     }
   };
@@ -95,7 +97,10 @@ const SchedulePage: React.FC = observer(() => {
         }
       }
     } catch (error) {
+      // Ошибка уже обработана в store и показана пользователю
+      // Пробрасываем ошибку дальше, чтобы модалка не закрылась
       console.error('Failed to save holidays:', error);
+      throw error;
     }
   };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isAfter, startOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import AppButton from '@/components/ui/AppButton/AppButton';
 import { EditIcon } from '@/components/ui/icons';
@@ -33,18 +33,65 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({
       return 'Не указаны';
     }
 
-    return specialDates
+    const today = startOfDay(new Date());
+    
+    // Фильтруем только будущие даты и парсим их
+    const futureDates = specialDates
       .filter(d => d.specific_date && d.is_closed)
       .map(d => {
         try {
           const date = parseISO(d.specific_date!);
-          return format(date, 'd MMMM', { locale: ru });
+          return { date, dateStr: d.specific_date! };
         } catch (error) {
           console.error('Error parsing date:', error);
-          return d.specific_date;
+          return null;
         }
       })
-      .join(', ');
+      .filter(d => d !== null && isAfter(d.date, today))
+      .sort((a, b) => a!.date.getTime() - b!.date.getTime());
+
+    if (futureDates.length === 0) {
+      return 'Не указаны';
+    }
+
+    // Группируем даты по месяцам
+    const datesByMonth: Record<string, number[]> = {};
+    
+    futureDates.forEach(item => {
+      const monthYear = format(item!.date, 'LLLL', { locale: ru }); // например "ноябрь"
+      const day = item!.date.getDate();
+      
+      if (!datesByMonth[monthYear]) {
+        datesByMonth[monthYear] = [];
+      }
+      datesByMonth[monthYear].push(day);
+    });
+
+    // Форматируем вывод: "1, 2, 4, 6 ноября, 2, 5, 8 декабря"
+    // Конвертируем название месяца в родительный падеж
+    const monthToGenitive: Record<string, string> = {
+      'январь': 'января',
+      'февраль': 'февраля',
+      'март': 'марта',
+      'апрель': 'апреля',
+      'май': 'мая',
+      'июнь': 'июня',
+      'июль': 'июля',
+      'август': 'августа',
+      'сентябрь': 'сентября',
+      'октябрь': 'октября',
+      'ноябрь': 'ноября',
+      'декабрь': 'декабря',
+    };
+
+    const result = Object.entries(datesByMonth)
+      .map(([month, days]) => {
+        const genitiveMonth = monthToGenitive[month] || month;
+        return `${days.join(', ')} ${genitiveMonth}`;
+      })
+      .join('\n');
+
+    return result;
   };
 
   return (
@@ -95,7 +142,7 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({
           <div className="schedule-page__day-schedule-list">
             <div className="schedule-page__day-schedule-item">
               <p className="schedule-page__day-name">Выходные</p>
-              <p className="schedule-page__day-time">{formatSpecialDates()}</p>
+              <p className="schedule-page__day-time" style={{ whiteSpace: 'pre-line' }}>{formatSpecialDates()}</p>
             </div>
           </div>
         </div>

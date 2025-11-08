@@ -25,6 +25,10 @@
   align-items: center;
 }
 
+.app-header__notification-wrapper {
+  position: relative;
+}
+
 .app-header__icon-button {
   width: 49px;
   height: 49px;
@@ -36,6 +40,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
 }
 
 .app-header__icon-button:hover {
@@ -44,4 +49,24 @@
 
 .app-header__icon-button:active {
   transform: scale(0.95);
+}
+
+.app-header__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  background: #D8182E;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Onest', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1;
+  color: #FFFFFF;
+  padding: 0 5px;
+  border: 2px solid #F9F8F5;
 }

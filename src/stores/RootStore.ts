@@ -4,6 +4,7 @@ import { ToastStore, toastStore } from './ToastStore';
 import { ServicesStore, servicesStore } from './ServicesStore';
 import { BookingsStore, bookingsStore } from './BookingsStore';
 import { OperatingHoursStore, operatingHoursStore } from './OperatingHoursStore';
+import { NotificationStore, notificationStore } from './NotificationStore';
 
 /**
  * Root store that combines all application stores
@@ -14,6 +15,7 @@ export class RootStore {
   servicesStore: ServicesStore;
   bookingsStore: BookingsStore;
   operatingHoursStore: OperatingHoursStore;
+  notificationStore: NotificationStore;
 
   constructor() {
     // Используем singleton instances
@@ -22,6 +24,7 @@ export class RootStore {
     this.servicesStore = servicesStore;
     this.bookingsStore = bookingsStore;
     this.operatingHoursStore = operatingHoursStore;
+    this.notificationStore = notificationStore;
     
     // Устанавливаем ссылку на rootStore в operatingHoursStore
     this.operatingHoursStore.setRootStore(this);

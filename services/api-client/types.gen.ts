@@ -690,6 +690,37 @@ export type ClientSearchResultDto = {
     name?: string;
 };
 
+export type ConflictingBookingDto = {
+    /**
+     * UUID бронирования
+     */
+    uuid: string;
+    /**
+     * Дата и время начала бронирования
+     */
+    start_time: string;
+    /**
+     * Дата и время окончания бронирования
+     */
+    end_time: string;
+    /**
+     * Статус бронирования
+     */
+    status: string;
+    /**
+     * Имя клиента
+     */
+    client_name?: string;
+    /**
+     * Телефон клиента
+     */
+    client_phone?: string;
+    /**
+     * Название услуги
+     */
+    service_name?: string;
+};
+
 export type CreateBookingDto = {
     /**
      * Уникальный идентификатор сервисного центра
@@ -1596,6 +1627,25 @@ export namespace RoleResponseDto {
         CLIENT = 'CLIENT'
     }
 }
+
+export type ScheduleConflictErrorDto = {
+    /**
+     * Код ошибки
+     */
+    error: string;
+    /**
+     * Сообщение об ошибке
+     */
+    message: string;
+    /**
+     * Список конфликтующих бронирований
+     */
+    conflicting_bookings: Array<ConflictingBookingDto>;
+    /**
+     * Количество конфликтующих бронирований
+     */
+    count: number;
+};
 
 export type SendCodeDto = {
     phone: string;

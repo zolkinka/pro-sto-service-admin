@@ -746,7 +746,8 @@ export const operatingHoursUpdateRegular = (data: OperatingHoursUpdateRegularDat
         body: data.requestBody,
         mediaType: 'application/json',
         errors: {
-            404: 'Сервисный центр не найден'
+            404: 'Сервисный центр не найден',
+            409: 'Невозможно изменить расписание: найдены подтвержденные заказы'
         }
     });
 };
@@ -770,7 +771,8 @@ export const operatingHoursCreateSpecial = (data: OperatingHoursCreateSpecialDat
         body: data.requestBody,
         mediaType: 'application/json',
         errors: {
-            404: 'Сервисный центр не найден'
+            404: 'Сервисный центр не найден',
+            409: 'Невозможно изменить расписание: найдены подтвержденные заказы'
         }
     });
 };
@@ -796,7 +798,8 @@ export const operatingHoursUpdate = (data: OperatingHoursUpdateData): Cancelable
         body: data.requestBody,
         mediaType: 'application/json',
         errors: {
-            404: 'Запись не найдена'
+            404: 'Запись не найдена',
+            409: 'Невозможно изменить расписание: найдены подтвержденные заказы'
         }
     });
 };

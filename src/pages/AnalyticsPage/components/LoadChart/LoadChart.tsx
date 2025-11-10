@@ -12,7 +12,20 @@ const LoadChart: React.FC<LoadChartProps> = ({
   const [animatedData, setAnimatedData] = useState<number[]>([]);
 
   // Вычисляем максимальное значение для шкалы Y
-  const calculatedMax = maxCount || Math.max(...data.map((d) => d.value), 50);
+  // Округляем до ближайшего кратного 10 вверх
+  const getCalculatedMax = () => {
+    if (maxCount) return maxCount;
+    
+    const dataMax = Math.max(...data.map((d) => d.value), 0);
+    
+    // Если максимум 0, возвращаем 10 как минимум
+    if (dataMax === 0) return 10;
+    
+    // Округляем вверх до ближайшего кратного 10
+    return Math.ceil(dataMax / 10) * 10;
+  };
+  
+  const calculatedMax = getCalculatedMax();
   const yAxisValues = [calculatedMax, calculatedMax * 0.8, calculatedMax * 0.6, calculatedMax * 0.4, calculatedMax * 0.2, 0];
 
   // Анимация появления столбцов
@@ -83,6 +96,11 @@ const LoadChart: React.FC<LoadChartProps> = ({
       </div>
       
       <div className="load-chart__content">
+        <div className="load-chart__grid-lines">
+          {yAxisValues.map((_, index) => (
+            <div key={index} className="load-chart__grid-line" />
+          ))}
+        </div>
         <div className="load-chart__bars">
           {data.map((point, index) => {
             const height = (animatedData[index] / calculatedMax) * 100;
@@ -96,9 +114,7 @@ const LoadChart: React.FC<LoadChartProps> = ({
                     transitionDelay: `${index * 50}ms`,
                   }}
                   title={`${point.label}: ${point.value}`}
-                >
-                  <div className="load-chart__bar-value">{point.value}</div>
-                </div>
+                />
               </div>
             );
           })}

@@ -1,7 +1,7 @@
 /* StatCard Component Styles */
 
 .stat-card {
-  background-color: var(--color-gray-100);
+  background-color: #F9F8F5;
   border-radius: var(--border-radius-2xl);
   padding: var(--spacing-lg);
   display: flex;

@@ -2,7 +2,7 @@
 
 .top-services-table {
   width: 100%;
-  background-color: var(--color-gray-25);
+  background-color: #FFFFFF;
   border-radius: var(--border-radius-2xl);
   overflow: hidden;
 }

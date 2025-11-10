@@ -1,0 +1,43 @@
+.period-selector {
+  display: inline-flex;
+  background-color: var(--color-gray-100);
+  border-radius: var(--border-radius-lg);
+  padding: 4px;
+  gap: 4px;
+}
+
+.period-selector__button {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 16px;
+  border: none;
+  background-color: transparent;
+  color: var(--color-gray-800);
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.period-selector__button:hover:not(:disabled):not(.period-selector__button_active) {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.period-selector__button:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.period-selector__button_active {
+  background-color: var(--color-gray-25);
+  color: var(--color-gray-900);
+  box-shadow: var(--shadow-sm);
+}
+
+.period-selector__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

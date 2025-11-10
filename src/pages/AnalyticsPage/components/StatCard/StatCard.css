@@ -1,0 +1,133 @@
+/* StatCard Component Styles */
+
+.stat-card {
+  background-color: var(--color-gray-100);
+  border-radius: var(--border-radius-2xl);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-width: 200px;
+}
+
+.stat-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-card__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-800);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.stat-card__icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-gray-25);
+  border-radius: var(--border-radius-lg);
+  flex-shrink: 0;
+}
+
+.stat-card__icon-container svg,
+.stat-card__icon-container img {
+  width: 24px;
+  height: 24px;
+}
+
+.stat-card__value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  line-height: 1.2;
+}
+
+.stat-card__change {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+}
+
+.stat-card__change_positive {
+  color: var(--color-green-400);
+}
+
+.stat-card__change_negative {
+  color: var(--color-red-400);
+}
+
+/* Loading State */
+.stat-card_loading {
+  pointer-events: none;
+}
+
+.stat-card__skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-200) 25%,
+    var(--color-gray-300) 50%,
+    var(--color-gray-200) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--border-radius-md);
+}
+
+.stat-card__skeleton_title {
+  width: 60%;
+  height: 16px;
+}
+
+.stat-card__skeleton_value {
+  width: 80%;
+  height: 32px;
+  margin-top: var(--spacing-xs);
+}
+
+.stat-card__skeleton_change {
+  width: 40%;
+  height: 14px;
+  margin-top: var(--spacing-xs);
+}
+
+.stat-card__icon-skeleton {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-200) 25%,
+    var(--color-gray-300) 50%,
+    var(--color-gray-200) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--border-radius-lg);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .stat-card {
+    min-width: unset;
+    width: 100%;
+  }
+  
+  .stat-card__value {
+    font-size: var(--font-size-2xl);
+  }
+}

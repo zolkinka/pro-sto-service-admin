@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterData, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, AdminSearchClientsData, AdminSearchClientsResponse, AdminFindOrCreateClientData, AdminFindOrCreateClientResponse, AdminCreateOrUpdateCarData, AdminCreateOrUpdateCarResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, AdminBookingsGetListData, AdminBookingsGetListResponse, AdminCreateBookingData, AdminCreateBookingResponse, AdminBookingsGetPendingData, AdminBookingsGetPendingResponse, AdminBookingsGetOneData, AdminBookingsGetOneResponse, AdminBookingsUpdateData, AdminBookingsUpdateResponse, AdminBookingsUpdateStatusData, AdminBookingsUpdateStatusResponse, RegisterNotificationTokenData, RegisterNotificationTokenResponse, UnregisterNotificationTokenData, UnregisterNotificationTokenResponse, GetNotificationSettingsResponse, UpdateNotificationSettingsData, UpdateNotificationSettingsResponse, GetNotificationsData, GetNotificationsResponse, MarkNotificationAsReadData, MarkNotificationAsReadResponse, MarkAllNotificationsAsReadResponse, GetUnreadNotificationsCountResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, AdminSearchCarsData, AdminSearchCarsResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookData, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse } from './types.gen';
+import type { AppGetHelloResponse, AppHealthCheckResponse, AuthLoginData, AuthLoginResponse, AuthLogoutResponse, AuthGetCurrentUserResponse, AuthRefreshResponse, RolesGetAllResponse, RolesCreateData, RolesCreateResponse, RolesGetOneData, RolesGetOneResponse, RolesUpdateData, RolesUpdateResponse, RolesDeleteData, RolesDeleteResponse, ClientAuthSendCodeData, ClientAuthSendCodeResponse, ClientAuthLoginData, ClientAuthLoginResponse, ClientAuthRefreshData, ClientAuthRefreshResponse, ClientAuthRegisterData, ClientAuthRegisterResponse, ClientAuthSetPhoneData, ClientAuthSetPhoneResponse, AdminAuthSendCodeData, AdminAuthSendCodeResponse, AdminAuthLoginData, AdminAuthLoginResponse, ClientGetMeResponse, ClientUpdateMeData, ClientUpdateMeResponse, ClientListCarsResponse, ClientCreateCarData, ClientCreateCarResponse, ClientGetCarData, ClientGetCarResponse, ClientUpdateCarData, ClientUpdateCarResponse, ClientDeleteCarData, ClientDeleteCarResponse, ClientListBookingsResponse, AdminSearchClientsData, AdminSearchClientsResponse, AdminFindOrCreateClientData, AdminFindOrCreateClientResponse, AdminCreateOrUpdateCarData, AdminCreateOrUpdateCarResponse, ServiceCenterListData, ServiceCenterListResponse, ServiceCenterGetOneData, ServiceCenterGetOneResponse, ServiceCenterGetSlotsData, ServiceCenterGetSlotsResponse, ServiceCenterToggleFavoriteData, ServiceCenterToggleFavoriteResponse, OperatingHoursGetAllData, OperatingHoursGetAllResponse, OperatingHoursUpdateRegularData, OperatingHoursUpdateRegularResponse, OperatingHoursCreateSpecialData, OperatingHoursCreateSpecialResponse, OperatingHoursUpdateData, OperatingHoursUpdateResponse, OperatingHoursDeleteData, OperatingHoursDeleteResponse, BookingCreateData, BookingCreateResponse, BookingListData, BookingListResponse, BookingGetOneData, BookingGetOneResponse, BookingCancelData, BookingCancelResponse, AdminBookingsGetListData, AdminBookingsGetListResponse, AdminCreateBookingData, AdminCreateBookingResponse, AdminBookingsGetPendingData, AdminBookingsGetPendingResponse, AdminBookingsGetOneData, AdminBookingsGetOneResponse, AdminBookingsUpdateData, AdminBookingsUpdateResponse, AdminBookingsUpdateStatusData, AdminBookingsUpdateStatusResponse, RegisterNotificationTokenData, RegisterNotificationTokenResponse, UnregisterNotificationTokenData, UnregisterNotificationTokenResponse, GetNotificationSettingsResponse, UpdateNotificationSettingsData, UpdateNotificationSettingsResponse, GetNotificationsData, GetNotificationsResponse, MarkNotificationAsReadData, MarkNotificationAsReadResponse, MarkAllNotificationsAsReadResponse, GetUnreadNotificationsCountResponse, CarsControllerGetMakesData, CarsControllerGetMakesResponse, CarsControllerGetModelsByMakeIdData, CarsControllerGetModelsByMakeIdResponse, AdminSearchCarsData, AdminSearchCarsResponse, PaymentsControllerCreatePaymentData, PaymentsControllerCreatePaymentResponse, PaymentsControllerGetAllPaymentsResponse, PaymentsControllerGetPaymentData, PaymentsControllerGetPaymentResponse, PaymentsControllerGetPaymentByBookingData, PaymentsControllerGetPaymentByBookingResponse, PaymentsControllerUpdatePaymentStatusData, PaymentsControllerUpdatePaymentStatusResponse, PaymentsControllerHandleWebhookData, PaymentsControllerHandleWebhookResponse, AdminServicesGetAllData, AdminServicesGetAllResponse, AdminServicesCreateData, AdminServicesCreateResponse, AdminServicesGetOneData, AdminServicesGetOneResponse, AdminServicesUpdateData, AdminServicesUpdateResponse, AdminServicesDeleteData, AdminServicesDeleteResponse, AdminAnalyticsGetStatsData, AdminAnalyticsGetStatsResponse, AdminAnalyticsGetTopServicesData, AdminAnalyticsGetTopServicesResponse, AdminAnalyticsGetLoadChartData, AdminAnalyticsGetLoadChartResponse } from './types.gen';
 
 /**
  * Hello World
@@ -1553,6 +1553,114 @@ export const adminServicesDelete = (data: AdminServicesDeleteData): CancelablePr
             401: 'Не авторизован',
             403: 'Нет доступа (только ADMIN)',
             404: 'Услуга не найдена'
+        }
+    });
+};
+
+/**
+ * Получить общую статистику за период
+ * Возвращает общую статистику сервисного центра за указанный период:
+ * - Общее количество записей
+ * - Количество подтверждённых записей
+ * - Количество не состоявшихся записей
+ * - Общая выручка
+ *
+ * Для каждой метрики предоставляется текущее значение и процент изменения по сравнению с предыдущим периодом той же длительности.
+ * @param data The data for the request.
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.dateFrom Дата начала периода в формате ISO 8601
+ * @param data.dateTo Дата окончания периода в формате ISO 8601
+ * @param data.period Период для сравнения статистики
+ * @returns AnalyticsStatsResponseDto Статистика успешно получена
+ * @throws ApiError
+ */
+export const adminAnalyticsGetStats = (data: AdminAnalyticsGetStatsData): CancelablePromise<AdminAnalyticsGetStatsResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/analytics/stats',
+        query: {
+            service_center_uuid: data.serviceCenterUuid,
+            date_from: data.dateFrom,
+            date_to: data.dateTo,
+            period: data.period
+        },
+        errors: {
+            400: 'Некорректные параметры запроса',
+            401: 'Не авторизован',
+            403: 'Нет доступа к указанному сервисному центру',
+            404: 'Сервисный центр не найден'
+        }
+    });
+};
+
+/**
+ * Получить топ популярных услуг
+ * Возвращает список наиболее популярных услуг за указанный период, отсортированных по количеству записей.
+ * Для каждой услуги предоставляется:
+ * - Название услуги
+ * - Количество записей
+ * - Общая выручка
+ *
+ * По умолчанию возвращается топ 10 услуг, но можно настроить через параметр limit (максимум 50).
+ * @param data The data for the request.
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.dateFrom Дата начала периода в формате ISO 8601
+ * @param data.dateTo Дата окончания периода в формате ISO 8601
+ * @param data.limit Максимальное количество услуг в топе
+ * @returns AnalyticsTopServicesResponseDto Топ услуг успешно получен
+ * @throws ApiError
+ */
+export const adminAnalyticsGetTopServices = (data: AdminAnalyticsGetTopServicesData): CancelablePromise<AdminAnalyticsGetTopServicesResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/analytics/top-services',
+        query: {
+            service_center_uuid: data.serviceCenterUuid,
+            date_from: data.dateFrom,
+            date_to: data.dateTo,
+            limit: data.limit
+        },
+        errors: {
+            400: 'Некорректные параметры запроса',
+            401: 'Не авторизован',
+            403: 'Нет доступа к указанному сервисному центру',
+            404: 'Сервисный центр не найден'
+        }
+    });
+};
+
+/**
+ * Получить данные графика загрузки
+ * Возвращает данные для построения графика загрузки сервисного центра.
+ *
+ * Поддерживает два режима в зависимости от параметра period:
+ * - **week**: Группировка по дням недели (Понедельник-Воскресенье), возвращает 7 точек данных
+ * - **day**: Группировка по часам (0-23), возвращает 24 точки данных
+ *
+ * Каждая точка данных содержит метку (день недели или час) и количество записей.
+ * @param data The data for the request.
+ * @param data.serviceCenterUuid UUID сервисного центра
+ * @param data.dateFrom Дата начала периода в формате ISO 8601
+ * @param data.dateTo Дата окончания периода в формате ISO 8601
+ * @param data.period Период группировки данных графика (по дням недели или по часам)
+ * @returns AnalyticsLoadChartResponseDto Данные графика загрузки успешно получены
+ * @throws ApiError
+ */
+export const adminAnalyticsGetLoadChart = (data: AdminAnalyticsGetLoadChartData): CancelablePromise<AdminAnalyticsGetLoadChartResponse> => {
+    return __request(OpenAPI, {
+        method: 'GET',
+        url: '/api/admin/analytics/load-chart',
+        query: {
+            service_center_uuid: data.serviceCenterUuid,
+            date_from: data.dateFrom,
+            date_to: data.dateTo,
+            period: data.period
+        },
+        errors: {
+            400: 'Некорректные параметры запроса',
+            401: 'Не авторизован',
+            403: 'Нет доступа к указанному сервисному центру',
+            404: 'Сервисный центр не найден'
         }
     });
 };

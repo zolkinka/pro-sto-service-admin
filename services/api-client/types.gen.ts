@@ -299,6 +299,39 @@ export type AdminUserDto = {
     service_center_uuid: string;
 };
 
+export type AnalyticsLoadChartResponseDto = {
+    /**
+     * Данные для графика загрузки
+     */
+    load_data: Array<LoadDataPointDto>;
+};
+
+export type AnalyticsStatsResponseDto = {
+    /**
+     * Общее количество записей за период с процентом изменения
+     */
+    total_bookings: (StatsChangeDto);
+    /**
+     * Количество подтверждённых записей с процентом изменения
+     */
+    confirmed_bookings: (StatsChangeDto);
+    /**
+     * Количество не состоявшихся записей с процентом изменения
+     */
+    cancelled_bookings: (StatsChangeDto);
+    /**
+     * Общая выручка за период с процентом изменения
+     */
+    revenue: (StatsChangeDto);
+};
+
+export type AnalyticsTopServicesResponseDto = {
+    /**
+     * Список топовых услуг по количеству записей
+     */
+    top_services: Array<TopServiceDto>;
+};
+
 export type AuthResponseDto = {
     /**
      * Статус успешности операции
@@ -1175,6 +1208,17 @@ export type ErrorResponseDto = {
     };
 };
 
+export type LoadDataPointDto = {
+    /**
+     * Метка данных (день недели для week: 'Пн', 'Вт'... или час для day: '0', '1'...)
+     */
+    label: string;
+    /**
+     * Количество записей в этот период
+     */
+    bookings_count: number;
+};
+
 export type LoginDto = {
     /**
      * Email пользователя
@@ -1791,6 +1835,36 @@ export type SetPhoneDto = {
      * Уникальный идентификатор устройства
      */
     device_id?: string;
+};
+
+export type StatsChangeDto = {
+    /**
+     * Текущее значение метрики
+     */
+    current: number;
+    /**
+     * Процентное изменение по сравнению с предыдущим периодом (может быть отрицательным)
+     */
+    change_percent: number;
+};
+
+export type TopServiceDto = {
+    /**
+     * UUID услуги
+     */
+    service_uuid: string;
+    /**
+     * Название услуги
+     */
+    service_name: string;
+    /**
+     * Количество записей на эту услугу
+     */
+    bookings_count: number;
+    /**
+     * Общая выручка от этой услуги
+     */
+    revenue: number;
 };
 
 export type UnregisterTokenDto = {
@@ -2791,3 +2865,66 @@ export type AdminServicesDeleteData = {
 };
 
 export type AdminServicesDeleteResponse = (unknown);
+
+export type AdminAnalyticsGetStatsData = {
+    /**
+     * Дата начала периода в формате ISO 8601
+     */
+    dateFrom: string;
+    /**
+     * Дата окончания периода в формате ISO 8601
+     */
+    dateTo: string;
+    /**
+     * Период для сравнения статистики
+     */
+    period: 'day' | 'week';
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+};
+
+export type AdminAnalyticsGetStatsResponse = (AnalyticsStatsResponseDto);
+
+export type AdminAnalyticsGetTopServicesData = {
+    /**
+     * Дата начала периода в формате ISO 8601
+     */
+    dateFrom: string;
+    /**
+     * Дата окончания периода в формате ISO 8601
+     */
+    dateTo: string;
+    /**
+     * Максимальное количество услуг в топе
+     */
+    limit?: number;
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+};
+
+export type AdminAnalyticsGetTopServicesResponse = (AnalyticsTopServicesResponseDto);
+
+export type AdminAnalyticsGetLoadChartData = {
+    /**
+     * Дата начала периода в формате ISO 8601
+     */
+    dateFrom: string;
+    /**
+     * Дата окончания периода в формате ISO 8601
+     */
+    dateTo: string;
+    /**
+     * Период группировки данных графика (по дням недели или по часам)
+     */
+    period: 'day' | 'week';
+    /**
+     * UUID сервисного центра
+     */
+    serviceCenterUuid: string;
+};
+
+export type AdminAnalyticsGetLoadChartResponse = (AnalyticsLoadChartResponseDto);

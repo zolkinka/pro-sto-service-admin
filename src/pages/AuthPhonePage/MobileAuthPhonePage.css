@@ -1,0 +1,79 @@
+/* MobileAuthPhonePage */
+.mobile-auth-phone {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  background-color: var(--color-gray-25);
+  padding: var(--spacing-mobile-2xl) var(--spacing-mobile-xl);
+}
+
+.mobile-auth-phone__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  gap: var(--spacing-mobile-3xl);
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mobile-auth-phone__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-mobile-xl);
+  align-items: center;
+}
+
+.mobile-auth-phone__logo {
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-auth-phone__title {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-mobile-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+}
+
+.mobile-auth-phone__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-mobile-xl);
+}
+
+.mobile-auth-phone__link {
+  color: var(--color-gray-900);
+  text-decoration: underline;
+  font-weight: var(--font-weight-medium);
+}
+
+.mobile-auth-phone__link:hover {
+  text-decoration: none;
+}
+
+/* Responsive adjustments */
+@media (max-height: 600px) {
+  .mobile-auth-phone {
+    padding: var(--spacing-mobile-xl) var(--spacing-mobile-lg);
+  }
+  
+  .mobile-auth-phone__content {
+    gap: var(--spacing-mobile-2xl);
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  .mobile-auth-phone {
+    padding-top: max(var(--spacing-mobile-2xl), env(safe-area-inset-top));
+    padding-bottom: max(var(--spacing-mobile-2xl), env(safe-area-inset-bottom));
+    padding-left: max(var(--spacing-mobile-xl), env(safe-area-inset-left));
+    padding-right: max(var(--spacing-mobile-xl), env(safe-area-inset-right));
+  }
+}

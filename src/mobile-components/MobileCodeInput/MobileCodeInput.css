@@ -1,0 +1,100 @@
+/* MobileCodeInput Component */
+.mobile-code-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-mobile-md);
+}
+
+.mobile-code-input__label {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-mobile-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
+  line-height: 1.4;
+}
+
+.mobile-code-input__fields {
+  display: flex;
+  gap: var(--spacing-mobile-md);
+  justify-content: center;
+}
+
+.mobile-code-input__field {
+  width: 64px;
+  height: 64px;
+  
+  font-family: var(--font-onest);
+  font-size: var(--font-size-mobile-3xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+  text-align: center;
+  
+  background-color: var(--color-gray-100);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-mobile-lg);
+  
+  outline: none;
+  transition: all var(--transition-fast);
+  
+  /* iOS specific */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mobile-code-input__field::placeholder {
+  color: var(--color-gray-400);
+}
+
+/* Focus state */
+.mobile-code-input__field:focus {
+  background-color: var(--color-gray-25);
+  border-color: var(--color-gray-400);
+}
+
+/* Error state */
+.mobile-code-input__field_error {
+  border-color: var(--color-error-500);
+}
+
+.mobile-code-input__field_error:focus {
+  box-shadow: 0 0 0 3px rgba(232, 48, 70, 0.1);
+}
+
+/* Disabled state */
+.mobile-code-input__field:disabled {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.mobile-code-input__error {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-mobile-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-error-500);
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Touch target optimization */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-code-input__field {
+    /* Ensure minimum touch target */
+    min-width: var(--mobile-touch-target-min);
+    min-height: var(--mobile-touch-target-min);
+  }
+}
+
+/* Smaller screens */
+@media (max-width: 375px) {
+  .mobile-code-input__field {
+    width: 48px;
+    height: 48px;
+    font-size: var(--font-size-mobile-xl);
+  }
+  
+  .mobile-code-input__fields {
+    gap: var(--spacing-mobile-sm);
+  }
+}

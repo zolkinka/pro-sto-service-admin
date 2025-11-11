@@ -1,0 +1,82 @@
+/* MobileCheckbox Component */
+.mobile-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-mobile-md);
+  cursor: pointer;
+  user-select: none;
+  
+  /* iOS specific */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-checkbox_disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mobile-checkbox__input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.mobile-checkbox__checkmark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  width: 24px;
+  height: 24px;
+  
+  background-color: var(--color-gray-25);
+  border: 1.5px solid var(--color-gray-900);
+  border-radius: 4px;
+  
+  transition: all var(--transition-fast);
+}
+
+/* Checkmark icon */
+.mobile-checkbox__checkmark::after {
+  content: '';
+  position: absolute;
+  display: none;
+  
+  width: 5px;
+  height: 10px;
+  
+  border: solid var(--color-gray-25);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Show checkmark when checked */
+.mobile-checkbox__input:checked ~ .mobile-checkbox__checkmark::after {
+  display: block;
+}
+
+.mobile-checkbox__input:checked ~ .mobile-checkbox__checkmark {
+  background-color: var(--color-gray-900);
+  border-color: var(--color-gray-900);
+}
+
+.mobile-checkbox__label {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-mobile-base);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-700);
+  line-height: 1.5;
+  padding-top: 1px;
+}
+
+/* Touch target optimization */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-checkbox {
+    min-height: var(--mobile-touch-target-min);
+    align-items: center;
+  }
+}

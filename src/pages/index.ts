@@ -1,7 +1,7 @@
 export { default as Dashboard } from './Dashboard';
 export { default as NotFound } from './NotFound';
-export { default as AuthPhonePage } from './AuthPhonePage';
-export { default as AuthCodePage } from './AuthCodePage';
+export { default as AuthPhonePage, MobileAuthPhonePage } from './AuthPhonePage';
+export { default as AuthCodePage, MobileAuthCodePage } from './AuthCodePage';
 export { ServicesPage } from './ServicesPage';
 export { OrdersPage } from './OrdersPage';
 export { AnalyticsPage } from './AnalyticsPage';

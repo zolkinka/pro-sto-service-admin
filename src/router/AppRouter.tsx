@@ -3,12 +3,14 @@ import { observer } from 'mobx-react-lite';
 import { ROUTES } from '@/constants/routes';
 import { authStore } from '@/stores/AuthStore';
 import AppLayout from '@/components/Layout/AppLayout';
-// import { PlatformRoute } from './PlatformRoute'; // Будет использоваться при создании мобильных версий
+import { PlatformRoute } from './PlatformRoute';
 import { 
   Dashboard, 
   NotFound, 
-  AuthPhonePage, 
+  AuthPhonePage,
+  MobileAuthPhonePage,
   AuthCodePage,
+  MobileAuthCodePage,
   ServicesPage,
   OrdersPage,
   AnalyticsPage,
@@ -37,8 +39,24 @@ const AppRouter = observer(() => {
       <Route path="/" element={<Navigate to={ROUTES.ORDERS} replace />} />
       
       {/* Публичные маршруты авторизации (без MainLayout) */}
-      <Route path={ROUTES.AUTH_PHONE} element={<AuthPhonePage />} />
-      <Route path={ROUTES.AUTH_CODE} element={<AuthCodePage />} />
+      <Route 
+        path={ROUTES.AUTH_PHONE} 
+        element={
+          <PlatformRoute 
+            desktop={AuthPhonePage} 
+            mobile={MobileAuthPhonePage}
+          />
+        } 
+      />
+      <Route 
+        path={ROUTES.AUTH_CODE} 
+        element={
+          <PlatformRoute 
+            desktop={AuthCodePage} 
+            mobile={MobileAuthCodePage}
+          />
+        } 
+      />
       
       {/* Публичный маршрут для мок-платежа (без авторизации и без Layout) */}
       <Route path={ROUTES.PAYMENT_MOCK} element={<PaymentMockPage />} />

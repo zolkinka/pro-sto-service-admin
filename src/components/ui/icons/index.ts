@@ -8,3 +8,6 @@ export { NotesIcon } from './NotesIcon';
 export { TaskCheckIcon } from './TaskCheckIcon';
 export { TaskMinusIcon } from './TaskMinusIcon';
 export { CardIcon } from './CardIcon';
+export { MenuIcon } from './MenuIcon';
+export { CloseIcon } from './CloseIcon';
+export { LogoutIcon } from './LogoutIcon';

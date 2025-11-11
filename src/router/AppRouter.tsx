@@ -3,7 +3,9 @@ import { observer } from 'mobx-react-lite';
 import { ROUTES } from '@/constants/routes';
 import { authStore } from '@/stores/AuthStore';
 import AppLayout from '@/components/Layout/AppLayout';
+import { MobileLayout } from '@/components/Layout';
 import { PlatformRoute } from './PlatformRoute';
+import { usePlatform } from '@/hooks';
 import { 
   Dashboard, 
   NotFound, 
@@ -20,19 +22,38 @@ import {
 } from '@/pages';
 
 /**
- * PrivateRoute - защищенный маршрут, доступный только авторизованным пользователям
- * Если пользователь не авторизован - редирект на страницу входа
- * Оборачивает содержимое в AppLayout с фиксированным Header
+ * ProtectedLayout - Layout wrapper для защищенных маршрутов
+ * Выбирает между MobileLayout и AppLayout в зависимости от платформы
+ * Проверяет авторизацию и редиректит на страницу входа при необходимости
  */
-const PrivateRoute = observer(({ children }: { children: React.ReactNode }) => {
+const ProtectedLayout = observer(() => {
+  const platform = usePlatform();
+  
   if (!authStore.isAuthenticated) {
     return <Navigate to={ROUTES.AUTH_PHONE} replace />;
   }
 
-  return <AppLayout>{children}</AppLayout>;
+  // MobileLayout и AppLayout оба используют Outlet для рендера дочерних маршрутов
+  return platform === 'mobile' ? <MobileLayout /> : <AppLayout><div /></AppLayout>;
+});
+
+/**
+ * PrivateRoute - обертка для отдельных защищенных страниц без layout
+ * Используется для desktop версии, где AppLayout принимает children
+ */
+const PrivateRoute = observer(({ children }: { children: React.ReactNode }) => {
+  const platform = usePlatform();
+  
+  if (!authStore.isAuthenticated) {
+    return <Navigate to={ROUTES.AUTH_PHONE} replace />;
+  }
+
+  return platform === 'mobile' ? <>{children}</> : <AppLayout>{children}</AppLayout>;
 });
 
 const AppRouter = observer(() => {
+  const platform = usePlatform();
+  
   return (
     <Routes>
       {/* Редирект с корня на /orders */}
@@ -61,67 +82,26 @@ const AppRouter = observer(() => {
       {/* Публичный маршрут для мок-платежа (без авторизации и без Layout) */}
       <Route path={ROUTES.PAYMENT_MOCK} element={<PaymentMockPage />} />
 
-      {/* Защищенные маршруты (с MainLayout) */}
-      <Route
-        path={ROUTES.DASHBOARD}
-        element={
-          <PrivateRoute>
-            {/* 
-              PlatformRoute автоматически выбирает desktop или mobile версию компонента
-              Пример использования:
-              <PlatformRoute desktop={Dashboard} mobile={MobileDashboard} />
-              
-              Пока мобильные версии не созданы, используем только desktop версию
-            */}
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path={ROUTES.SERVICES}
-        element={
-          <PrivateRoute>
-            <ServicesPage />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path={ROUTES.ORDERS}
-        element={
-          <PrivateRoute>
-            <OrdersPage />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path={ROUTES.ANALYTICS}
-        element={
-          <PrivateRoute>
-            <AnalyticsPage />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path={ROUTES.SCHEDULE}
-        element={
-          <PrivateRoute>
-            <SchedulePage />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path={ROUTES.SETTINGS}
-        element={
-          <PrivateRoute>
-            <SettingsPage />
-          </PrivateRoute>
-        }
-      />
+      {/* Защищенные маршруты - используем layout route для mobile */}
+      {platform === 'mobile' ? (
+        <Route element={<ProtectedLayout />}>
+          <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+          <Route path={ROUTES.SERVICES} element={<ServicesPage />} />
+          <Route path={ROUTES.ORDERS} element={<OrdersPage />} />
+          <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
+          <Route path={ROUTES.SCHEDULE} element={<SchedulePage />} />
+          <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+        </Route>
+      ) : (
+        <>
+          <Route path={ROUTES.DASHBOARD} element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path={ROUTES.SERVICES} element={<PrivateRoute><ServicesPage /></PrivateRoute>} />
+          <Route path={ROUTES.ORDERS} element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
+          <Route path={ROUTES.ANALYTICS} element={<PrivateRoute><AnalyticsPage /></PrivateRoute>} />
+          <Route path={ROUTES.SCHEDULE} element={<PrivateRoute><SchedulePage /></PrivateRoute>} />
+          <Route path={ROUTES.SETTINGS} element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+        </>
+      )}
 
       {/* 404 страница */}
       <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />

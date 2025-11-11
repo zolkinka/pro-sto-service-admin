@@ -1,0 +1,12 @@
+.mobile-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-gray-100);
+}
+
+.mobile-layout__content {
+  flex: 1;
+  padding-top: var(--mobile-header-height);
+  overflow-y: auto;
+}

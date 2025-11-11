@@ -60,7 +60,7 @@ const MobileAuthPhonePage: React.FC = observer(() => {
     }
   };
 
-  const isValid = phone.length === 10 && agreed;
+  const isValid = extractPhoneDigits(phone).length === 10 && agreed;
 
   return (
     <div className="mobile-auth-phone">

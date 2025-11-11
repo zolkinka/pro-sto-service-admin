@@ -18,3 +18,6 @@ export type { MobileCodeInputProps } from './MobileCodeInput';
 export { MobileCheckbox } from './MobileCheckbox';
 export type { MobileCheckboxProps } from './MobileCheckbox';
 
+export { MobileHeader } from './MobileHeader';
+export { MobileMenu } from './MobileMenu';
+

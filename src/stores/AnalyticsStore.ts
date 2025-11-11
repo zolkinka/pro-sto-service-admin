@@ -1,14 +1,14 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { 
   format, 
-  startOfDay, 
-  endOfDay, 
   startOfWeek, 
   endOfWeek, 
-  addDays, 
+  startOfMonth,
+  endOfMonth,
   addWeeks, 
-  subDays, 
-  subWeeks 
+  addMonths,
+  subWeeks,
+  subMonths
 } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type {
@@ -26,7 +26,7 @@ import { toastStore } from './ToastStore';
 /**
  * Тип периода для аналитики
  */
-export type PeriodType = 'day' | 'week';
+export type PeriodType = 'month' | 'week';
 
 /**
  * Store для управления состоянием страницы аналитики
@@ -34,7 +34,7 @@ export type PeriodType = 'day' | 'week';
  */
 export class AnalyticsStore {
   // Выбранный период
-  periodType: PeriodType = 'week';
+  periodType: PeriodType = 'month';
   
   // Текущая дата
   currentDate: Date = new Date();
@@ -86,8 +86,8 @@ export class AnalyticsStore {
    * Переход к предыдущему периоду
    */
   navigateToPreviousPeriod() {
-    if (this.periodType === 'day') {
-      this.currentDate = subDays(this.currentDate, 1);
+    if (this.periodType === 'month') {
+      this.currentDate = subMonths(this.currentDate, 1);
     } else {
       this.currentDate = subWeeks(this.currentDate, 1);
     }
@@ -97,8 +97,8 @@ export class AnalyticsStore {
    * Переход к следующему периоду
    */
   navigateToNextPeriod() {
-    if (this.periodType === 'day') {
-      this.currentDate = addDays(this.currentDate, 1);
+    if (this.periodType === 'month') {
+      this.currentDate = addMonths(this.currentDate, 1);
     } else {
       this.currentDate = addWeeks(this.currentDate, 1);
     }
@@ -108,8 +108,8 @@ export class AnalyticsStore {
    * Computed: начало периода
    */
   get dateFrom(): Date {
-    if (this.periodType === 'day') {
-      return startOfDay(this.currentDate);
+    if (this.periodType === 'month') {
+      return startOfMonth(this.currentDate);
     } else {
       return startOfWeek(this.currentDate, { weekStartsOn: 1 }); // понедельник
     }
@@ -119,8 +119,8 @@ export class AnalyticsStore {
    * Computed: конец периода
    */
   get dateTo(): Date {
-    if (this.periodType === 'day') {
-      return endOfDay(this.currentDate);
+    if (this.periodType === 'month') {
+      return endOfMonth(this.currentDate);
     } else {
       return endOfWeek(this.currentDate, { weekStartsOn: 1 }); // воскресенье
     }
@@ -130,8 +130,8 @@ export class AnalyticsStore {
    * Computed: дата для UI
    */
   get formattedDate(): string {
-    if (this.periodType === 'day') {
-      return format(this.currentDate, 'd MMMM yyyy', { locale: ru });
+    if (this.periodType === 'month') {
+      return format(this.currentDate, 'LLLL yyyy', { locale: ru });
     } else {
       const from = format(this.dateFrom, 'd MMM', { locale: ru });
       const to = format(this.dateTo, 'd MMM yyyy', { locale: ru });

@@ -15,16 +15,16 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-const formatDate = (date: Date, period: 'day' | 'week'): string => {
+const formatDate = (date: Date, period: 'month' | 'week'): string => {
   const months = [
     'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
     'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
   ];
 
-  if (period === 'day') {
-    const day = date.getDate();
+  if (period === 'month') {
     const month = months[date.getMonth()];
-    return `${day} ${month}`;
+    const year = date.getFullYear();
+    return `${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`;
   }
 
   // For week: calculate start and end of week

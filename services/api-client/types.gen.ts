@@ -2878,7 +2878,7 @@ export type AdminAnalyticsGetStatsData = {
     /**
      * Период для сравнения статистики
      */
-    period: 'day' | 'week';
+    period: 'day' | 'week' | 'month';
     /**
      * UUID сервисного центра
      */
@@ -2920,7 +2920,7 @@ export type AdminAnalyticsGetLoadChartData = {
     /**
      * Период группировки данных графика (по дням недели или по часам)
      */
-    period: 'day' | 'week';
+    period: 'day' | 'week' | 'month';
     /**
      * UUID сервисного центра
      */

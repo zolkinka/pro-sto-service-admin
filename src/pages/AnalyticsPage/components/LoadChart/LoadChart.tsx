@@ -8,6 +8,8 @@ const LoadChart: React.FC<LoadChartProps> = ({
   maxCount,
   loading = false,
   className,
+  period = 'week',
+  date = new Date(),
 }) => {
   const [animatedData, setAnimatedData] = useState<number[]>([]);
 
@@ -33,7 +35,7 @@ const LoadChart: React.FC<LoadChartProps> = ({
     if (!loading && data.length > 0) {
       // Сброс анимации
       setAnimatedData(data.map(() => 0));
-      
+
       // Запуск анимации с задержкой
       const timer = setTimeout(() => {
         setAnimatedData(data.map((d) => d.value));
@@ -45,6 +47,9 @@ const LoadChart: React.FC<LoadChartProps> = ({
 
   // Состояние загрузки
   if (loading) {
+    // определяем количество элементов по периоду
+    const xCount = period === 'month' ? new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() : 7;
+
     return (
       <div className={classNames('load-chart', 'load-chart_loading', className)}>
         <div className="load-chart__y-axis">
@@ -56,14 +61,14 @@ const LoadChart: React.FC<LoadChartProps> = ({
         </div>
         <div className="load-chart__content">
           <div className="load-chart__bars">
-            {[1, 2, 3, 4, 5, 6, 7].map((index) => (
+            {Array.from({ length: xCount }).map((_, index) => (
               <div key={index} className="load-chart__bar-wrapper">
                 <div className="load-chart__skeleton load-chart__skeleton_bar" />
               </div>
             ))}
           </div>
           <div className="load-chart__x-axis">
-            {[1, 2, 3, 4, 5, 6, 7].map((index) => (
+            {Array.from({ length: xCount }).map((_, index) => (
               <div key={index} className="load-chart__x-label">
                 <div className="load-chart__skeleton load-chart__skeleton_x-label" />
               </div>

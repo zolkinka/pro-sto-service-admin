@@ -9,7 +9,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   disabled = false,
   className,
 }) => {
-  const handleKeyDown = (e: React.KeyboardEvent, period: 'day' | 'week') => {
+  const handleKeyDown = (e: React.KeyboardEvent, period: 'month' | 'week') => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (!disabled && value !== period) {
@@ -23,15 +23,15 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
       <button
         type="button"
         className={classNames('period-selector__button', {
-          'period-selector__button_active': value === 'day',
+          'period-selector__button_active': value === 'month',
         })}
         disabled={disabled}
-        onClick={() => !disabled && onChange('day')}
-        onKeyDown={(e) => handleKeyDown(e, 'day')}
-        aria-pressed={value === 'day'}
-        data-testid="period-selector-day"
+        onClick={() => !disabled && onChange('month')}
+        onKeyDown={(e) => handleKeyDown(e, 'month')}
+        aria-pressed={value === 'month'}
+        data-testid="period-selector-month"
       >
-        День
+        Месяц
       </button>
       <button
         type="button"

@@ -14,4 +14,8 @@ export interface LoadChartProps {
   loading?: boolean;
   /** Дополнительный CSS класс */
   className?: string;
+  /** Текущий период ("month" | "week") чтобы корректно рендерить количество меток X */
+  period?: 'month' | 'week';
+  /** Текущая дата (используется для вычисления количества дней в месяце при period='month') */
+  date?: Date;
 }

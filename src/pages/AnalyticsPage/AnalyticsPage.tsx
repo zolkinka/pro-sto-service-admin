@@ -31,7 +31,7 @@ const AnalyticsPage = observer(() => {
   }, [analyticsStore.periodType, analyticsStore.currentDate, analyticsStore]);
 
   // Обработчики для PeriodSelector и DateNavigation
-  const handlePeriodChange = (period: 'day' | 'week') => {
+  const handlePeriodChange = (period: 'month' | 'week') => {
     analyticsStore.setPeriodType(period);
   };
 
@@ -112,7 +112,12 @@ const AnalyticsPage = observer(() => {
           {/* Content */}
           <div className="analytics-page__content">
             <TopServicesTable services={mappedServices} loading={analyticsStore.isLoading} />
-            <LoadChart data={mappedChartData} loading={analyticsStore.isLoading} />
+            <LoadChart 
+              data={mappedChartData} 
+              loading={analyticsStore.isLoading}
+              period={analyticsStore.periodType}
+              date={analyticsStore.currentDate}
+            />
           </div>
         </div>
       </div>

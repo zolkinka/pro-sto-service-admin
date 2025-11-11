@@ -1,4 +1,4 @@
-export type Period = 'day' | 'week';
+export type Period = 'month' | 'week';
 
 export interface PeriodSelectorProps {
   value: Period;

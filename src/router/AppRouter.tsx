@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { ROUTES } from '@/constants/routes';
 import { authStore } from '@/stores/AuthStore';
 import AppLayout from '@/components/Layout/AppLayout';
+// import { PlatformRoute } from './PlatformRoute'; // Будет использоваться при создании мобильных версий
 import { 
   Dashboard, 
   NotFound, 
@@ -47,6 +48,13 @@ const AppRouter = observer(() => {
         path={ROUTES.DASHBOARD}
         element={
           <PrivateRoute>
+            {/* 
+              PlatformRoute автоматически выбирает desktop или mobile версию компонента
+              Пример использования:
+              <PlatformRoute desktop={Dashboard} mobile={MobileDashboard} />
+              
+              Пока мобильные версии не созданы, используем только desktop версию
+            */}
             <Dashboard />
           </PrivateRoute>
         }

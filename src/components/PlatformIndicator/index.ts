@@ -1,0 +1,1 @@
+export { PlatformIndicator } from './PlatformIndicator';

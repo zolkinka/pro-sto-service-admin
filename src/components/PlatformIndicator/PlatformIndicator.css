@@ -1,0 +1,23 @@
+.platform-indicator {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  padding: 8px 16px;
+  background: rgba(220, 38, 38, 0.9);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  user-select: none;
+}
+
+.platform-indicator[data-platform="mobile"] {
+  background: rgba(34, 197, 94, 0.9);
+}
+
+.platform-indicator[data-platform="desktop"] {
+  background: rgba(59, 130, 246, 0.9);
+}

@@ -1,0 +1,121 @@
+/* MobileServiceCard Component */
+.mobile-service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0 16px;
+  
+  background-color: var(--color-gray-25);
+  border-bottom: 1px solid #ededed;
+  
+  width: 100%;
+}
+
+.mobile-service-card:last-child {
+  border-bottom: none;
+  padding-bottom: 8px;
+}
+
+.mobile-service-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-service-card__description {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  padding: 4px 0;
+}
+
+.mobile-service-card__title {
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.mobile-service-card__subtitle {
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.2;
+  color: var(--color-gray-600);
+  margin: 0;
+}
+
+.mobile-service-card__buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mobile-service-card__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  
+  background: none;
+  border: none;
+  cursor: pointer;
+  
+  transition: transform var(--transition-fast);
+  
+  /* iOS specific */
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-service-card__button:active {
+  transform: scale(0.9);
+}
+
+.mobile-service-card__button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mobile-service-card__prices {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mobile-service-card__price-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-service-card__price-label {
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.2;
+  color: var(--color-gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-service-card__price-value {
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  color: var(--color-gray-900);
+}

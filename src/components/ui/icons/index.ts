@@ -11,3 +11,4 @@ export { CardIcon } from './CardIcon';
 export { MenuIcon } from './MenuIcon';
 export { CloseIcon } from './CloseIcon';
 export { LogoutIcon } from './LogoutIcon';
+export { TrashIcon } from './TrashIcon';

@@ -3,6 +3,7 @@ export { default as NotFound } from './NotFound';
 export { default as AuthPhonePage, MobileAuthPhonePage } from './AuthPhonePage';
 export { default as AuthCodePage, MobileAuthCodePage } from './AuthCodePage';
 export { ServicesPage } from './ServicesPage';
+export { default as MobileServicesPage } from './ServicesPage/MobileServicesPage';
 export { OrdersPage } from './OrdersPage';
 export { AnalyticsPage } from './AnalyticsPage';
 export { SchedulePage } from './SchedulePage';

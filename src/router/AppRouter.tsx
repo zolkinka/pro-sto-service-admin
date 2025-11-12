@@ -13,13 +13,13 @@ import {
   MobileAuthPhonePage,
   AuthCodePage,
   MobileAuthCodePage,
-  ServicesPage,
   OrdersPage,
   AnalyticsPage,
   SchedulePage,
   SettingsPage,
   PaymentMockPage
 } from '@/pages';
+import ServicesPageWrapper from '@/pages/ServicesPage';
 
 /**
  * ProtectedLayout - Layout wrapper для защищенных маршрутов
@@ -86,7 +86,7 @@ const AppRouter = observer(() => {
       {platform === 'mobile' ? (
         <Route element={<ProtectedLayout />}>
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
-          <Route path={ROUTES.SERVICES} element={<ServicesPage />} />
+          <Route path={ROUTES.SERVICES} element={<ServicesPageWrapper />} />
           <Route path={ROUTES.ORDERS} element={<OrdersPage />} />
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route path={ROUTES.SCHEDULE} element={<SchedulePage />} />
@@ -95,7 +95,7 @@ const AppRouter = observer(() => {
       ) : (
         <>
           <Route path={ROUTES.DASHBOARD} element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path={ROUTES.SERVICES} element={<PrivateRoute><ServicesPage /></PrivateRoute>} />
+          <Route path={ROUTES.SERVICES} element={<PrivateRoute><ServicesPageWrapper /></PrivateRoute>} />
           <Route path={ROUTES.ORDERS} element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
           <Route path={ROUTES.ANALYTICS} element={<PrivateRoute><AnalyticsPage /></PrivateRoute>} />
           <Route path={ROUTES.SCHEDULE} element={<PrivateRoute><SchedulePage /></PrivateRoute>} />

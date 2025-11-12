@@ -21,3 +21,7 @@ export type { MobileCheckboxProps } from './MobileCheckbox';
 export { MobileHeader } from './MobileHeader';
 export { MobileMenu } from './MobileMenu';
 
+export { default as MobileCategoryTabs } from './MobileCategoryTabs/MobileCategoryTabs';
+export { default as MobileServiceCard } from './MobileServiceCard/MobileServiceCard';
+export { default as MobileServiceModal } from './MobileServiceModal/MobileServiceModal';
+export { default as MobileConfirmDeleteModal } from './MobileConfirmDeleteModal/MobileConfirmDeleteModal';

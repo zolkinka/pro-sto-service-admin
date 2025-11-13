@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import { AppBaseDropdown } from '../AppBaseDropdown';
+import { MobileDrawerContent } from '../AppBaseDropdown/MobileDrawerContent';
 import AppInput from '../AppInput/AppInput';
 import type { AppDatePickerProps } from './AppDatePicker.types';
 import { CalendarIcon } from './icons/CalendarIcon';
@@ -15,6 +16,7 @@ import {
   isSameDay,
   parseDate,
 } from './utils';
+import { usePlatform } from '@/hooks/usePlatform';
 import './AppDatePicker.css';
 
 /**
@@ -46,7 +48,11 @@ export const AppDatePicker: React.FC<AppDatePickerProps> = ({
   onChange,
   'data-testid': dataTestId,
 }) => {
+  const platform = usePlatform();
+  const isMobile = platform === 'mobile';
+  
   const [isOpen, setIsOpen] = useState(false);
+  const [tempDate, setTempDate] = useState<Date | null>(null);
   
   // Парсим входящее значение
   const selectedDate = useMemo(() => parseDate(value), [value]);
@@ -81,21 +87,43 @@ export const AppDatePicker: React.FC<AppDatePickerProps> = ({
       return;
     }
     
-    onChange?.(date);
-    setIsOpen(false);
-  }, [onChange, minDate, maxDate, disabledDates]);
+    if (isMobile) {
+      // На мобильных сохраняем временное значение
+      setTempDate(date);
+    } else {
+      // На desktop сразу применяем
+      onChange?.(date);
+      setIsOpen(false);
+    }
+  }, [onChange, minDate, maxDate, disabledDates, isMobile]);
 
+  // Обработчик закрытия dropdown
+  const handleDropdownClose = useCallback(() => {
+    setIsOpen(false);
+    setTempDate(null);
+  }, []);
+  
+  // Подтверждение выбора даты на мобильных
+  const handleConfirm = useCallback(() => {
+    if (tempDate) {
+      onChange?.(tempDate);
+    }
+    setIsOpen(false);
+    setTempDate(null);
+  }, [tempDate, onChange]);
+  
+  // Отмена выбора на мобильных
+  const handleCancel = useCallback(() => {
+    setIsOpen(false);
+    setTempDate(null);
+  }, []);
+  
   // Обработчик клика по input (открытие календаря)
   const handleInputClick = useCallback(() => {
     if (!disabled) {
       setIsOpen(!isOpen);
     }
   }, [disabled, isOpen]);
-
-  // Обработчик закрытия dropdown
-  const handleDropdownClose = useCallback(() => {
-    setIsOpen(false);
-  }, []);
 
   // Навигация на предыдущий месяц
   const handlePrevMonth = useCallback(() => {
@@ -135,7 +163,10 @@ export const AppDatePicker: React.FC<AppDatePickerProps> = ({
 
   // Рендер календаря
   const renderCalendar = () => {
-    return (
+    // Используем tempDate для отображения выделенной даты на мобильных
+    const displayedSelectedDate = isMobile ? tempDate : selectedDate;
+    
+    const calendarContent = (
       <div className="app-date-picker__calendar">
         {/* Заголовок с навигацией */}
         <div className="app-date-picker__header">
@@ -174,7 +205,7 @@ export const AppDatePicker: React.FC<AppDatePickerProps> = ({
           {calendarGrid.map((week, weekIndex) => (
             <div key={weekIndex} className="app-date-picker__week">
               {week.map((cell) => {
-                const isSelected = isSameDay(cell.date, selectedDate);
+                const isSelected = isSameDay(cell.date, displayedSelectedDate);
                 const isDisabled = isDateDisabled(
                   cell.date,
                   minDate,
@@ -209,6 +240,23 @@ export const AppDatePicker: React.FC<AppDatePickerProps> = ({
         </div>
       </div>
     );
+    
+    // На мобильных оборачиваем в MobileDrawerContent с кнопками
+    if (isMobile) {
+      return (
+        <MobileDrawerContent
+          showFooter
+          cancelText="Отмена"
+          confirmText="Добавить"
+          onCancel={handleCancel}
+          onConfirm={handleConfirm}
+        >
+          {calendarContent}
+        </MobileDrawerContent>
+      );
+    }
+    
+    return calendarContent;
   };
 
   const wrapperClassName = classNames('app-date-picker', {

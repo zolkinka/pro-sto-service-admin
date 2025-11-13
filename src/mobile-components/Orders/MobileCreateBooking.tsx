@@ -1,13 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
 import { AppInput, AppButton } from '@/components/ui';
 import { AppSingleSelect } from '@/components/ui/AppSingleSelect';
+import { AppMultiSelect } from '@/components/ui/AppMultiSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
+import { AppAutocomplete } from '@/components/ui/AppAutocomplete';
 import AppTimePicker from '@/components/ui/AppTimePicker/AppTimePicker';
 import type { SelectOption } from '@/components/ui/AppSingleSelect/AppSingleSelect.types';
+import type { SelectOption as MultiSelectOption } from '@/components/ui/AppMultiSelect/AppMultiSelect.types';
+import type { SelectOption as AutocompleteOption } from '@/components/ui/AppAutocomplete/AppAutocomplete.types';
+import type { ClientSearchResultDto, CarSearchResultDto } from '../../../services/api-client/types.gen';
 import { 
   carsControllerGetMakes,
   carsControllerGetModelsByMakeId,
@@ -15,6 +20,8 @@ import {
   adminCreateOrUpdateCar,
   adminCreateBooking,
   serviceCenterGetSlots,
+  adminSearchClients,
+  adminSearchCars,
 } from '../../../services/api-client';
 import { MobileConfirmBookingModal } from '@/mobile-components/Orders/MobileConfirmBookingModal';
 import './MobileCreateBooking.css';
@@ -55,7 +62,7 @@ export const MobileCreateBooking = observer(() => {
   const locationState = location.state as LocationState | null;
 
   // Form state
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(''); // Храним введенный телефон
   const [licensePlate, setLicensePlate] = useState('');
   const [selectedMake, setSelectedMake] = useState<SelectOption | null>(null);
   const [selectedModel, setSelectedModel] = useState<SelectOption | null>(null);
@@ -64,8 +71,16 @@ export const MobileCreateBooking = observer(() => {
   );
   const [selectedTime, setSelectedTime] = useState(locationState?.initialTime || '');
   const [selectedService, setSelectedService] = useState<SelectOption | null>(null);
-  const [selectedAdditionalService, setSelectedAdditionalService] = useState<SelectOption | null>(null);
+  const [selectedAdditionalServices, setSelectedAdditionalServices] = useState<MultiSelectOption[]>([]);
   const [comment, setComment] = useState('');
+  
+  // Client and car autocomplete state
+  const [selectedClient, setSelectedClient] = useState<ClientSearchResultDto | null>(null);
+  const [clientName, setClientName] = useState<string>('');
+  const [selectedCar, setSelectedCar] = useState<CarSearchResultDto | null>(null);
+  const [phoneAutocompleteValue, setPhoneAutocompleteValue] = useState<AutocompleteOption | undefined>();
+  const [carAutocompleteValue, setCarAutocompleteValue] = useState<AutocompleteOption | undefined>();
+  const [clientCarsOptions, setClientCarsOptions] = useState<AutocompleteOption[]>([]); // Опции автомобилей выбранного клиента
   
   // Data state
   const [makes, setMakes] = useState<CarMake[]>([]);
@@ -196,12 +211,153 @@ export const MobileCreateBooking = observer(() => {
       value: service.uuid,
     }));
 
-  const additionalServiceOptions: SelectOption[] = servicesStore.services
+  const additionalServiceOptions: MultiSelectOption[] = servicesStore.services
     .filter(service => service.service_type === 'additional')
     .map(service => ({
       label: service.name,
       value: service.uuid,
     }));
+
+  // Функция поиска клиентов по номеру телефона
+  const searchClients = useCallback(async (phoneQuery: string): Promise<AutocompleteOption[]> => {
+    const digits = phoneQuery.replace(/\D/g, '');
+    const searchDigits = digits.startsWith('7') ? digits.substring(1) : digits;
+    
+    if (searchDigits.length < 3) {
+      return [];
+    }
+
+    try {
+      const results = await adminSearchClients({ phone: searchDigits, limit: 10 });
+      
+      return results.map((client: ClientSearchResultDto) => ({
+        label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
+        value: client.uuid,
+        isCustom: false,
+      } as AutocompleteOption));
+    } catch (error) {
+      console.error('Failed to search clients:', error);
+      toastStore.showError('Не удалось выполнить поиск клиентов');
+      return [];
+    }
+  }, [toastStore]);
+
+  // Обработчик выбора клиента из автокомплита
+  const handleClientSelect = useCallback(async (option: AutocompleteOption) => {
+    setPhoneAutocompleteValue(option);
+    
+    if (option.isCustom || !option.value) {
+      setSelectedClient(null);
+      setClientName('');
+      setClientCarsOptions([]);
+      setPhone(option.label);
+      return;
+    }
+
+    // Ищем клиента в результатах поиска
+    try {
+      const phoneDigits = option.label.replace(/\D/g, '');
+      const searchDigits = phoneDigits.startsWith('7') ? phoneDigits.substring(1) : phoneDigits;
+      const clients = await adminSearchClients({ phone: searchDigits, limit: 1 });
+      
+      if (clients.length > 0) {
+        const clientData = clients[0];
+        setSelectedClient(clientData);
+        setClientName(clientData.name ? String(clientData.name) : '');
+        setPhone(clientData.phone);
+        
+        // Загружаем автомобили выбранного клиента
+        const cars = await adminSearchCars({
+          licensePlate: '',
+          clientUuid: clientData.uuid,
+          limit: 50,
+        });
+        
+        const carsOptions: AutocompleteOption[] = cars.map((car: CarSearchResultDto) => ({
+          label: `${car.license_plate} (${car.make} ${car.model})`,
+          value: car.uuid,
+          isCustom: false,
+        }));
+        
+        setClientCarsOptions(carsOptions);
+      }
+    } catch (error) {
+      console.error('Failed to load client data:', error);
+      setClientCarsOptions([]);
+    }
+  }, []);
+
+  // Функция поиска автомобилей по номеру
+  const searchCars = useCallback(async (plateQuery: string): Promise<AutocompleteOption[]> => {
+    if (plateQuery.length < 2) {
+      return [];
+    }
+
+    try {
+      const results = await adminSearchCars({
+        licensePlate: plateQuery,
+        clientUuid: selectedClient?.uuid,
+        limit: 10,
+      });
+      
+      return results.map((car: CarSearchResultDto) => ({
+        label: `${car.license_plate} (${car.make} ${car.model})`,
+        value: car.uuid,
+        isCustom: false,
+      } as AutocompleteOption));
+    } catch (error) {
+      console.error('Failed to search cars:', error);
+      toastStore.showError('Не удалось выполнить поиск автомобилей');
+      return [];
+    }
+  }, [selectedClient?.uuid, toastStore]);
+
+  // Обработчик выбора автомобиля из автокомплита
+  const handleCarSelect = useCallback(async (option: AutocompleteOption) => {
+    setCarAutocompleteValue(option);
+    
+    if (option.isCustom || !option.value) {
+      setSelectedCar(null);
+      setLicensePlate(option.label);
+      return;
+    }
+
+    // Ищем автомобиль в результатах поиска
+    try {
+      const cars = await adminSearchCars({
+        licensePlate: option.label.split(' ')[0], // Берём только номер из "A000AA (Toyota Camry)"
+        clientUuid: selectedClient?.uuid,
+        limit: 1,
+      });
+      
+      if (cars.length > 0) {
+        const carData = cars[0];
+        setSelectedCar(carData);
+        setLicensePlate(carData.license_plate);
+        
+        const makeOption = makeOptions.find(m => m.label === carData.make);
+        if (makeOption) {
+          setSelectedMake(makeOption);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load car data:', error);
+    }
+  }, [selectedClient?.uuid, makeOptions]);
+
+  // Предзаполнение модели при выборе автомобиля
+  useEffect(() => {
+    if (selectedCar && models.length > 0) {
+      const modelOption = models
+        .filter(m => m.id && m.name)
+        .map(m => ({ label: m.name!, value: m.id! }))
+        .find(m => m.label === selectedCar.model);
+      
+      if (modelOption) {
+        setSelectedModel(modelOption);
+      }
+    }
+  }, [selectedCar, models]);
 
   // Вычисление общей стоимости
   const totalCost = useMemo(() => {
@@ -214,15 +370,17 @@ export const MobileCreateBooking = observer(() => {
       }
     }
     
-    if (selectedAdditionalService) {
-      const additionalService = servicesStore.services.find(s => s.uuid === selectedAdditionalService.value);
-      if (additionalService) {
-        cost += additionalService.price || 0;
-      }
+    if (selectedAdditionalServices.length > 0) {
+      selectedAdditionalServices.forEach(additionalService => {
+        const service = servicesStore.services.find(s => s.uuid === additionalService.value);
+        if (service) {
+          cost += service.price || 0;
+        }
+      });
     }
     
     return cost;
-  }, [selectedService, selectedAdditionalService, servicesStore.services]);
+  }, [selectedService, selectedAdditionalServices, servicesStore.services]);
 
   const handleBack = () => {
     navigate('/orders');
@@ -296,8 +454,8 @@ export const MobileCreateBooking = observer(() => {
       const startTime = new Date(selectedDate);
       startTime.setHours(hours, minutes, 0, 0);
 
-      const additionalServiceUuids = selectedAdditionalService 
-        ? [String(selectedAdditionalService.value)] 
+      const additionalServiceUuids = selectedAdditionalServices.length > 0
+        ? selectedAdditionalServices.map(service => String(service.value))
         : [];
 
       const bookingResponse = await adminCreateBooking({
@@ -369,11 +527,47 @@ export const MobileCreateBooking = observer(() => {
 
       <div className="mobile-create-booking__content">
         <div className="mobile-create-booking__field">
-          <AppInput
+          <AppAutocomplete
             label="Номер телефона"
             placeholder="+7"
-            value={phone}
-            onChange={setPhone}
+            value={phoneAutocompleteValue}
+            onSearch={searchClients}
+            onChange={handleClientSelect}
+            minSearchLength={3}
+            searchDebounce={300}
+          />
+        </div>
+
+        <div className="mobile-create-booking__field">
+          <AppInput
+            label="Имя клиента"
+            placeholder="Имя"
+            value={clientName}
+            onChange={setClientName}
+          />
+        </div>
+
+        <div className="mobile-create-booking__field">
+          <AppAutocomplete
+            label="Введите номер"
+            placeholder="A000AA 111"
+            value={carAutocompleteValue}
+            onSearch={searchCars}
+            onChange={handleCarSelect}
+            options={clientCarsOptions}
+            minSearchLength={2}
+            searchDebounce={300}
+          />
+        </div>
+
+        <div className="mobile-create-booking__field">
+          <AppSingleSelect
+            label="Выберите марку"
+            placeholder="Марка"
+            options={makeOptions}
+            value={selectedMake}
+            onChange={setSelectedMake}
+            clearable
           />
         </div>
 
@@ -385,26 +579,6 @@ export const MobileCreateBooking = observer(() => {
             value={selectedModel}
             onChange={setSelectedModel}
             disabled={!selectedMake || isLoadingModels}
-            clearable
-          />
-        </div>
-
-        <div className="mobile-create-booking__field">
-          <AppInput
-            label="Введите номер"
-            placeholder="A000AA 111"
-            value={licensePlate}
-            onChange={setLicensePlate}
-          />
-        </div>
-
-        <div className="mobile-create-booking__field">
-          <AppSingleSelect
-            label="Выберите марку"
-            placeholder="Марка"
-            options={makeOptions}
-            value={selectedMake}
-            onChange={setSelectedMake}
             clearable
           />
         </div>
@@ -444,13 +618,12 @@ export const MobileCreateBooking = observer(() => {
         </div>
 
         <div className="mobile-create-booking__field">
-          <AppSingleSelect
-            label="Дополнительная услуга"
-            placeholder="Выберите дополнительную услугу"
+          <AppMultiSelect
+            label="Дополнительные услуги"
+            placeholder="Выберите дополнительные услуги"
             options={additionalServiceOptions}
-            value={selectedAdditionalService}
-            onChange={setSelectedAdditionalService}
-            clearable
+            value={selectedAdditionalServices}
+            onChange={setSelectedAdditionalServices}
           />
         </div>
 

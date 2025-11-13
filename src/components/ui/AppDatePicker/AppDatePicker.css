@@ -24,6 +24,17 @@
   gap: 16px;
 }
 
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .app-date-picker__calendar {
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    gap: 12px;
+  }
+}
+
 /* Заголовок с навигацией */
 .app-date-picker__header {
   display: flex;
@@ -59,6 +70,20 @@
 
 .app-date-picker__nav-button:active {
   background: var(--color-gray-400);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .app-date-picker__nav-button {
+    width: 40px;
+    height: 40px;
+    background: var(--color-gray-200);
+    border-radius: 20px;
+  }
+
+  .app-date-picker__nav-button:hover {
+    background: var(--color-gray-300);
+  }
 }
 
 /* Дни недели */

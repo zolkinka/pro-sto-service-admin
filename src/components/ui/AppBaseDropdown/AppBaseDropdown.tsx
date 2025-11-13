@@ -21,6 +21,8 @@ import { useEscapeKey } from './hooks/useEscapeKey';
 import { useLatest } from './hooks/useLatest';
 import { useResizeObserver } from './hooks/useResizeObserver';
 import { useWindowEvent } from './hooks/useWindowEvent';
+import { usePlatform } from '@/hooks/usePlatform';
+import { MobileDrawer } from './MobileDrawer';
 
 export interface AppBaseDropdownProps {
   opened: boolean;
@@ -34,6 +36,8 @@ export interface AppBaseDropdownProps {
   onClose?: () => void;
   toggle: ReactNode;
   dropdown: ReactNode;
+  /** Force mobile drawer mode (useful for specific components like DatePicker) */
+  forceMobileDrawer?: boolean;
 }
 
 export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
@@ -48,7 +52,11 @@ export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
   onClose,
   toggle,
   dropdown,
+  forceMobileDrawer = false,
 }) => {
+  const platform = usePlatform();
+  const isMobileMode = platform === 'mobile' || forceMobileDrawer;
+  
   const rootRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -234,7 +242,8 @@ export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
   // Event listeners
   useResizeObserver(toggleRef, handleToggleDimensionChange);
   useWindowEvent('resize', handleWindowResize, undefined, state.localOpened);
-  useWindowEvent('mousedown', handleOutsideClick, true, state.localOpened);
+  // Don't handle outside clicks in mobile mode - drawer handles its own closing
+  useWindowEvent('mousedown', handleOutsideClick, true, state.localOpened && !isMobileMode);
   useEscapeKey(close, state.localOpened);
 
   const rootClassName = useMemo(() => [
@@ -242,6 +251,26 @@ export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
     opened && CSS_CLASSES.rootOpened,
   ].filter(Boolean).join(' '), [opened]);
 
+  // Mobile drawer mode
+  if (isMobileMode) {
+    return (
+      <div ref={rootRef} className={rootClassName}>
+        <div
+          ref={toggleRef}
+          className={CSS_CLASSES.toggleWrapper}
+          style={{ width: toggleWidth }}
+        >
+          {toggle}
+        </div>
+
+        <MobileDrawer opened={opened} onClose={onClose}>
+          {dropdown}
+        </MobileDrawer>
+      </div>
+    );
+  }
+
+  // Desktop dropdown mode
   return (
     <div ref={rootRef} className={rootClassName}>
       {state.localOpened && (

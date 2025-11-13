@@ -1,0 +1,46 @@
+.mobile-drawer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.mobile-drawer-content__body {
+  flex: 1;
+}
+
+.mobile-drawer-content__footer {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.mobile-drawer-content__button {
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  font-family: 'Onest', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.mobile-drawer-content__button:active {
+  opacity: 0.7;
+}
+
+.mobile-drawer-content__button--cancel {
+  background: transparent;
+  color: var(--color-gray-900, #302F2D);
+}
+
+.mobile-drawer-content__button--confirm {
+  background: var(--color-gray-900, #302F2D);
+  color: white;
+}

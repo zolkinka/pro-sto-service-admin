@@ -1,0 +1,304 @@
+.mobile-special-date-modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.mobile-special-date-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(83, 81, 79, 0.2);
+  backdrop-filter: blur(1.5px);
+}
+
+.mobile-special-date-modal__content {
+  position: relative;
+  width: 100%;
+  max-height: 80vh;
+  background: white;
+  border-radius: 30px 30px 0 0;
+  box-shadow: 8px -13px 15px 0px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 28px;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.mobile-special-date-modal__handle {
+  width: 39px;
+  height: 5px;
+  background: #e7e7e7;
+  border-radius: 5px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.mobile-special-date-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Календарь */
+.mobile-special-date-modal__calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-special-date-modal__calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-special-date-modal__nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--color-gray-200);
+  border: none;
+  border-radius: 20px;
+  color: var(--color-gray-900);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mobile-special-date-modal__nav-button:hover {
+  background: var(--color-gray-300);
+}
+
+.mobile-special-date-modal__calendar-month {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-800);
+  line-height: 1.2;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.mobile-special-date-modal__calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.mobile-special-date-modal__calendar-weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-800);
+  line-height: 1.2;
+}
+
+.mobile-special-date-modal__calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.mobile-special-date-modal__calendar-day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 20px;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-900);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mobile-special-date-modal__calendar-day:hover:not(.mobile-special-date-modal__calendar-day_empty) {
+  background: var(--color-gray-100);
+}
+
+.mobile-special-date-modal__calendar-day_today {
+  background: var(--color-gray-300);
+}
+
+.mobile-special-date-modal__calendar-day_selected {
+  background: var(--color-gray-900) !important;
+  color: white;
+  font-weight: var(--font-weight-medium);
+}
+
+.mobile-special-date-modal__calendar-day_other-month {
+  color: #667085;
+}
+
+.mobile-special-date-modal__calendar-day_empty {
+  pointer-events: none;
+}
+
+/* Секции */
+.mobile-special-date-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-special-date-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-special-date-modal__label {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-800);
+  line-height: 1.2;
+}
+
+/* Dropdown button */
+.mobile-special-date-modal__dropdown-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 12px;
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-900);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mobile-special-date-modal__dropdown-button:hover {
+  border-color: var(--color-gray-400);
+}
+
+.mobile-special-date-modal__dropdown-button svg {
+  flex-shrink: 0;
+  color: var(--color-gray-500);
+}
+
+/* Dropdown menu - rendered via AppBaseDropdown */
+.mobile-special-date-modal__dropdown-menu {
+  background: white;
+  overflow: hidden;
+}
+
+.mobile-special-date-modal__dropdown-option {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-900);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mobile-special-date-modal__dropdown-option:hover {
+  background: var(--color-gray-100);
+}
+
+/* Время работы */
+.mobile-special-date-modal__times {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.mobile-special-date-modal__times-separator {
+  width: 16px;
+  height: 2px;
+  background: var(--color-gray-200);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-bottom: 19px;
+}
+
+/* Ошибка */
+.mobile-special-date-modal__error {
+  padding: 12px;
+  background: var(--color-error-25);
+  border-radius: 12px;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-error-500);
+  line-height: 1.2;
+}
+
+/* Разделитель */
+.mobile-special-date-modal__divider {
+  height: 1px;
+  background: var(--color-gray-200);
+  flex-shrink: 0;
+}
+
+/* Footer */
+.mobile-special-date-modal__footer {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mobile-special-date-modal__button {
+  flex: 1;
+  height: 40px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 16px;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mobile-special-date-modal__button_cancel {
+  background: transparent;
+  color: var(--color-gray-900);
+}
+
+.mobile-special-date-modal__button_cancel:hover:not(:disabled) {
+  background: var(--color-gray-100);
+}
+
+.mobile-special-date-modal__button_save {
+  background: var(--color-gray-900);
+  color: white;
+}
+
+.mobile-special-date-modal__button_save:hover:not(:disabled) {
+  background: var(--color-gray-800);
+}
+
+.mobile-special-date-modal__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

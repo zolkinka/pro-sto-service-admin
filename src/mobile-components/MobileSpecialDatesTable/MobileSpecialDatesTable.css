@@ -1,0 +1,102 @@
+.mobile-special-dates-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.mobile-special-dates-table_empty {
+  padding: 24px;
+  text-align: center;
+}
+
+.mobile-special-dates-table__empty-message {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-600);
+  line-height: 1.2;
+}
+
+.mobile-special-dates-table__row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.mobile-special-dates-table__row_header {
+  min-height: 43px;
+}
+
+.mobile-special-dates-table__row:not(.mobile-special-dates-table__row_header) {
+  min-height: 49px;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.mobile-special-dates-table__cell {
+  display: flex;
+  align-items: center;
+  padding: 12px 12px 12px 0;
+  gap: 10px;
+}
+
+.mobile-special-dates-table__cell_date {
+  width: 85px;
+  flex-shrink: 0;
+}
+
+.mobile-special-dates-table__cell_type {
+  width: 105px;
+  flex-shrink: 0;
+}
+
+.mobile-special-dates-table__cell_time {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-special-dates-table__cell_action {
+  width: 69px;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.mobile-special-dates-table__header-text {
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-600);
+  line-height: 1.2;
+}
+
+.mobile-special-dates-table__cell-text {
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-900);
+  line-height: 1.2;
+}
+
+.mobile-special-dates-table__delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mobile-special-dates-table__delete-button:hover {
+  color: var(--color-error-500);
+}
+
+.mobile-special-dates-table__delete-button svg {
+  width: 24px;
+  height: 24px;
+}

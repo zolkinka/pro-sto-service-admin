@@ -4,18 +4,28 @@ import './MobileConfirmDeleteModal.css';
 
 export interface MobileConfirmDeleteModalProps {
   isOpen: boolean;
-  serviceName: string;
+  title?: string;
+  message?: string;
+  itemName?: string;
+  serviceName?: string; // Deprecated, use itemName instead
   onConfirm: () => void;
   onCancel: () => void;
   isDeleting?: boolean;
+  confirmText?: string;
+  cancelText?: string;
 }
 
 const MobileConfirmDeleteModal: React.FC<MobileConfirmDeleteModalProps> = ({
   isOpen,
-  serviceName,
+  title = 'Удалить услугу?',
+  message,
+  itemName,
+  serviceName, // Deprecated
   onConfirm,
   onCancel,
   isDeleting = false,
+  confirmText = 'Удалить',
+  cancelText = 'Отмена',
 }) => {
   // Блокируем скролл при открытии модала
   useEffect(() => {
@@ -34,6 +44,16 @@ const MobileConfirmDeleteModal: React.FC<MobileConfirmDeleteModalProps> = ({
     return null;
   }
 
+  // Для обратной совместимости
+  const displayName = itemName || serviceName;
+  
+  // Генерация сообщения по умолчанию
+  const displayMessage = message || (
+    displayName 
+      ? <>Вы действительно хотите удалить услугу <strong>{displayName}</strong>?</>
+      : 'Вы действительно хотите удалить этот элемент?'
+  );
+
   return (
     <div className="mobile-confirm-delete-modal">
       <div
@@ -42,9 +62,9 @@ const MobileConfirmDeleteModal: React.FC<MobileConfirmDeleteModalProps> = ({
         role="presentation"
       />
       <div className="mobile-confirm-delete-modal__content">
-        <h3 className="mobile-confirm-delete-modal__title">Удалить услугу?</h3>
+        <h3 className="mobile-confirm-delete-modal__title">{title}</h3>
         <p className="mobile-confirm-delete-modal__text">
-          Вы действительно хотите удалить услугу <strong>{serviceName}</strong>?
+          {displayMessage}
         </p>
         <div className="mobile-confirm-delete-modal__buttons">
           <MobileButton
@@ -53,7 +73,7 @@ const MobileConfirmDeleteModal: React.FC<MobileConfirmDeleteModalProps> = ({
             disabled={isDeleting}
             fullWidth
           >
-            Отмена
+            {cancelText}
           </MobileButton>
           <MobileButton
             variant="primary"
@@ -62,7 +82,7 @@ const MobileConfirmDeleteModal: React.FC<MobileConfirmDeleteModalProps> = ({
             disabled={isDeleting}
             fullWidth
           >
-            Удалить
+            {confirmText}
           </MobileButton>
         </div>
       </div>

@@ -1,0 +1,93 @@
+.mobile-time-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.mobile-time-picker__label {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-800);
+  line-height: 1.2;
+}
+
+/* Input-style trigger (matches Figma design) */
+.mobile-time-picker__input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  height: 40px;
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  width: 100%;
+}
+
+.mobile-time-picker__input:hover:not(.mobile-time-picker__input_disabled) {
+  border-color: var(--color-gray-400);
+}
+
+.mobile-time-picker__input_open {
+  border-color: var(--color-gray-900);
+}
+
+.mobile-time-picker__input_disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mobile-time-picker__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-gray-500);
+}
+
+.mobile-time-picker__value {
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-500);
+  line-height: 1.2;
+  text-align: center;
+  min-width: 40px;
+}
+
+/* Dropdown content rendered via AppBaseDropdown */
+.mobile-time-picker__list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+  background: white;
+}
+
+.mobile-time-picker__option {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-onest);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-900);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mobile-time-picker__option:hover {
+  background: var(--color-gray-100);
+}
+
+.mobile-time-picker__option_selected {
+  background: var(--color-gray-300);
+  font-weight: var(--font-weight-medium);
+}

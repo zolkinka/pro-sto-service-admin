@@ -16,6 +16,7 @@ import {
   OrdersPage,
   AnalyticsPage,
   SchedulePage,
+  MobileSchedulePage,
   SettingsPage,
   PaymentMockPage
 } from '@/pages';
@@ -89,7 +90,15 @@ const AppRouter = observer(() => {
           <Route path={ROUTES.SERVICES} element={<ServicesPageWrapper />} />
           <Route path={ROUTES.ORDERS} element={<OrdersPage />} />
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
-          <Route path={ROUTES.SCHEDULE} element={<SchedulePage />} />
+          <Route 
+            path={ROUTES.SCHEDULE} 
+            element={
+              <PlatformRoute 
+                desktop={SchedulePage} 
+                mobile={MobileSchedulePage}
+              />
+            } 
+          />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
         </Route>
       ) : (
@@ -98,7 +107,17 @@ const AppRouter = observer(() => {
           <Route path={ROUTES.SERVICES} element={<PrivateRoute><ServicesPageWrapper /></PrivateRoute>} />
           <Route path={ROUTES.ORDERS} element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
           <Route path={ROUTES.ANALYTICS} element={<PrivateRoute><AnalyticsPage /></PrivateRoute>} />
-          <Route path={ROUTES.SCHEDULE} element={<PrivateRoute><SchedulePage /></PrivateRoute>} />
+          <Route 
+            path={ROUTES.SCHEDULE} 
+            element={
+              <PrivateRoute>
+                <PlatformRoute 
+                  desktop={SchedulePage} 
+                  mobile={MobileSchedulePage}
+                />
+              </PrivateRoute>
+            } 
+          />
           <Route path={ROUTES.SETTINGS} element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
         </>
       )}

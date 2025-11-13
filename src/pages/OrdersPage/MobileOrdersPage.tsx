@@ -18,6 +18,11 @@ export const MobileOrdersPage = observer(() => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentTime, setCurrentTime] = useState<string>('');
   const [uiCategory, setUiCategory] = useState<CategoryType>('car_wash');
+  
+  // Состояния для автоматического показа pending заказов
+  const [pendingBookings, setPendingBookings] = useState<string[]>([]);
+  const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
+  const [showingPendingBooking, setShowingPendingBooking] = useState(false);
 
   // Обновление текущего времени каждую секунду
   useEffect(() => {
@@ -69,6 +74,22 @@ export const MobileOrdersPage = observer(() => {
       }
     }
   }, [selectedDate, authStore.user, bookingsStore, servicesStore]);
+
+  // Эффект для автоматического показа pending заказов
+  useEffect(() => {
+    // После загрузки pending заказов проверяем их наличие
+    if (!bookingsStore.isLoadingPending && bookingsStore.pendingBookings.length > 0) {
+      const pendingUuids = bookingsStore.pendingBookings.map(b => b.uuid);
+      
+      if (pendingUuids.length > 0 && !showingPendingBooking && pendingBookings.length === 0) {
+        setPendingBookings(pendingUuids);
+        setCurrentPendingIndex(0);
+        setShowingPendingBooking(true);
+        // Переходим на страницу первого pending заказа
+        navigate(`/orders/${pendingUuids[0]}?showAsNew=true&pendingIndex=${currentPendingIndex}&pendingTotal=${pendingUuids.length}`);
+      }
+    }
+  }, [bookingsStore.pendingBookings, bookingsStore.isLoadingPending, showingPendingBooking, pendingBookings.length, currentPendingIndex, navigate]);
 
   // Генерируем временные слоты с 08:00 до 22:00
   const timeSlots = useMemo(() => {
@@ -125,6 +146,20 @@ export const MobileOrdersPage = observer(() => {
 
   const handleAddBooking = () => {
     navigate('/orders/create');
+  };
+
+  const handleSlotClick = (timeSlot: string) => {
+    // Парсим время слота (например, "14:00")
+    const [hours] = timeSlot.split(':').map(Number);
+    
+    // Создаем дату с выбранным днем и временем
+    const bookingDate = new Date(selectedDate);
+    bookingDate.setHours(hours, 0, 0, 0);
+    
+    // Переходим на страницу создания бронирования с параметрами
+    const dateParam = format(bookingDate, 'yyyy-MM-dd');
+    const timeParam = timeSlot;
+    navigate(`/orders/create?date=${dateParam}&time=${timeParam}`);
   };
 
   // Показываем все временные слоты
@@ -189,6 +224,7 @@ export const MobileOrdersPage = observer(() => {
                     time={timeSlot}
                     bookings={bookings}
                     onBookingClick={handleBookingClick}
+                    onSlotClick={() => handleSlotClick(timeSlot)}
                   />
                 );
               })

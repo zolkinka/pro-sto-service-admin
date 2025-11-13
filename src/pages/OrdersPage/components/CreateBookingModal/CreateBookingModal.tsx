@@ -85,6 +85,20 @@ const CreateBookingModal = observer(({
   // Ref для отслеживания первой загрузки (чтобы не очищать initialTime)
   const isFirstLoad = useRef(true);
 
+  // Обновление даты и времени при открытии модального окна с новыми значениями
+  useEffect(() => {
+    if (isOpen) {
+      if (initialDate) {
+        setSelectedDate(initialDate);
+      }
+      if (initialTime) {
+        setSelectedTime(initialTime);
+      }
+      // Сбрасываем флаг первой загрузки при открытии
+      isFirstLoad.current = true;
+    }
+  }, [isOpen, initialDate, initialTime]);
+
   const loadMakes = useCallback(async () => {
     try {
       const response = await carsControllerGetMakes({ limit: 1000 });

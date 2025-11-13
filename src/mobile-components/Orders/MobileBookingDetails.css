@@ -17,6 +17,42 @@
   z-index: 10;
 }
 
+/* Специальные стили для хедера нового заказа */
+.mobile-booking-details__header_new {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: none;
+}
+
+.mobile-booking-details__header_new .mobile-booking-details__back {
+  color: #FFFFFF;
+}
+
+.mobile-booking-details__new-order-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.mobile-booking-details__new-order-text {
+  font-family: 'Onest', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.mobile-booking-details__new-order-counter {
+  font-family: 'Onest', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1;
+}
+
 .mobile-booking-details__header-status {
   display: inline-block;
   padding: 6px 12px;

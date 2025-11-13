@@ -60,16 +60,40 @@ export const MobileCreateBooking = observer(() => {
   const { servicesStore, toastStore, authStore, bookingsStore } = useStores();
   
   const locationState = location.state as LocationState | null;
+  
+  // Получаем параметры из URL query
+  const searchParams = new URLSearchParams(location.search);
+  const dateParam = searchParams.get('date'); // format: 'yyyy-MM-dd'
+  const timeParam = searchParams.get('time'); // format: 'HH:mm'
+  
+  // Определяем начальную дату и время из URL параметров или location state
+  const getInitialDate = (): Date | null => {
+    if (dateParam) {
+      return new Date(dateParam);
+    }
+    if (locationState?.initialDate) {
+      return new Date(locationState.initialDate);
+    }
+    return null;
+  };
+  
+  const getInitialTime = (): string => {
+    if (timeParam) {
+      return timeParam;
+    }
+    if (locationState?.initialTime) {
+      return locationState.initialTime;
+    }
+    return '';
+  };
 
   // Form state
   const [phone, setPhone] = useState(''); // Храним введенный телефон
   const [licensePlate, setLicensePlate] = useState('');
   const [selectedMake, setSelectedMake] = useState<SelectOption | null>(null);
   const [selectedModel, setSelectedModel] = useState<SelectOption | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(
-    locationState?.initialDate ? new Date(locationState.initialDate) : null
-  );
-  const [selectedTime, setSelectedTime] = useState(locationState?.initialTime || '');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(getInitialDate());
+  const [selectedTime, setSelectedTime] = useState(getInitialTime());
   const [selectedService, setSelectedService] = useState<SelectOption | null>(null);
   const [selectedAdditionalServices, setSelectedAdditionalServices] = useState<MultiSelectOption[]>([]);
   const [comment, setComment] = useState('');

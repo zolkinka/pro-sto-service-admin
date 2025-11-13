@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useStores } from '@/hooks';
@@ -46,9 +46,15 @@ const getStatusClass = (status: string): string => {
 export const MobileBookingDetails = observer(() => {
   const { uuid } = useParams<{ uuid: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { bookingsStore } = useStores();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  
+  // Проверяем, нужно ли показывать как новый заказ
+  const showAsNew = searchParams.get('showAsNew') === 'true';
+  const pendingIndex = parseInt(searchParams.get('pendingIndex') || '0', 10);
+  const pendingTotal = parseInt(searchParams.get('pendingTotal') || '1', 10);
 
   useEffect(() => {
     if (uuid) {
@@ -61,7 +67,20 @@ export const MobileBookingDetails = observer(() => {
   }, [uuid, bookingsStore]);
 
   const handleBack = () => {
-    navigate('/orders');
+    if (showAsNew && pendingIndex < pendingTotal - 1) {
+      // Переходим к следующему pending заказу
+      // Нужно получить следующий uuid из store
+      const nextIndex = pendingIndex + 1;
+      if (bookingsStore.pendingBookings[nextIndex]) {
+        const nextUuid = bookingsStore.pendingBookings[nextIndex].uuid;
+        navigate(`/orders/${nextUuid}?showAsNew=true&pendingIndex=${nextIndex}&pendingTotal=${pendingTotal}`);
+      } else {
+        navigate('/orders');
+      }
+    } else {
+      // Обычный возврат назад
+      navigate('/orders');
+    }
   };
 
   const handleCancelClick = () => {
@@ -120,7 +139,7 @@ export const MobileBookingDetails = observer(() => {
 
   return (
     <div className="mobile-booking-details">
-      <div className="mobile-booking-details__header">
+      <div className={`mobile-booking-details__header ${showAsNew ? 'mobile-booking-details__header_new' : ''}`}>
         <button 
           className="mobile-booking-details__back"
           onClick={handleBack}
@@ -129,11 +148,19 @@ export const MobileBookingDetails = observer(() => {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Назад
+          {showAsNew ? 'Далее' : 'Назад'}
         </button>
-        <div className={`mobile-booking-details__header-status ${getStatusClass(booking.status)}`}>
-          {getStatusLabel(booking.status)}
-        </div>
+        
+        {showAsNew ? (
+          <div className="mobile-booking-details__new-order-badge">
+            <span className="mobile-booking-details__new-order-text">Новый заказ</span>
+            <span className="mobile-booking-details__new-order-counter">{pendingIndex + 1}/{pendingTotal}</span>
+          </div>
+        ) : (
+          <div className={`mobile-booking-details__header-status ${getStatusClass(booking.status)}`}>
+            {getStatusLabel(booking.status)}
+          </div>
+        )}
       </div>
 
       <div className="mobile-booking-details__content">

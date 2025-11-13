@@ -6,6 +6,7 @@ import { useStores } from '@/hooks';
 import { MobileOrdersHeader } from '@/mobile-components/MobileHeader/MobileOrdersHeader';
 import { MobileCalendarView } from '@/mobile-components/Orders/MobileCalendarView';
 import { MobileBookingSlot } from '@/mobile-components/Orders/MobileBookingSlot';
+import { MobileNewBookingModal } from '@/mobile-components/Orders/MobileNewBookingModal';
 import MobileCategoryTabs from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { CategoryType } from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { AdminBookingResponseDto } from '../../../services/api-client';
@@ -19,10 +20,11 @@ export const MobileOrdersPage = observer(() => {
   const [currentTime, setCurrentTime] = useState<string>('');
   const [uiCategory, setUiCategory] = useState<CategoryType>('car_wash');
   
-  // Состояния для автоматического показа pending заказов
+  // Состояния для модального окна pending заказов
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingBookings, setPendingBookings] = useState<string[]>([]);
   const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
-  const [showingPendingBooking, setShowingPendingBooking] = useState(false);
+  const [hasShownPending, setHasShownPending] = useState(false);
 
   // Обновление текущего времени каждую секунду
   useEffect(() => {
@@ -75,21 +77,19 @@ export const MobileOrdersPage = observer(() => {
     }
   }, [selectedDate, authStore.user, bookingsStore, servicesStore]);
 
-  // Эффект для автоматического показа pending заказов
+  // Эффект для автоматического показа pending заказов в модальном окне
   useEffect(() => {
-    // После загрузки pending заказов проверяем их наличие
-    if (!bookingsStore.isLoadingPending && bookingsStore.pendingBookings.length > 0) {
+    if (!bookingsStore.isLoadingPending && bookingsStore.pendingBookings.length > 0 && !hasShownPending) {
       const pendingUuids = bookingsStore.pendingBookings.map(b => b.uuid);
       
-      if (pendingUuids.length > 0 && !showingPendingBooking && pendingBookings.length === 0) {
+      if (pendingUuids.length > 0) {
         setPendingBookings(pendingUuids);
         setCurrentPendingIndex(0);
-        setShowingPendingBooking(true);
-        // Переходим на страницу первого pending заказа
-        navigate(`/orders/${pendingUuids[0]}?showAsNew=true&pendingIndex=${currentPendingIndex}&pendingTotal=${pendingUuids.length}`);
+        setIsModalOpen(true);
+        setHasShownPending(true);
       }
     }
-  }, [bookingsStore.pendingBookings, bookingsStore.isLoadingPending, showingPendingBooking, pendingBookings.length, currentPendingIndex, navigate]);
+  }, [bookingsStore.pendingBookings, bookingsStore.isLoadingPending, hasShownPending]);
 
   // Генерируем временные слоты с 08:00 до 22:00
   const timeSlots = useMemo(() => {
@@ -162,6 +162,65 @@ export const MobileOrdersPage = observer(() => {
     navigate(`/orders/create?date=${dateParam}&time=${timeParam}`);
   };
 
+  // Обработчики модального окна pending заказов
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // Сбрасываем состояние после анимации закрытия
+    setTimeout(() => {
+      setPendingBookings([]);
+      setCurrentPendingIndex(0);
+    }, 300);
+  };
+
+  const handleConfirmBooking = async () => {
+    const currentBookingUuid = pendingBookings[currentPendingIndex];
+    
+    try {
+      const success = await bookingsStore.updateBookingStatus(currentBookingUuid, 'confirmed');
+      
+      if (success) {
+        // Показываем следующий pending заказ или закрываем модалку
+        const nextIndex = currentPendingIndex + 1;
+        
+        if (nextIndex < pendingBookings.length) {
+          setCurrentPendingIndex(nextIndex);
+        } else {
+          handleCloseModal();
+          // Обновляем список заказов
+          bookingsStore.fetchBookings();
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка подтверждения заказа:', error);
+    }
+  };
+
+  const handleCancelBooking = async () => {
+    const confirmed = window.confirm('Вы уверены, что хотите отменить эту запись?');
+    if (!confirmed) return;
+
+    const currentBookingUuid = pendingBookings[currentPendingIndex];
+    
+    try {
+      const success = await bookingsStore.updateBookingStatus(currentBookingUuid, 'cancelled');
+      
+      if (success) {
+        // Показываем следующий pending заказ или закрываем модалку
+        const nextIndex = currentPendingIndex + 1;
+        
+        if (nextIndex < pendingBookings.length) {
+          setCurrentPendingIndex(nextIndex);
+        } else {
+          handleCloseModal();
+          // Обновляем список заказов
+          bookingsStore.fetchBookings();
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка отмены заказа:', error);
+    }
+  };
+
   // Показываем все временные слоты
   const visibleSlots = timeSlots;
 
@@ -232,6 +291,19 @@ export const MobileOrdersPage = observer(() => {
           </div>
         </div>
       </div>
+
+      {/* Modal for pending bookings */}
+      {isModalOpen && pendingBookings.length > 0 && (
+        <MobileNewBookingModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          bookingUuid={pendingBookings[currentPendingIndex]}
+          onConfirm={handleConfirmBooking}
+          onCancel={handleCancelBooking}
+          currentPendingIndex={currentPendingIndex}
+          totalPendingCount={pendingBookings.length}
+        />
+      )}
     </div>
   );
 });

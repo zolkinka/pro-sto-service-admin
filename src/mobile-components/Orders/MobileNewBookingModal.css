@@ -1,0 +1,331 @@
+/* Mobile New Booking Modal */
+.mobile-new-booking-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.mobile-new-booking-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(83, 81, 79, 0.2);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+}
+
+.mobile-new-booking-modal__container {
+  position: relative;
+  width: 100%;
+  max-width: 343px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 24px;
+  box-shadow: 0px 2px 4px 0px rgba(30, 27, 21, 0.05);
+  z-index: 1001;
+}
+
+.mobile-new-booking-modal__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 16px;
+}
+
+/* Notification Header */
+.mobile-new-booking-modal__notification {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background-color: #0AB878;
+  border-radius: 16px;
+  color: #FFFFFF;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.mobile-new-booking-modal__notification svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.mobile-new-booking-modal__notification svg path {
+  stroke: #FFFFFF;
+}
+
+.mobile-new-booking-modal__counter {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* Car Section */
+.mobile-new-booking-modal__car-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 16px;
+  min-height: 66px;
+}
+
+.mobile-new-booking-modal__car-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-new-booking-modal__car-name {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #302F2D;
+}
+
+.mobile-new-booking-modal__car-plate-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #302F2D;
+}
+
+.mobile-new-booking-modal__car-plate-number {
+  font-weight: 400;
+}
+
+.mobile-new-booking-modal__car-plate-divider {
+  color: #B2B1AE;
+}
+
+.mobile-new-booking-modal__car-plate-region {
+  font-weight: 400;
+}
+
+/* Service Section */
+.mobile-new-booking-modal__service-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 16px;
+}
+
+.mobile-new-booking-modal__datetime {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #302F2D;
+  margin-bottom: 4px;
+}
+
+.mobile-new-booking-modal__divider {
+  height: 1px;
+  background: #F4F3F0;
+  margin: 6px 0;
+}
+
+.mobile-new-booking-modal__service-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-new-booking-modal__service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  gap: 8px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.mobile-new-booking-modal__service-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-new-booking-modal__service-name {
+  font-weight: 400;
+  color: #302F2D;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+.mobile-new-booking-modal__service-duration {
+  font-weight: 400;
+  color: #B2B1AE;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mobile-new-booking-modal__service-price {
+  font-weight: 400;
+  color: #302F2D;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Comment Section */
+.mobile-new-booking-modal__comment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 16px;
+  min-height: 70px;
+}
+
+.mobile-new-booking-modal__comment-label {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #B2B1AE;
+}
+
+.mobile-new-booking-modal__comment-text {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #302F2D;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Action Buttons */
+.mobile-new-booking-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.mobile-new-booking-modal__confirm-button {
+  width: 100%;
+  height: 50px;
+  padding: 16px 20px;
+  background-color: #302F2D;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-new-booking-modal__confirm-button:active {
+  opacity: 0.9;
+}
+
+.mobile-new-booking-modal__cancel-button {
+  width: 100%;
+  height: 44px;
+  padding: 12px 16px;
+  background: transparent;
+  color: #E83046;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s;
+}
+
+.mobile-new-booking-modal__cancel-button svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.mobile-new-booking-modal__cancel-button:active {
+  background-color: rgba(232, 48, 70, 0.05);
+}
+
+/* Skeleton Loading */
+.mobile-new-booking-modal__skeleton-notification,
+.mobile-new-booking-modal__skeleton-car,
+.mobile-new-booking-modal__skeleton-service,
+.mobile-new-booking-modal__skeleton-comment,
+.mobile-new-booking-modal__skeleton-button {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: mobile-new-booking-modal-skeleton-loading 1.5s infinite;
+  border-radius: 16px;
+}
+
+@keyframes mobile-new-booking-modal-skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.mobile-new-booking-modal__skeleton-notification {
+  height: 56px;
+}
+
+.mobile-new-booking-modal__skeleton-car {
+  height: 66px;
+}
+
+.mobile-new-booking-modal__skeleton-service {
+  height: 160px;
+}
+
+.mobile-new-booking-modal__skeleton-comment {
+  height: 70px;
+}
+
+.mobile-new-booking-modal__skeleton-button {
+  height: 50px;
+  border-radius: 20px;
+}

@@ -270,16 +270,14 @@
 }
 
 /* Стилизуем кнопку отмены как красную */
-.mobile-booking-details__actions .mobile-button.mobile-button_variant_primary {
-  background-color: #ff3b30;
+.mobile-booking-details__actions .mobile-button {
+  background-color: #FF3B30;
+  color: #FFFFFF;
 }
 
-.mobile-booking-details__actions .mobile-button.mobile-button_variant_primary:hover {
-  background-color: #d93229;
-}
-
-.mobile-booking-details__actions .mobile-button.mobile-button_variant_primary:active {
-  background-color: #b82b22;
+.mobile-booking-details__actions .mobile-button:active:not(.mobile-button_disabled):not(.mobile-button_loading) {
+  background-color: #E6342A;
+  transform: scale(0.98);
 }
 
 .mobile-booking-details__loading,

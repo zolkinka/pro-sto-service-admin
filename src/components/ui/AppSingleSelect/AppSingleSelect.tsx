@@ -4,6 +4,7 @@ import { AppBaseDropdown } from '../AppBaseDropdown';
 import { AppInput } from '../AppInput';
 import type { AppSingleSelectProps, SelectOption } from './AppSingleSelect.types';
 import { ChevronDownIcon } from './ChevronDownIcon';
+import { usePlatform } from '../../../hooks';
 import './AppSingleSelect.css';
 
 /**
@@ -42,6 +43,9 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
   baseDropdownProps = {},
   className,
 }) => {
+  const platform = usePlatform();
+  const isMobileMode = platform === 'mobile';
+  
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -172,12 +176,21 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
 
   const wrapperClassName = classNames('app-single-select', {
     'app-single-select_disabled': disabled,
+    'app-single-select_error': !!error,
   }, className);
+
+  // В mobile режиме: фиксированная высота если есть поиск (>10 опций), иначе динамическая
+  const hasSearch = options.length > 10;
+  const mobileDrawerProps = isMobileMode && hasSearch ? {
+    mobileDrawerMaxHeight: '66.67vh',
+    mobileDrawerFixedHeight: true,
+  } : {};
 
   return (
     <div className={wrapperClassName}>
       <AppBaseDropdown
         {...baseDropdownProps}
+        {...mobileDrawerProps}
         opened={isOpen}
         onClose={handleDropdownClose}
         toggle={renderToggle()}

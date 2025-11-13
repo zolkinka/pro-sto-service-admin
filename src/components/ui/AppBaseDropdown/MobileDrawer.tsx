@@ -7,6 +7,7 @@ export interface MobileDrawerProps {
   onClose?: () => void;
   children: React.ReactNode;
   maxHeight?: string; // e.g. "50vh", "400px", default "90vh"
+  fixedHeight?: boolean; // if true, use maxHeight as fixed height (height = minHeight = maxHeight)
 }
 
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({ 
@@ -14,6 +15,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onClose, 
   children,
   maxHeight = '90vh',
+  fixedHeight = false,
 }) => {
   const drawerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -53,7 +55,13 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
       <div 
         className="mobile-drawer" 
         ref={drawerRef}
-        style={{ maxHeight }}
+        style={fixedHeight ? { 
+          height: maxHeight,
+          minHeight: maxHeight,
+          maxHeight 
+        } : { 
+          maxHeight 
+        }}
       >
         <div className="mobile-drawer__handle" />
         <div className="mobile-drawer__content">

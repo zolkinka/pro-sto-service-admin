@@ -5,6 +5,7 @@ import { AppInput } from '../AppInput';
 import { AppTag } from '../AppTag';
 import type { AppMultiSelectProps, SelectOption } from './AppMultiSelect.types';
 import { ChevronDownIcon } from '../AppSingleSelect/ChevronDownIcon';
+import { usePlatform } from '../../../hooks';
 import './AppMultiSelect.css';
 
 /**
@@ -46,6 +47,8 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const platform = usePlatform();
+  const isMobileMode = platform === 'mobile';
 
   // Фильтрация опций по поисковому запросу
   const filteredOptions = useMemo(() => {
@@ -215,10 +218,16 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
     'app-multi-select_disabled': disabled,
   }, className);
 
+  const hasSearch = options.length > 10;
+  const mobileDrawerProps = isMobileMode && hasSearch 
+    ? { mobileDrawerMaxHeight: '66.67vh', mobileDrawerFixedHeight: true } 
+    : {};
+
   return (
     <div className={wrapperClassName}>
       <AppBaseDropdown
         {...baseDropdownProps}
+        {...mobileDrawerProps}
         opened={isOpen}
         onClose={handleDropdownClose}
         toggle={renderToggle()}

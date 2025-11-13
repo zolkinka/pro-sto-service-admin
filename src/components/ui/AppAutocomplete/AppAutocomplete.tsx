@@ -486,24 +486,24 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
         </div>
         
         <div className="app-autocomplete__mobile-options">
+          {/* Показываем введённое значение как опцию, если есть inputValue и достаточная длина */}
+          {inputValue.trim() && inputValue.length >= minSearchLength && (
+            <div
+              className="app-autocomplete__mobile-option app-autocomplete__mobile-option_custom"
+              onClick={() => handleSelect({ 
+                label: inputValue, 
+                value: null, 
+                isCustom: true 
+              })}
+            >
+              {inputValue}
+            </div>
+          )}
+          
           {isLoading ? (
             <div className="app-autocomplete__mobile-loading">Загрузка...</div>
           ) : (
             <>
-              {/* Показываем введённое значение как опцию, если есть inputValue и достаточная длина */}
-              {inputValue.trim() && inputValue.length >= minSearchLength && (
-                <div
-                  className="app-autocomplete__mobile-option app-autocomplete__mobile-option_custom"
-                  onClick={() => handleSelect({ 
-                    label: inputValue, 
-                    value: null, 
-                    isCustom: true 
-                  })}
-                >
-                  {inputValue}
-                </div>
-              )}
-              
               {/* Показываем найденные опции */}
               {filteredOptions.length > 0 ? (
                 filteredOptions.map((optionItem, index) => (
@@ -541,7 +541,8 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
         dropdown={isMobileMode ? renderMobileDrawer() : renderDropdown()}
         maxDropdownHeight={280}
         noRestrictHeigth={true}
-        mobileDrawerMaxHeight="55vh"
+        mobileDrawerMaxHeight="66.67vh"
+        mobileDrawerFixedHeight={true}
       />
     </div>
   );

@@ -40,6 +40,8 @@ export interface AppBaseDropdownProps {
   forceMobileDrawer?: boolean;
   /** Max height for mobile drawer (e.g. "50vh", "400px"), default "90vh" */
   mobileDrawerMaxHeight?: string;
+  /** If true, mobile drawer will have fixed height instead of dynamic */
+  mobileDrawerFixedHeight?: boolean;
 }
 
 export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
@@ -56,6 +58,7 @@ export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
   dropdown,
   forceMobileDrawer = false,
   mobileDrawerMaxHeight = '90vh',
+  mobileDrawerFixedHeight = false,
 }) => {
   const platform = usePlatform();
   const isMobileMode = platform === 'mobile' || forceMobileDrawer;
@@ -266,7 +269,12 @@ export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
           {toggle}
         </div>
 
-        <MobileDrawer opened={opened} onClose={onClose} maxHeight={mobileDrawerMaxHeight}>
+        <MobileDrawer 
+          opened={opened} 
+          onClose={onClose} 
+          maxHeight={mobileDrawerMaxHeight}
+          fixedHeight={mobileDrawerFixedHeight}
+        >
           {dropdown}
         </MobileDrawer>
       </div>

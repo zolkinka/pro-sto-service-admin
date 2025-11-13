@@ -1,0 +1,81 @@
+.mobile-orders-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-100);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.mobile-orders-header__logo {
+  height: 24px;
+  width: auto;
+}
+
+.mobile-orders-header__buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-orders-header__add-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-gray-900);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  
+  /* iOS specific */
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-orders-header__add-button:active {
+  transform: scale(0.95);
+  background-color: var(--color-gray-800);
+}
+
+.mobile-orders-header__add-icon {
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--color-white);
+  line-height: 1;
+}
+
+.mobile-orders-header__button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-gray-50);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  
+  /* iOS specific */
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-orders-header__button:active {
+  transform: scale(0.95);
+  background-color: var(--color-gray-100);
+}
+
+.mobile-orders-header__button svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-gray-700);
+}

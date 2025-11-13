@@ -1,9 +1,11 @@
 import React from 'react';
 import './MobileCategoryTabs.css';
 
+export type CategoryType = 'car_wash' | 'auto_service' | 'tire_service';
+
 export interface MobileCategoryTabsProps {
-  activeCategory: 'car_wash' | 'tire_service';
-  onCategoryChange: (category: 'car_wash' | 'tire_service') => void;
+  activeCategory: CategoryType;
+  onCategoryChange: (category: CategoryType) => void;
 }
 
 const MobileCategoryTabs: React.FC<MobileCategoryTabsProps> = ({
@@ -20,6 +22,15 @@ const MobileCategoryTabs: React.FC<MobileCategoryTabsProps> = ({
         type="button"
       >
         Мойка
+      </button>
+      <button
+        className={`mobile-category-tabs__tab ${
+          activeCategory === 'auto_service' ? 'mobile-category-tabs__tab_active' : ''
+        }`}
+        onClick={() => onCategoryChange('auto_service')}
+        type="button"
+      >
+        Автосервис
       </button>
       <button
         className={`mobile-category-tabs__tab ${

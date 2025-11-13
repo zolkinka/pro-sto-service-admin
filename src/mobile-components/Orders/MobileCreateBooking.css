@@ -1,0 +1,57 @@
+.mobile-create-booking {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+.mobile-create-booking__header {
+  padding: 16px;
+  border-bottom: 1px solid #e5e5e5;
+  background: var(--color-background);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.mobile-create-booking__back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.mobile-create-booking__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.mobile-create-booking__content {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 80px;
+}
+
+.mobile-create-booking__field {
+  margin-bottom: 20px;
+}
+
+.mobile-create-booking__actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: var(--color-background);
+  border-top: 1px solid #e5e5e5;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}

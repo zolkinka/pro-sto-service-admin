@@ -98,8 +98,11 @@ const MobileServicesPage = observer(() => {
   };
 
   // Обработчик изменения категории
-  const handleCategoryChange = (category: 'car_wash' | 'tire_service') => {
-    servicesStore.setActiveCategory(category);
+  const handleCategoryChange = (category: 'car_wash' | 'tire_service' | 'auto_service') => {
+    // Для auto_service пока не меняем категорию в стор, так как API не поддерживает
+    if (category !== 'auto_service') {
+      servicesStore.setActiveCategory(category);
+    }
   };
 
   // Компонент пустого состояния

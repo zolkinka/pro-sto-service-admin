@@ -1,0 +1,105 @@
+.mobile-orders-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-background);
+}
+
+.mobile-orders-page__content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-orders-page__categories {
+  padding: 16px;
+}
+
+.mobile-orders-page__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.mobile-orders-page__time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-700);
+}
+
+.mobile-orders-page__time svg {
+  flex-shrink: 0;
+}
+
+.mobile-orders-page__add-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-orders-page__add-text {
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+}
+
+.mobile-orders-page__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-gray-900);
+  color: var(--color-white);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  
+  /* iOS specific */
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-orders-page__add-btn:active {
+  transform: scale(0.95);
+  background-color: var(--color-gray-800);
+}
+
+.mobile-orders-page__add-icon {
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.mobile-orders-page__actions {
+  padding: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.mobile-orders-page__slots {
+  padding: 0 16px 80px 16px;
+}
+
+.mobile-orders-page__loading {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.mobile-orders-page__empty {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}

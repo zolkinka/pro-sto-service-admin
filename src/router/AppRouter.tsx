@@ -14,12 +14,14 @@ import {
   AuthCodePage,
   MobileAuthCodePage,
   OrdersPage,
+  MobileOrdersPage,
   AnalyticsPage,
   SchedulePage,
   MobileSchedulePage,
   SettingsPage,
   PaymentMockPage
 } from '@/pages';
+import { MobileBookingDetails, MobileCreateBooking } from '@/mobile-components';
 import ServicesPageWrapper from '@/pages/ServicesPage';
 
 /**
@@ -88,7 +90,9 @@ const AppRouter = observer(() => {
         <Route element={<ProtectedLayout />}>
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.SERVICES} element={<ServicesPageWrapper />} />
-          <Route path={ROUTES.ORDERS} element={<OrdersPage />} />
+          <Route path={ROUTES.ORDERS} element={<MobileOrdersPage />} />
+          <Route path="/orders/create" element={<MobileCreateBooking />} />
+          <Route path="/orders/:uuid" element={<MobileBookingDetails />} />
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route 
             path={ROUTES.SCHEDULE} 

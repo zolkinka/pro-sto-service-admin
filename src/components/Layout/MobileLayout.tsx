@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { MobileHeader } from '../../mobile-components/MobileHeader';
 import { MobileMenu } from '../../mobile-components/MobileMenu';
 import './MobileLayout.css';
 
 export const MobileLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -20,13 +21,19 @@ export const MobileLayout = () => {
     console.log('Notifications clicked');
   };
 
+  // Страницы, которые используют свой собственный хедер
+  const pagesWithCustomHeader = ['/orders'];
+  const shouldShowDefaultHeader = !pagesWithCustomHeader.includes(location.pathname);
+
   return (
     <div className="mobile-layout">
-      <MobileHeader 
-        onMenuClick={handleMenuToggle}
-        onNotificationClick={handleNotificationClick}
-        isMenuOpen={isMenuOpen}
-      />
+      {shouldShowDefaultHeader && (
+        <MobileHeader 
+          onMenuClick={handleMenuToggle}
+          onNotificationClick={handleNotificationClick}
+          isMenuOpen={isMenuOpen}
+        />
+      )}
       
       <main className="mobile-layout__content">
         <Outlet />

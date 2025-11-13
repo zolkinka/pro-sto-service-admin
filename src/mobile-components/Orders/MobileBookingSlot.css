@@ -1,0 +1,36 @@
+.mobile-booking-slot {
+  border-bottom: 1px solid #e5e5e5;
+  padding: 16px 0;
+}
+
+.mobile-booking-slot:last-child {
+  border-bottom: none;
+}
+
+.mobile-booking-slot_clickable {
+  cursor: pointer;
+}
+
+.mobile-booking-slot_clickable:active {
+  background-color: #f8f8f8;
+}
+
+.mobile-booking-slot__time {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+}
+
+.mobile-booking-slot__content {
+  padding-left: 16px;
+}
+
+.mobile-booking-slot__empty {
+  min-height: 16px;
+}
+
+.mobile-booking-slot__bookings {
+  display: flex;
+  flex-direction: column;
+}

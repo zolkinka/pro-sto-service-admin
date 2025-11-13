@@ -1,0 +1,79 @@
+.mobile-calendar-view {
+  background: var(--color-background);
+  border-bottom: 1px solid #e5e5e5;
+  padding: 16px;
+}
+
+.mobile-calendar-view__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mobile-calendar-view__nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.mobile-calendar-view__nav-button:hover {
+  background-color: #f0f0f0;
+}
+
+.mobile-calendar-view__nav-button:active {
+  background-color: #e0e0e0;
+}
+
+.mobile-calendar-view__date {
+  text-align: center;
+  flex: 1;
+  padding: 0 16px;
+}
+
+.mobile-calendar-view__date-main {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  text-transform: capitalize;
+}
+
+.mobile-calendar-view__date-weekday {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.mobile-calendar-view__today {
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-calendar-view__today-button {
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.mobile-calendar-view__today-button:hover {
+  background: var(--color-primary-hover);
+}
+
+.mobile-calendar-view__today-button:active {
+  background: var(--color-primary-active);
+}

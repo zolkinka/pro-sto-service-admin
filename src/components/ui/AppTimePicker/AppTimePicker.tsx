@@ -27,6 +27,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
   label,
   className,
   availableSlots,
+  iconLeft,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const optionsContainerRef = useRef<HTMLDivElement>(null);
@@ -152,6 +153,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
             mask="00:00"
             lazy={false}
             placeholderChar="0"
+            iconLeft={iconLeft}
           />
           <div 
             className={arrowClassName}

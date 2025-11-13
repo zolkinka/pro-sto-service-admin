@@ -87,24 +87,27 @@ const AppRouter = observer(() => {
 
       {/* Защищенные маршруты - используем layout route для mobile */}
       {platform === 'mobile' ? (
-        <Route element={<ProtectedLayout />}>
-          <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
-          <Route path={ROUTES.SERVICES} element={<ServicesPageWrapper />} />
-          <Route path={ROUTES.ORDERS} element={<MobileOrdersPage />} />
-          <Route path="/orders/create" element={<MobileCreateBooking />} />
-          <Route path="/orders/:uuid" element={<MobileBookingDetails />} />
-          <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
-          <Route 
-            path={ROUTES.SCHEDULE} 
-            element={
-              <PlatformRoute 
-                desktop={SchedulePage} 
-                mobile={MobileSchedulePage}
-              />
-            } 
-          />
-          <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
-        </Route>
+        <>
+          <Route element={<ProtectedLayout />}>
+            <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+            <Route path={ROUTES.SERVICES} element={<ServicesPageWrapper />} />
+            <Route path={ROUTES.ORDERS} element={<MobileOrdersPage />} />
+            <Route path="/orders/:uuid" element={<MobileBookingDetails />} />
+            <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
+            <Route 
+              path={ROUTES.SCHEDULE} 
+              element={
+                <PlatformRoute 
+                  desktop={SchedulePage} 
+                  mobile={MobileSchedulePage}
+                />
+              } 
+            />
+            <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+          </Route>
+          {/* Страница создания заказа без layout */}
+          <Route path="/orders/create" element={<PrivateRoute><MobileCreateBooking /></PrivateRoute>} />
+        </>
       ) : (
         <>
           <Route path={ROUTES.DASHBOARD} element={<PrivateRoute><Dashboard /></PrivateRoute>} />

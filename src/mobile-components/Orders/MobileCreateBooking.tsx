@@ -19,6 +19,19 @@ import {
 import { MobileConfirmBookingModal } from '@/mobile-components/Orders/MobileConfirmBookingModal';
 import './MobileCreateBooking.css';
 
+// Иконка часов для поля времени
+const ClockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path 
+      d="M10 5V10L13 13M19 10C19 14.9706 14.9706 19 10 19C5.02944 19 1 14.9706 1 10C1 5.02944 5.02944 1 10 1C14.9706 1 19 5.02944 19 10Z" 
+      stroke="#B2B1AE" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 interface LocationState {
   initialDate?: Date;
   initialTime?: string;
@@ -51,6 +64,7 @@ export const MobileCreateBooking = observer(() => {
   );
   const [selectedTime, setSelectedTime] = useState(locationState?.initialTime || '');
   const [selectedService, setSelectedService] = useState<SelectOption | null>(null);
+  const [selectedAdditionalService, setSelectedAdditionalService] = useState<SelectOption | null>(null);
   const [comment, setComment] = useState('');
   
   // Data state
@@ -182,15 +196,33 @@ export const MobileCreateBooking = observer(() => {
       value: service.uuid,
     }));
 
+  const additionalServiceOptions: SelectOption[] = servicesStore.services
+    .filter(service => service.service_type === 'additional')
+    .map(service => ({
+      label: service.name,
+      value: service.uuid,
+    }));
+
   // Вычисление общей стоимости
   const totalCost = useMemo(() => {
-    if (!selectedService) return 0;
+    let cost = 0;
     
-    const service = servicesStore.services.find(s => s.uuid === selectedService.value);
-    if (!service) return 0;
+    if (selectedService) {
+      const service = servicesStore.services.find(s => s.uuid === selectedService.value);
+      if (service) {
+        cost += service.price || 0;
+      }
+    }
     
-    return service.price || 0;
-  }, [selectedService, servicesStore.services]);
+    if (selectedAdditionalService) {
+      const additionalService = servicesStore.services.find(s => s.uuid === selectedAdditionalService.value);
+      if (additionalService) {
+        cost += additionalService.price || 0;
+      }
+    }
+    
+    return cost;
+  }, [selectedService, selectedAdditionalService, servicesStore.services]);
 
   const handleBack = () => {
     navigate('/orders');
@@ -264,6 +296,10 @@ export const MobileCreateBooking = observer(() => {
       const startTime = new Date(selectedDate);
       startTime.setHours(hours, minutes, 0, 0);
 
+      const additionalServiceUuids = selectedAdditionalService 
+        ? [String(selectedAdditionalService.value)] 
+        : [];
+
       const bookingResponse = await adminCreateBooking({
         requestBody: {
           service_center_uuid: authStore.user.service_center_uuid,
@@ -272,7 +308,7 @@ export const MobileCreateBooking = observer(() => {
           service_uuid: String(selectedService.value),
           start_time: startTime.toISOString(),
           payment_method: 'cash',
-          additional_service_uuids: [],
+          additional_service_uuids: additionalServiceUuids,
           admin_comment: comment || undefined,
         }
       });
@@ -327,9 +363,8 @@ export const MobileCreateBooking = observer(() => {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Назад
         </button>
-        <h1 className="mobile-create-booking__title">Новая запись</h1>
+        <h1 className="mobile-create-booking__title">Добавление записи</h1>
       </div>
 
       <div className="mobile-create-booking__content">
@@ -344,8 +379,8 @@ export const MobileCreateBooking = observer(() => {
 
         <div className="mobile-create-booking__field">
           <AppSingleSelect
-            label="Модель"
-            placeholder="Выберите модель"
+            label="Выберите модель"
+            placeholder="Модель"
             options={modelOptions}
             value={selectedModel}
             onChange={setSelectedModel}
@@ -356,7 +391,7 @@ export const MobileCreateBooking = observer(() => {
 
         <div className="mobile-create-booking__field">
           <AppInput
-            label="Номер автомобиля"
+            label="Введите номер"
             placeholder="A000AA 111"
             value={licensePlate}
             onChange={setLicensePlate}
@@ -365,8 +400,8 @@ export const MobileCreateBooking = observer(() => {
 
         <div className="mobile-create-booking__field">
           <AppSingleSelect
-            label="Марка"
-            placeholder="Выберите марку"
+            label="Выберите марку"
+            placeholder="Марка"
             options={makeOptions}
             value={selectedMake}
             onChange={setSelectedMake}
@@ -374,29 +409,32 @@ export const MobileCreateBooking = observer(() => {
           />
         </div>
 
-        <div className="mobile-create-booking__field">
-          <AppDatePicker
-            label="Дата"
-            value={selectedDate}
-            onChange={setSelectedDate}
-            minDate={new Date()}
-          />
-        </div>
+        <div className="mobile-create-booking__date-time-section">
+          <div className="mobile-create-booking__date-field">
+            <AppDatePicker
+              label="Дата и время"
+              value={selectedDate}
+              onChange={setSelectedDate}
+              minDate={new Date()}
+            />
+          </div>
 
-        <div className="mobile-create-booking__field">
-          <AppTimePicker
-            label="Время"
-            value={selectedTime}
-            onChange={setSelectedTime}
-            placeholder="09:00"
-            availableSlots={availableTimeSlots}
-            disabled={isLoadingSlots || !selectedDate || !selectedService}
-          />
+          <div className="mobile-create-booking__time-field">
+            <AppTimePicker
+              label=" "
+              value={selectedTime}
+              onChange={setSelectedTime}
+              placeholder="09:00"
+              availableSlots={availableTimeSlots}
+              disabled={isLoadingSlots || !selectedDate || !selectedService}
+              iconLeft={<ClockIcon />}
+            />
+          </div>
         </div>
 
         <div className="mobile-create-booking__field">
           <AppSingleSelect
-            label="Услуга"
+            label="Название услуги"
             placeholder="Выберите услугу"
             options={mainServiceOptions}
             value={selectedService}
@@ -406,23 +444,34 @@ export const MobileCreateBooking = observer(() => {
         </div>
 
         <div className="mobile-create-booking__field">
+          <AppSingleSelect
+            label="Дополнительная услуга"
+            placeholder="Выберите дополнительную услугу"
+            options={additionalServiceOptions}
+            value={selectedAdditionalService}
+            onChange={setSelectedAdditionalService}
+            clearable
+          />
+        </div>
+
+        <div className="mobile-create-booking__field">
           <AppInput
-            label="Комментарий"
-            placeholder=""
+            label="Комментарий к заказу"
+            placeholder=" "
             value={comment}
             onChange={setComment}
           />
         </div>
+      </div>
 
-        <div className="mobile-create-booking__actions">
-          <AppButton
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            loading={isSubmitting}
-          >
-            {totalCost > 0 ? `Создать заказ ${totalCost}₽` : 'Создать заказ'}
-          </AppButton>
-        </div>
+      <div className="mobile-create-booking__footer">
+        <AppButton
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          loading={isSubmitting}
+        >
+          {totalCost > 0 ? `Создать заказ ${totalCost}₽` : 'Создать заказ'}
+        </AppButton>
       </div>
 
       {bookingsStore.selectedBooking && (

@@ -10,3 +10,8 @@
   padding-top: var(--mobile-header-height);
   overflow-y: auto;
 }
+
+.mobile-layout__content--no-padding {
+  padding-top: 0;
+  overflow-y: hidden;
+}

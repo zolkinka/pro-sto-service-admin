@@ -24,6 +24,7 @@ export const MobileLayout = () => {
   // Страницы, которые используют свой собственный хедер
   const pagesWithCustomHeader = ['/orders'];
   const shouldShowDefaultHeader = !pagesWithCustomHeader.includes(location.pathname);
+  const hasCustomHeader = pagesWithCustomHeader.includes(location.pathname);
 
   return (
     <div className="mobile-layout">
@@ -35,8 +36,8 @@ export const MobileLayout = () => {
         />
       )}
       
-      <main className="mobile-layout__content">
-        <Outlet />
+      <main className={`mobile-layout__content ${hasCustomHeader ? 'mobile-layout__content--no-padding' : ''}`}>
+        <Outlet context={{ onMenuToggle: handleMenuToggle, isMenuOpen }} />
       </main>
 
       <MobileMenu 

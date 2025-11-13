@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
 import { MobileOrdersHeader } from '@/mobile-components/MobileHeader/MobileOrdersHeader';
@@ -14,8 +14,8 @@ import './MobileOrdersPage.css';
 export const MobileOrdersPage = observer(() => {
   const { bookingsStore, authStore, servicesStore } = useStores();
   const navigate = useNavigate();
+  const outletContext = useOutletContext<{ onMenuToggle: () => void; isMenuOpen: boolean }>();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('');
   const [uiCategory, setUiCategory] = useState<CategoryType>('car_wash');
 
@@ -34,14 +34,11 @@ export const MobileOrdersPage = observer(() => {
 
   const handleCategoryChange = (category: CategoryType) => {
     setUiCategory(category);
-    // Для auto_service пока не меняем категорию в стор, так как API не поддерживает
-    if (category !== 'auto_service') {
-      servicesStore.setActiveCategory(category);
-    }
+    servicesStore.setActiveCategory(category);
   };
 
   const handleMenuClick = () => {
-    setIsMenuOpen(!isMenuOpen);
+    outletContext?.onMenuToggle();
   };
 
   const handleNotificationClick = () => {
@@ -99,12 +96,7 @@ export const MobileOrdersPage = observer(() => {
     bookingsStore.bookings.forEach((booking) => {
       // Фильтруем по категории
       const businessType = serviceBusinessTypeMap.get(booking.service?.uuid || '');
-      if (uiCategory === 'auto_service') {
-        // Для auto_service показываем все, что не car_wash и не tire_service
-        if (businessType === 'car_wash' || businessType === 'tire_service') {
-          return;
-        }
-      } else if (businessType !== uiCategory) {
+      if (businessType !== uiCategory) {
         return;
       }
 
@@ -143,65 +135,65 @@ export const MobileOrdersPage = observer(() => {
       <MobileOrdersHeader 
         onMenuClick={handleMenuClick}
         onNotificationClick={handleNotificationClick}
-        isMenuOpen={isMenuOpen}
+        isMenuOpen={outletContext?.isMenuOpen || false}
       />
       
-      <div className="mobile-orders-page__content">
-        <div className="mobile-orders-page__categories">
-          <MobileCategoryTabs
-            activeCategory={uiCategory}
-            onCategoryChange={handleCategoryChange}
-          />
-        </div>
-
-        <MobileCalendarView
-          selectedDate={selectedDate}
-          onDateChange={handleDateChange}
+      <div className="mobile-orders-page__categories">
+        <MobileCategoryTabs
+          activeCategory={uiCategory}
+          onCategoryChange={handleCategoryChange}
         />
+      </div>
 
-        <div className="mobile-orders-page__toolbar">
-          <div className="mobile-orders-page__time">
-            <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="14" cy="14" r="10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M14 7V14L18.2 18.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span>{currentTime}</span>
+      <div className="mobile-orders-page__content">
+        <div className="mobile-orders-page__form">
+          <div className="mobile-orders-page__form-header">
+            <MobileCalendarView
+              selectedDate={selectedDate}
+              onDateChange={handleDateChange}
+            />
           </div>
-          <div className="mobile-orders-page__add-section">
-            <span className="mobile-orders-page__add-text">Добавить запись</span>
-            <button 
-              className="mobile-orders-page__add-btn"
-              onClick={handleAddBooking}
-              aria-label="Добавить запись"
-            >
-              <span className="mobile-orders-page__add-icon">+</span>
-            </button>
-          </div>
-        </div>
 
-        <div className="mobile-orders-page__slots">
-          {bookingsStore.isLoading ? (
-            <div className="mobile-orders-page__loading">
-              Загрузка...
+          <div className="mobile-orders-page__toolbar">
+            <div className="mobile-orders-page__time">
+              <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="14" cy="14" r="10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M14 7V14L18.2 18.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span>{currentTime}</span>
             </div>
-          ) : visibleSlots.length === 0 ? (
-            <div className="mobile-orders-page__empty">
-              Нет бронирований на выбранную дату
+            <div className="mobile-orders-page__add-section">
+              <span className="mobile-orders-page__add-text">Добавить запись</span>
+              <button 
+                className="mobile-orders-page__add-btn"
+                onClick={handleAddBooking}
+                aria-label="Добавить запись"
+              >
+                <span className="mobile-orders-page__add-icon">+</span>
+              </button>
             </div>
-          ) : (
-            visibleSlots.map((timeSlot) => {
-              const bookings = bookingsBySlot.get(timeSlot) || [];
-              
-              return (
-                <MobileBookingSlot
-                  key={timeSlot}
-                  time={timeSlot}
-                  bookings={bookings}
-                  onBookingClick={handleBookingClick}
-                />
-              );
-            })
-          )}
+          </div>
+
+          <div className="mobile-orders-page__slots-container">
+            {bookingsStore.isLoading ? (
+              <div className="mobile-orders-page__loading">
+                Загрузка...
+              </div>
+            ) : (
+              visibleSlots.map((timeSlot) => {
+                const bookings = bookingsBySlot.get(timeSlot) || [];
+                
+                return (
+                  <MobileBookingSlot
+                    key={timeSlot}
+                    time={timeSlot}
+                    bookings={bookings}
+                    onBookingClick={handleBookingClick}
+                  />
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>

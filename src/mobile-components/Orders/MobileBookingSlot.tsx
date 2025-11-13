@@ -7,14 +7,17 @@ interface MobileBookingSlotProps {
   time: string;
   bookings: AdminBookingResponseDto[];
   onBookingClick: (uuid: string) => void;
+  onSlotClick?: () => void;
 }
 
 export const MobileBookingSlot: React.FC<MobileBookingSlotProps> = ({
   time,
   bookings,
   onBookingClick,
+  onSlotClick,
 }) => {
   const hasBookings = bookings.length > 0;
+  const isClickable = !hasBookings && onSlotClick;
   
   return (
     <div className="mobile-booking-slot">
@@ -24,17 +27,18 @@ export const MobileBookingSlot: React.FC<MobileBookingSlotProps> = ({
       
       <div className="mobile-booking-slot__content">
         {hasBookings ? (
-          <div className="mobile-booking-slot__bookings">
-            {bookings.map((booking) => (
-              <MobileBookingCard
-                key={booking.uuid}
-                booking={booking}
-                onClick={onBookingClick}
-              />
-            ))}
-          </div>
+          bookings.map((booking) => (
+            <MobileBookingCard
+              key={booking.uuid}
+              booking={booking}
+              onClick={onBookingClick}
+            />
+          ))
         ) : (
-          <div className="mobile-booking-slot__empty" />
+          <div 
+            className={`mobile-booking-slot__empty ${isClickable ? 'mobile-booking-slot__empty_clickable' : ''}`}
+            onClick={isClickable ? onSlotClick : undefined}
+          />
         )}
       </div>
     </div>

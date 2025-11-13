@@ -35,7 +35,7 @@ import './AppDatePicker.css';
 export const AppDatePicker: React.FC<AppDatePickerProps> = ({
   value,
   label = 'Время и дата',
-  placeholder = 'Выберите дату',
+  placeholder = 'Дата',
   disabled = false,
   error,
   required = false,

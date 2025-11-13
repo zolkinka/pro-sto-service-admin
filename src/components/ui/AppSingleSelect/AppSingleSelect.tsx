@@ -49,6 +49,9 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // В mobile режиме: фиксированная высота если есть поиск (>10 опций), иначе динамическая
+  const hasSearch = options.length > 10;
+
   // Фильтрация опций по поисковому запросу
   const filteredOptions = useMemo(() => {
     if (!searchQuery.trim()) return options;
@@ -174,13 +177,60 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
     );
   };
 
+  // Рендер mobile drawer содержимого
+  const renderMobileDrawer = () => {
+    return (
+      <div className="app-single-select__mobile-drawer">
+        {/* Поиск показывается только для списков > 10 элементов */}
+        {hasSearch && (
+          <div className="app-single-select__mobile-search">
+            <AppInput
+              value={searchQuery}
+              placeholder={searchPlaceholder}
+              onChange={setSearchQuery}
+              autoComplete="off"
+              autoFocus
+            />
+          </div>
+        )}
+        
+        <div className="app-single-select__mobile-options">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((optionItem) => {
+              const optionClassName = classNames('app-single-select__mobile-option', {
+                'app-single-select__mobile-option_selected': value?.value === optionItem.value,
+              });
+
+              return (
+                <div
+                  key={optionItem.value}
+                  className={optionClassName}
+                  onClick={() => handleSelect(optionItem)}
+                >
+                  {option || optionItem.label}
+                  {value?.value === optionItem.value && (
+                    <div className="app-single-select__mobile-option-check" aria-hidden="true">
+                      ✓
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="app-single-select__mobile-no-options">
+              Ничего не найдено
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const wrapperClassName = classNames('app-single-select', {
     'app-single-select_disabled': disabled,
     'app-single-select_error': !!error,
   }, className);
 
-  // В mobile режиме: фиксированная высота если есть поиск (>10 опций), иначе динамическая
-  const hasSearch = options.length > 10;
   const mobileDrawerProps = isMobileMode && hasSearch ? {
     mobileDrawerMaxHeight: '66.67vh',
     mobileDrawerFixedHeight: true,
@@ -194,7 +244,7 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
         opened={isOpen}
         onClose={handleDropdownClose}
         toggle={renderToggle()}
-        dropdown={renderDropdown()}
+        dropdown={isMobileMode ? renderMobileDrawer() : renderDropdown()}
         maxDropdownHeight={280}
         noRestrictHeigth={true}
       />

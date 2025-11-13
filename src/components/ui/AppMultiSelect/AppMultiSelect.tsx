@@ -50,6 +50,9 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
   const platform = usePlatform();
   const isMobileMode = platform === 'mobile';
 
+  // В mobile режиме: фиксированная высота если есть поиск (>10 опций), иначе динамическая
+  const hasSearch = options.length > 10;
+
   // Фильтрация опций по поисковому запросу
   const filteredOptions = useMemo(() => {
     if (!searchQuery.trim()) return options;
@@ -214,11 +217,59 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
     );
   };
 
+  // Рендер mobile drawer содержимого
+  const renderMobileDrawer = () => {
+    return (
+      <div className="app-multi-select__mobile-drawer">
+        {/* Поиск показывается только для списков > 10 элементов */}
+        {hasSearch && (
+          <div className="app-multi-select__mobile-search">
+            <AppInput
+              value={searchQuery}
+              placeholder={searchPlaceholder}
+              onChange={setSearchQuery}
+              autoComplete="off"
+              autoFocus
+            />
+          </div>
+        )}
+        
+        <div className="app-multi-select__mobile-options">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((optionItem) => {
+              const optionClassName = classNames('app-multi-select__mobile-option', {
+                'app-multi-select__mobile-option_selected': isOptionSelected(optionItem.value),
+              });
+
+              return (
+                <div
+                  key={optionItem.value}
+                  className={optionClassName}
+                  onClick={() => handleSelect(optionItem)}
+                >
+                  {option || optionItem.label}
+                  {isOptionSelected(optionItem.value) && (
+                    <div className="app-multi-select__mobile-option-check" aria-hidden="true">
+                      ✓
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="app-multi-select__mobile-no-options">
+              Ничего не найдено
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const wrapperClassName = classNames('app-multi-select', {
     'app-multi-select_disabled': disabled,
   }, className);
 
-  const hasSearch = options.length > 10;
   const mobileDrawerProps = isMobileMode && hasSearch 
     ? { mobileDrawerMaxHeight: '66.67vh', mobileDrawerFixedHeight: true } 
     : {};
@@ -231,7 +282,7 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
         opened={isOpen}
         onClose={handleDropdownClose}
         toggle={renderToggle()}
-        dropdown={renderDropdown()}
+        dropdown={isMobileMode ? renderMobileDrawer() : renderDropdown()}
         maxDropdownHeight={280}
         noRestrictHeigth={true}
       />

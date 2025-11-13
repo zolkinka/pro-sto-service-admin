@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { AppBaseDropdown } from '../AppBaseDropdown';
 import { AppInput, type AppInputRef } from '../AppInput';
 import { ChevronDownIcon } from '../AppSingleSelect/ChevronDownIcon';
+import { usePlatform } from '../../../hooks';
 import type { AppTimePickerProps } from './AppTimePicker.types';
 import './AppTimePicker.css';
 
@@ -30,9 +31,14 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
   iconLeft,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const optionsContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<AppInputRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const platform = usePlatform();
+  const isMobileMode = platform === 'mobile';
+  const hasSearch = true; // У TimePicker всегда есть поиск (много опций времени)
 
   // Генерация списка времени с шагом 15 минут или использование доступных слотов
   const timeOptions: string[] = useMemo(() => {
@@ -52,6 +58,15 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
     }
     return times;
   }, [availableSlots]);
+
+  // Фильтрация опций по поисковому запросу
+  const filteredOptions = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return timeOptions;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return timeOptions.filter(time => time.includes(query));
+  }, [timeOptions, searchQuery]);
 
   // Обработчик выбора опции из списка
   const handleSelect = useCallback((time: string) => {
@@ -194,6 +209,50 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
     );
   }, [timeOptions, value, handleSelect]);
 
+  // Рендер мобильного дровера
+  const renderMobileDrawer = () => {
+    return (
+      <div className="app-time-picker__mobile-drawer">
+        {hasSearch && (
+          <div className="app-time-picker__mobile-search">
+            <AppInput
+              value={searchQuery}
+              placeholder="Поиск..."
+              onChange={setSearchQuery}
+              autoComplete="off"
+              autoFocus
+            />
+          </div>
+        )}
+        <div className="app-time-picker__mobile-options">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((time) => {
+              const isSelected = value === time;
+              const optionClassName = classNames('app-time-picker__mobile-option', {
+                'app-time-picker__mobile-option_selected': isSelected,
+              });
+
+              return (
+                <div
+                  key={time}
+                  className={optionClassName}
+                  onClick={() => handleSelect(time)}
+                >
+                  <span>{time}</span>
+                  {isSelected && <span className="app-time-picker__mobile-option-check">✓</span>}
+                </div>
+              );
+            })
+          ) : (
+            <div className="app-time-picker__mobile-no-options">
+              Ничего не найдено
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const wrapperClassName = classNames('app-time-picker', {
     'app-time-picker_disabled': disabled,
   }, className);
@@ -204,8 +263,10 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
         opened={isOpen}
         onClose={handleDropdownClose}
         toggle={renderToggle()}
-        dropdown={renderDropdown()}
+        dropdown={isMobileMode ? renderMobileDrawer() : renderDropdown()}
         maxDropdownHeight={280}
+        mobileDrawerMaxHeight="66.67vh"
+        mobileDrawerFixedHeight={hasSearch}
         noRestrictHeigth={true}
       />
     </div>

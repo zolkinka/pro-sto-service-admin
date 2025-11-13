@@ -4,7 +4,7 @@ import { AppBaseDropdown } from '../AppBaseDropdown';
 import { AppInput, type AppInputRef } from '../AppInput';
 import type { AppAutocompleteProps, SelectOption } from './AppAutocomplete.types';
 import { ChevronDownIcon } from '../AppSingleSelect/ChevronDownIcon';
-import { useDebounce } from '../../../hooks';
+import { useDebounce, usePlatform } from '../../../hooks';
 import './AppAutocomplete.css';
 
 /**
@@ -62,12 +62,16 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   onAccept,
   onComplete,
 }) => {
+  const platform = usePlatform();
+  const isMobileMode = platform === 'mobile';
+  
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [asyncOptions, setAsyncOptions] = useState<SelectOption[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<AppInputRef>(null);
+  const mobileInputRef = useRef<AppInputRef>(null);
   // Флаг для предотвращения повторного вызова onChange в handleBlur после выбора
   const justSelectedRef = useRef(false);
   // Флаг для предотвращения поиска после выбора опции
@@ -398,6 +402,34 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
       'app-autocomplete__arrow_open': isOpen,
     });
 
+    // В mobile mode toggle - это просто readonly input
+    if (isMobileMode) {
+      const displayValue = value?.label || '';
+      
+      return (
+        <div className="app-autocomplete__input-container">
+          <div className="app-autocomplete__input-wrapper">
+            <AppInput
+              value={displayValue}
+              label={label}
+              placeholder={placeholder}
+              disabled={disabled}
+              error={error}
+              required={required}
+              readOnly
+              inputProps={{
+                onClick: () => !disabled && setIsOpen(true),
+              }}
+            />
+            <div className={arrowClassName} aria-hidden="true">
+              <ChevronDownIcon color="#B2B1AE" size={20} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Desktop mode - обычный autocomplete input
     return (
       <div className="app-autocomplete__input-container">
         <div className="app-autocomplete__input-wrapper">
@@ -431,6 +463,70 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     );
   };
 
+  // Рендер mobile drawer содержимого
+  const renderMobileDrawer = () => {
+    return (
+      <div className="app-autocomplete__mobile-drawer">
+        <div className="app-autocomplete__mobile-search">
+          <AppInput
+            ref={mobileInputRef}
+            value={inputValue}
+            placeholder={placeholder || 'Поиск...'}
+            onChange={handleInputChange}
+            autoComplete="off"
+            autoFocus
+            // Пропсы для маски
+            mask={mask}
+            unmask={unmask}
+            placeholderChar={placeholderChar}
+            lazy={lazy}
+            onAccept={handleMaskAccept}
+            onComplete={onComplete}
+          />
+        </div>
+        
+        <div className="app-autocomplete__mobile-options">
+          {isLoading ? (
+            <div className="app-autocomplete__mobile-loading">Загрузка...</div>
+          ) : (
+            <>
+              {/* Показываем введённое значение как опцию, если есть inputValue и достаточная длина */}
+              {inputValue.trim() && inputValue.length >= minSearchLength && (
+                <div
+                  className="app-autocomplete__mobile-option app-autocomplete__mobile-option_custom"
+                  onClick={() => handleSelect({ 
+                    label: inputValue, 
+                    value: null, 
+                    isCustom: true 
+                  })}
+                >
+                  {inputValue}
+                </div>
+              )}
+              
+              {/* Показываем найденные опции */}
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((optionItem, index) => (
+                  <div
+                    key={`${optionItem.value}-${index}`}
+                    className="app-autocomplete__mobile-option"
+                    onClick={() => handleSelect(optionItem)}
+                  >
+                    {renderOption ? renderOption(optionItem) : optionItem.label}
+                  </div>
+                ))
+              ) : inputValue.length < minSearchLength ? (
+                <div className="app-autocomplete__mobile-no-options">
+                  {`Введите минимум ${minSearchLength} символа`}
+                </div>
+              ) : null}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const wrapperClassName = classNames('app-autocomplete', {
     'app-autocomplete_disabled': disabled,
   }, className);
@@ -442,9 +538,10 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
         opened={isOpen}
         onClose={handleDropdownClose}
         toggle={renderToggle()}
-        dropdown={renderDropdown()}
+        dropdown={isMobileMode ? renderMobileDrawer() : renderDropdown()}
         maxDropdownHeight={280}
         noRestrictHeigth={true}
+        mobileDrawerMaxHeight="55vh"
       />
     </div>
   );

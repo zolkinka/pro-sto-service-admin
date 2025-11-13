@@ -6,12 +6,14 @@ export interface MobileDrawerProps {
   opened: boolean;
   onClose?: () => void;
   children: React.ReactNode;
+  maxHeight?: string; // e.g. "50vh", "400px", default "90vh"
 }
 
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({ 
   opened, 
   onClose, 
-  children 
+  children,
+  maxHeight = '90vh',
 }) => {
   const drawerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -48,7 +50,11 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   // Render drawer in a portal to escape parent stacking context
   return createPortal(
     <div className="mobile-drawer-overlay" ref={overlayRef} onClick={handleOverlayClick}>
-      <div className="mobile-drawer" ref={drawerRef}>
+      <div 
+        className="mobile-drawer" 
+        ref={drawerRef}
+        style={{ maxHeight }}
+      >
         <div className="mobile-drawer__handle" />
         <div className="mobile-drawer__content">
           {children}

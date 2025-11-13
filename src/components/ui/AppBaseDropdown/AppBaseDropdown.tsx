@@ -38,6 +38,8 @@ export interface AppBaseDropdownProps {
   dropdown: ReactNode;
   /** Force mobile drawer mode (useful for specific components like DatePicker) */
   forceMobileDrawer?: boolean;
+  /** Max height for mobile drawer (e.g. "50vh", "400px"), default "90vh" */
+  mobileDrawerMaxHeight?: string;
 }
 
 export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
@@ -53,6 +55,7 @@ export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
   toggle,
   dropdown,
   forceMobileDrawer = false,
+  mobileDrawerMaxHeight = '90vh',
 }) => {
   const platform = usePlatform();
   const isMobileMode = platform === 'mobile' || forceMobileDrawer;
@@ -263,7 +266,7 @@ export const AppBaseDropdown: React.FC<AppBaseDropdownProps> = ({
           {toggle}
         </div>
 
-        <MobileDrawer opened={opened} onClose={onClose}>
+        <MobileDrawer opened={opened} onClose={onClose} maxHeight={mobileDrawerMaxHeight}>
           {dropdown}
         </MobileDrawer>
       </div>

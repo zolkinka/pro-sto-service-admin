@@ -18,6 +18,12 @@
 .mobile-header__logo {
   height: 24px;
   width: auto;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.mobile-header__logo:active {
+  opacity: 0.7;
 }
 
 .mobile-header__buttons {

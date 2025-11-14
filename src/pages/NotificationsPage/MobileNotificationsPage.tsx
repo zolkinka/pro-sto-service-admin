@@ -1,12 +1,15 @@
 import { useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import { useNavigate } from 'react-router-dom';
 import { notificationStore } from '../../stores/NotificationStore';
 import { MobileMenu } from '../../mobile-components/MobileMenu';
-import { MobileNotificationsHeader } from '../../mobile-components/Notifications/MobileNotificationsHeader';
+import { MobileHeader } from '../../mobile-components/MobileHeader';
 import { MobileNotificationsList } from '../../mobile-components/Notifications/MobileNotificationsList';
+import { ROUTES } from '../../constants/routes';
 import './MobileNotificationsPage.css';
 
 export const MobileNotificationsPage = observer(() => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPulling, setIsPulling] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -71,6 +74,10 @@ export const MobileNotificationsPage = observer(() => {
     setIsMenuOpen(false);
   };
 
+  const handleNotificationClick = () => {
+    navigate(ROUTES.NOTIFICATIONS);
+  };
+
   return (
     <div 
       className="mobile-notifications-page"
@@ -79,7 +86,11 @@ export const MobileNotificationsPage = observer(() => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <MobileNotificationsHeader onMenuClick={handleMenuToggle} />
+      <MobileHeader 
+        onMenuClick={handleMenuToggle}
+        onNotificationClick={handleNotificationClick}
+        isMenuOpen={isMenuOpen}
+      />
       
       {/* Pull-to-refresh indicator */}
       {pullDistance > 0 && (

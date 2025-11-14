@@ -21,9 +21,10 @@ import {
   MobileSchedulePage,
   SettingsPage,
   PaymentMockPage,
-  MobileNotificationsPage
+  MobileNotificationsPage,
+  MobileOrderDetailsPage
 } from '@/pages';
-import { MobileBookingDetails, MobileCreateBooking } from '@/mobile-components';
+import { MobileCreateBooking } from '@/mobile-components';
 import ServicesPageWrapper from '@/pages/ServicesPage';
 
 /**
@@ -94,7 +95,6 @@ const AppRouter = observer(() => {
             <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
             <Route path={ROUTES.SERVICES} element={<ServicesPageWrapper />} />
             <Route path={ROUTES.ORDERS} element={<MobileOrdersPage />} />
-            <Route path="/orders/:uuid" element={<MobileBookingDetails />} />
             <Route 
               path={ROUTES.ANALYTICS} 
               element={
@@ -117,6 +117,8 @@ const AppRouter = observer(() => {
           </Route>
           {/* Страница создания заказа без layout */}
           <Route path="/orders/create" element={<PrivateRoute><MobileCreateBooking /></PrivateRoute>} />
+          {/* Страница детального просмотра заказа без layout */}
+          <Route path="/orders/:uuid" element={<PrivateRoute><MobileOrderDetailsPage /></PrivateRoute>} />
           {/* Страница уведомлений */}
           <Route path={ROUTES.NOTIFICATIONS} element={<PrivateRoute><MobileNotificationsPage /></PrivateRoute>} />
         </>

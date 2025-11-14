@@ -43,7 +43,6 @@ export { MobileCalendarView } from './Orders/MobileCalendarView';
 export { MobileBookingCard } from './Orders/MobileBookingCard';
 export { MobileBookingSlot } from './Orders/MobileBookingSlot';
 export { MobileCancelBookingModal } from './Orders/MobileCancelBookingModal';
-export { MobileBookingDetails } from './Orders/MobileBookingDetails';
 export { MobileCreateBooking } from './Orders/MobileCreateBooking';
 export { MobileConfirmBookingModal } from './Orders/MobileConfirmBookingModal';
 export { MobileNewBookingModal } from './Orders/MobileNewBookingModal';

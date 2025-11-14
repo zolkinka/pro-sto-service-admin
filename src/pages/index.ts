@@ -10,3 +10,4 @@ export { SchedulePage, MobileSchedulePage } from './SchedulePage';
 export { PaymentMockPage } from './PaymentMockPage';
 export { default as SettingsPage } from './SettingsPage';
 export { MobileNotificationsPage } from './NotificationsPage/MobileNotificationsPage';
+export { MobileOrderDetailsPage } from './OrderDetailsPage/MobileOrderDetailsPage';

@@ -1,0 +1,336 @@
+/* Mobile Order Details Page */
+.mobile-order-details-page {
+  min-height: 100vh;
+  background: #F9F8F5;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-order-details-page__content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-y: auto;
+  padding: 0 16px 32px;
+}
+
+.mobile-order-details-page__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  color: #73716F;
+}
+
+/* Header */
+.mobile-order-details-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  background: #F9F8F5;
+  z-index: 10;
+  padding: 26px 0;
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-bottom: 1px solid #F4F3F0;
+  flex-shrink: 0;
+}
+
+.mobile-order-details-page__back-button {
+  position: absolute;
+  left: 16px;
+  top: 18px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #302F2D;
+  transition: opacity 0.2s;
+}
+
+.mobile-order-details-page__back-button:active {
+  opacity: 0.6;
+}
+
+.mobile-order-details-page__title {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #302F2D;
+  margin: 0;
+  text-align: center;
+}
+
+.mobile-order-details-page__status-tag {
+  position: absolute;
+  right: 16px;
+  top: 18px;
+}
+
+/* Body */
+.mobile-order-details-page__body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  padding-top: 24px;
+}
+
+/* Car Section */
+.mobile-order-details-page__car-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 16px;
+  min-height: 66px;
+}
+
+.mobile-order-details-page__car-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-order-details-page__car-name {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #302F2D;
+}
+
+.mobile-order-details-page__car-plate-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #302F2D;
+}
+
+.mobile-order-details-page__car-plate-number {
+  font-weight: 400;
+}
+
+.mobile-order-details-page__car-plate-divider {
+  color: #B2B1AE;
+}
+
+.mobile-order-details-page__car-plate-region {
+  font-weight: 400;
+}
+
+/* Service Section */
+.mobile-order-details-page__service-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: #FFFFFF;
+  border: 1px solid #F4F3F0;
+  border-radius: 16px;
+}
+
+.mobile-order-details-page__datetime {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #302F2D;
+  margin-bottom: 4px;
+}
+
+.mobile-order-details-page__divider {
+  height: 1px;
+  background: #F4F3F0;
+  margin: 6px 0;
+}
+
+.mobile-order-details-page__service-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0 0;
+}
+
+.mobile-order-details-page__service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  gap: 8px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.mobile-order-details-page__service-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-order-details-page__service-name {
+  font-weight: 400;
+  color: #302F2D;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+.mobile-order-details-page__service-duration {
+  font-weight: 400;
+  color: #B2B1AE;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mobile-order-details-page__service-price {
+  font-weight: 400;
+  color: #302F2D;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Total */
+.mobile-order-details-page__total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.2;
+}
+
+.mobile-order-details-page__total-label {
+  font-size: 15px;
+  font-weight: 400;
+  color: #302F2D;
+}
+
+.mobile-order-details-page__total-price {
+  font-size: 16px;
+  font-weight: 500;
+  color: #302F2D;
+}
+
+/* Footer */
+.mobile-order-details-page__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.mobile-order-details-page__cancel-button {
+  width: 100%;
+  height: 44px;
+  padding: 12px 16px;
+  background: transparent;
+  color: #E83046;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s;
+}
+
+.mobile-order-details-page__cancel-button svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.mobile-order-details-page__cancel-button:active {
+  background-color: rgba(232, 48, 70, 0.05);
+}
+
+/* Skeleton Loading */
+.mobile-order-details-page__skeleton-header,
+.mobile-order-details-page__skeleton-car,
+.mobile-order-details-page__skeleton-service,
+.mobile-order-details-page__skeleton-button {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: mobile-order-details-page-skeleton-loading 1.5s infinite;
+  border-radius: 16px;
+}
+
+@keyframes mobile-order-details-page-skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.mobile-order-details-page__skeleton-header {
+  height: 52px;
+  border-bottom: 1px solid #F4F3F0;
+  border-radius: 16px;
+  flex-shrink: 0;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.mobile-order-details-page__skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.mobile-order-details-page__skeleton-car {
+  height: 66px;
+  border-radius: 16px;
+}
+
+.mobile-order-details-page__skeleton-service {
+  height: 200px;
+  border-radius: 16px;
+}
+
+.mobile-order-details-page__skeleton-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.mobile-order-details-page__skeleton-button {
+  height: 44px;
+  border-radius: 20px;
+}

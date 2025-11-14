@@ -1,0 +1,93 @@
+.notification-card {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 16px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  position: relative;
+  border: 1px solid #f4f3f0;
+  background: white;
+}
+
+.notification-card_unread {
+  background: #eef0fc;
+  border-color: #eef0fc;
+}
+
+.notification-card:active {
+  opacity: 0.7;
+}
+
+.notification-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-card__header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.notification-card__title {
+  font-family: 'Onest', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #302f2d;
+  white-space: nowrap;
+}
+
+.notification-card__meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.notification-card__car,
+.notification-card__booking-id,
+.notification-card__client,
+.notification-card__service {
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #302f2d;
+}
+
+.notification-card__divider {
+  width: 1px;
+  height: 12px;
+  background: #e0e0e0;
+  transform: rotate(90deg);
+}
+
+.notification-card__body {
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #73716f;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notification-card__date {
+  position: absolute;
+  right: 12px;
+  top: 16px;
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #b2b1ae;
+  white-space: nowrap;
+}

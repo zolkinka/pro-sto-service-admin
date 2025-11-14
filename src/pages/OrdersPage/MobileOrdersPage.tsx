@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
+import { ROUTES } from '@/constants/routes';
 import { MobileOrdersHeader } from '@/mobile-components/MobileHeader/MobileOrdersHeader';
 import { MobileCalendarView } from '@/mobile-components/Orders/MobileCalendarView';
 import { MobileBookingSlot } from '@/mobile-components/Orders/MobileBookingSlot';
@@ -54,7 +55,7 @@ export const MobileOrdersPage = observer(() => {
   };
 
   const handleNotificationClick = () => {
-    // TODO: Handle notification click
+    navigate(ROUTES.NOTIFICATIONS);
   };
 
   // Загружаем услуги и заказы при монтировании

@@ -20,7 +20,8 @@ import {
   SchedulePage,
   MobileSchedulePage,
   SettingsPage,
-  PaymentMockPage
+  PaymentMockPage,
+  MobileNotificationsPage
 } from '@/pages';
 import { MobileBookingDetails, MobileCreateBooking } from '@/mobile-components';
 import ServicesPageWrapper from '@/pages/ServicesPage';
@@ -116,6 +117,8 @@ const AppRouter = observer(() => {
           </Route>
           {/* Страница создания заказа без layout */}
           <Route path="/orders/create" element={<PrivateRoute><MobileCreateBooking /></PrivateRoute>} />
+          {/* Страница уведомлений */}
+          <Route path={ROUTES.NOTIFICATIONS} element={<PrivateRoute><MobileNotificationsPage /></PrivateRoute>} />
         </>
       ) : (
         <>
@@ -135,6 +138,8 @@ const AppRouter = observer(() => {
             } 
           />
           <Route path={ROUTES.SETTINGS} element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+          {/* Редирект на главную для desktop */}
+          <Route path={ROUTES.NOTIFICATIONS} element={<Navigate to={ROUTES.ORDERS} replace />} />
         </>
       )}
 

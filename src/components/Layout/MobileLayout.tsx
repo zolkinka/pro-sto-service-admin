@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { MobileHeader } from '../../mobile-components/MobileHeader';
 import { MobileMenu } from '../../mobile-components/MobileMenu';
+import { ROUTES } from '../../constants/routes';
 import './MobileLayout.css';
 
 export const MobileLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -17,8 +19,7 @@ export const MobileLayout = () => {
   };
 
   const handleNotificationClick = () => {
-    // TODO: Добавить обработку уведомлений
-    console.log('Notifications clicked');
+    navigate(ROUTES.NOTIFICATIONS);
   };
 
   // Страницы, которые используют свой собственный хедер

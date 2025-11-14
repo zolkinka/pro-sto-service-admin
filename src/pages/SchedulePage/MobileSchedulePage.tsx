@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { useStores } from '@/hooks/useStores';
+import { ROUTES } from '@/constants/routes';
 import { MobileHeader } from '@/mobile-components/MobileHeader/MobileHeader';
 import AppSwitch from '@/components/ui/AppSwitch/AppSwitch';
 import MobileTimePicker from '@/mobile-components/MobileTimePicker/MobileTimePicker';
@@ -20,6 +22,7 @@ interface DayScheduleFormData {
 
 const MobileSchedulePage: React.FC = observer(() => {
   const { operatingHoursStore, authStore } = useStores();
+  const navigate = useNavigate();
   const [uniformSchedule, setUniformSchedule] = useState(true);
   const [uniformOpenTime, setUniformOpenTime] = useState('09:00');
   const [uniformCloseTime, setUniformCloseTime] = useState('18:00');
@@ -225,7 +228,7 @@ const MobileSchedulePage: React.FC = observer(() => {
   };
 
   const handleNotificationClick = () => {
-    // TODO: Implement notification panel
+    navigate(ROUTES.NOTIFICATIONS);
   };
 
   if (!serviceCenterUuid) {

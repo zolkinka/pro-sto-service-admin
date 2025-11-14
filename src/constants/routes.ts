@@ -8,6 +8,7 @@ export const ROUTES = {
   ANALYTICS: '/analytics',
   SCHEDULE: '/schedule',
   SETTINGS: '/settings',
+  NOTIFICATIONS: '/notifications',
   PAYMENT_MOCK: '/payment-mock/:bookingUuid',
 } as const;
 

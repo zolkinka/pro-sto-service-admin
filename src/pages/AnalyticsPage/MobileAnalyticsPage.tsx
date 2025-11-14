@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import { startOfWeek, endOfWeek, format, getWeek } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import { useStores } from '../../hooks';
 import { NotesIcon, TaskCheckIcon, TaskMinusIcon, CardIcon } from '../../components/ui/icons';
 import {
@@ -93,6 +95,66 @@ const MobileAnalyticsPage = observer(() => {
     analyticsStore.navigateToNextPeriod();
   };
 
+  // Функция для группировки данных по неделям для месячного периода
+  const groupDataByWeeks = (data: ChartDataPoint[]): ChartDataPoint[] => {
+    if (data.length === 0) return [];
+
+    // Группируем данные по неделям
+    const weekGroups: {
+      [key: string]: { sum: number; days: number[]; weekStart: Date; weekEnd: Date };
+    } = {};
+
+    data.forEach((point) => {
+      const dayNum = parseInt(point.label, 10);
+      if (isNaN(dayNum)) return;
+
+      // Создаем дату для этого дня месяца
+      const dayDate = new Date(
+        analyticsStore.currentDate.getFullYear(),
+        analyticsStore.currentDate.getMonth(),
+        dayNum
+      );
+
+      // Находим начало и конец недели для этого дня
+      const weekStart = startOfWeek(dayDate, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(dayDate, { weekStartsOn: 1 });
+
+      // Используем начало недели как ключ
+      const weekKey = format(weekStart, 'yyyy-MM-dd');
+
+      if (!weekGroups[weekKey]) {
+        weekGroups[weekKey] = {
+          sum: 0,
+          days: [],
+          weekStart,
+          weekEnd,
+        };
+      }
+
+      weekGroups[weekKey].sum += point.value;
+      weekGroups[weekKey].days.push(dayNum);
+    });
+
+    // Преобразуем в массив ChartDataPoint и сортируем по датам
+    const weeks = Object.entries(weekGroups)
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .map(([, group]) => {
+        // Форматируем label как W{номер недели}
+        const weekNumber = getWeek(group.weekStart, { 
+          weekStartsOn: 1,
+          firstWeekContainsDate: 4,
+          locale: ru 
+        });
+        
+        return {
+          label: `W${weekNumber}`,
+          value: group.sum,
+        };
+      });
+
+    return weeks;
+  };
+
   // Маппинг данных
   const mappedServices: TopService[] = analyticsStore.topServices.slice(0, 6).map((service) => ({
     id: service.service_uuid,
@@ -101,11 +163,15 @@ const MobileAnalyticsPage = observer(() => {
     revenue: service.revenue,
   }));
 
-  const mappedChartData: ChartDataPoint[] =
-    analyticsStore.loadChartData?.load_data.map((point) => ({
+  const rawChartData: ChartDataPoint[] =
+    analyticsStore.loadChartData?.load_data?.map((point) => ({
       label: point.label,
       value: point.bookings_count,
     })) || [];
+
+  // Для месячного периода группируем по неделям
+  const mappedChartData: ChartDataPoint[] =
+    analyticsStore.periodType === 'month' ? groupDataByWeeks(rawChartData) : rawChartData;
 
   return (
     <div className="mobile-analytics-page" ref={scrollContainerRef}>

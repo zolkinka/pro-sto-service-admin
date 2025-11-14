@@ -70,12 +70,14 @@ export const MobileLoadChart = ({ data, loading = false }: MobileLoadChartProps)
           <div className="mobile-load-chart__bars-wrapper">
             <div className="mobile-load-chart__bars">
               {data.map((point, index) => {
-                const heightPercent = maxValue > 0 ? (point.value / maxValue) * 100 : 0;
+                // Chart height (253px) - top padding - y-axis spacing
+                const chartHeight = 229; // Высота области для столбцов
+                const heightPx = maxValue > 0 ? (point.value / maxValue) * chartHeight : 0;
                 return (
                   <div key={index} className="mobile-load-chart__bar-container">
                     <div
                       className="mobile-load-chart__bar"
-                      style={{ height: `${heightPercent}%` }}
+                      style={{ height: heightPx > 0 ? `${heightPx}px` : '0px' }}
                     />
                   </div>
                 );

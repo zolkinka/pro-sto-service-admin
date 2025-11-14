@@ -98,7 +98,6 @@
   width: 19px;
   background-color: #8c9def;
   border-radius: 8px 8px 0 0;
-  min-height: 2px;
   transition: height 0.3s ease;
 }
 

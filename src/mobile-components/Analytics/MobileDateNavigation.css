@@ -1,0 +1,38 @@
+.mobile-date-navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-date-navigation__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #73716f;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.mobile-date-navigation__arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.mobile-date-navigation__arrow:not(:disabled):active {
+  opacity: 0.6;
+}
+
+.mobile-date-navigation__date {
+  font-family: 'Onest', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #53514f;
+  text-align: center;
+  white-space: nowrap;
+}

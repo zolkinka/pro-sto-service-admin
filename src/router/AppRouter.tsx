@@ -16,6 +16,7 @@ import {
   OrdersPage,
   MobileOrdersPage,
   AnalyticsPage,
+  MobileAnalyticsPage,
   SchedulePage,
   MobileSchedulePage,
   SettingsPage,
@@ -93,7 +94,15 @@ const AppRouter = observer(() => {
             <Route path={ROUTES.SERVICES} element={<ServicesPageWrapper />} />
             <Route path={ROUTES.ORDERS} element={<MobileOrdersPage />} />
             <Route path="/orders/:uuid" element={<MobileBookingDetails />} />
-            <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
+            <Route 
+              path={ROUTES.ANALYTICS} 
+              element={
+                <PlatformRoute 
+                  desktop={AnalyticsPage} 
+                  mobile={MobileAnalyticsPage}
+                />
+              } 
+            />
             <Route 
               path={ROUTES.SCHEDULE} 
               element={

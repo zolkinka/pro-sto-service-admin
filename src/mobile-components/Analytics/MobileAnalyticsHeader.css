@@ -1,0 +1,48 @@
+.mobile-analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  width: 100%;
+}
+
+.mobile-analytics-header__logo {
+  height: 27px;
+  width: 105px;
+}
+
+.mobile-analytics-header__buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-analytics-header__button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 12px;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 26px;
+  box-shadow: 0px 1px 2px 0px rgba(30, 27, 21, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.mobile-analytics-header__button:active {
+  transform: scale(0.95);
+}
+
+.mobile-analytics-header__notification-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  background-color: #d8182e;
+  border-radius: 50%;
+}

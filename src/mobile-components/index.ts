@@ -48,3 +48,6 @@ export { MobileCreateBooking } from './Orders/MobileCreateBooking';
 export { MobileConfirmBookingModal } from './Orders/MobileConfirmBookingModal';
 export { MobileNewBookingModal } from './Orders/MobileNewBookingModal';
 export { MobileViewBookingModal } from './Orders/MobileViewBookingModal';
+
+// Analytics components
+export * from './Analytics';

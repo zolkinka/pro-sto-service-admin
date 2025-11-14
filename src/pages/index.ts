@@ -5,7 +5,7 @@ export { default as AuthCodePage, MobileAuthCodePage } from './AuthCodePage';
 export { ServicesPage } from './ServicesPage';
 export { default as MobileServicesPage } from './ServicesPage/MobileServicesPage';
 export { OrdersPage, MobileOrdersPage } from './OrdersPage';
-export { AnalyticsPage } from './AnalyticsPage';
+export { AnalyticsPage, MobileAnalyticsPage } from './AnalyticsPage';
 export { SchedulePage, MobileSchedulePage } from './SchedulePage';
 export { PaymentMockPage } from './PaymentMockPage';
 export { default as SettingsPage } from './SettingsPage';

@@ -1,0 +1,150 @@
+.mobile-load-chart {
+  width: 100%;
+  border: 1px solid #f9f8f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mobile-load-chart__header {
+  padding: 8px 12px;
+  background-color: #f9f8f5;
+}
+
+.mobile-load-chart__title {
+  font-family: 'Onest', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #15181e;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.mobile-load-chart__content {
+  padding: 16px 4px 8px;
+}
+
+.mobile-load-chart__chart-wrapper {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  height: 253px;
+  margin-bottom: 8px;
+}
+
+.mobile-load-chart__y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.mobile-load-chart__y-axis-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 17px;
+  width: 100%;
+}
+
+.mobile-load-chart__y-axis-label {
+  font-family: 'Onest', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #73716f;
+  text-align: right;
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.mobile-load-chart__y-axis-line {
+  position: absolute;
+  left: 40px;
+  right: 0;
+  height: 1px;
+  background-color: #f9f8f5;
+}
+
+.mobile-load-chart__bars-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-load-chart__bars {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 229px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.mobile-load-chart__bar-container {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+}
+
+.mobile-load-chart__bar {
+  width: 19px;
+  background-color: #8c9def;
+  border-radius: 8px 8px 0 0;
+  min-height: 2px;
+  transition: height 0.3s ease;
+}
+
+.mobile-load-chart__x-axis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px 0 40px;
+  height: 16px;
+}
+
+.mobile-load-chart__x-axis-label {
+  font-family: 'Onest', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #73716f;
+  text-align: center;
+  flex: 1;
+}
+
+.mobile-load-chart__empty {
+  padding: 40px;
+  text-align: center;
+  font-family: 'Onest', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #888684;
+}
+
+/* Loading state */
+.mobile-load-chart__skeleton {
+  width: 100%;
+  height: 280px;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

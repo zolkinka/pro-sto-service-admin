@@ -3,6 +3,11 @@
   gap: 16px;
   align-items: flex-start;
   min-height: 70px;
+  margin-bottom: 2px;
+}
+
+.mobile-booking-slot:last-child {
+  margin-bottom: 0;
 }
 
 .mobile-booking-slot__time {

@@ -23,7 +23,7 @@ export const MobileLayout = () => {
   };
 
   // Страницы, которые используют свой собственный хедер
-  const pagesWithCustomHeader = ['/orders'];
+  const pagesWithCustomHeader: string[] = [];
   const shouldShowDefaultHeader = !pagesWithCustomHeader.includes(location.pathname);
   const hasCustomHeader = pagesWithCustomHeader.includes(location.pathname);
 

@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
-import { ROUTES } from '@/constants/routes';
-import { MobileOrdersHeader } from '@/mobile-components/MobileHeader/MobileOrdersHeader';
 import { MobileCalendarView } from '@/mobile-components/Orders/MobileCalendarView';
 import { MobileBookingSlot } from '@/mobile-components/Orders/MobileBookingSlot';
 import { MobileNewBookingModal } from '@/mobile-components/Orders/MobileNewBookingModal';
@@ -16,7 +14,6 @@ import './MobileOrdersPage.css';
 export const MobileOrdersPage = observer(() => {
   const { bookingsStore, authStore, servicesStore } = useStores();
   const navigate = useNavigate();
-  const outletContext = useOutletContext<{ onMenuToggle: () => void; isMenuOpen: boolean }>();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentTime, setCurrentTime] = useState<string>('');
   const [uiCategory, setUiCategory] = useState<CategoryType>('car_wash');
@@ -43,14 +40,6 @@ export const MobileOrdersPage = observer(() => {
   const handleCategoryChange = (category: CategoryType) => {
     setUiCategory(category);
     servicesStore.setActiveCategory(category);
-  };
-
-  const handleMenuClick = () => {
-    outletContext?.onMenuToggle();
-  };
-
-  const handleNotificationClick = () => {
-    navigate(ROUTES.NOTIFICATIONS);
   };
 
   // Загружаем услуги и заказы при монтировании
@@ -227,12 +216,6 @@ export const MobileOrdersPage = observer(() => {
 
   return (
     <div className="mobile-orders-page">
-      <MobileOrdersHeader 
-        onMenuClick={handleMenuClick}
-        onNotificationClick={handleNotificationClick}
-        isMenuOpen={outletContext?.isMenuOpen || false}
-      />
-      
       <div className="mobile-orders-page__categories">
         <MobileCategoryTabs
           activeCategory={uiCategory}
@@ -257,16 +240,16 @@ export const MobileOrdersPage = observer(() => {
               </svg>
               <span>{currentTime}</span>
             </div>
-            <div className="mobile-orders-page__add-section">
+            <button 
+              className="mobile-orders-page__add-section"
+              onClick={handleAddBooking}
+              aria-label="Добавить запись"
+            >
               <span className="mobile-orders-page__add-text">Добавить запись</span>
-              <button 
-                className="mobile-orders-page__add-btn"
-                onClick={handleAddBooking}
-                aria-label="Добавить запись"
-              >
+              <div className="mobile-orders-page__add-btn">
                 <span className="mobile-orders-page__add-icon">+</span>
-              </button>
-            </div>
+              </div>
+            </button>
           </div>
 
           <div className="mobile-orders-page__slots-container">

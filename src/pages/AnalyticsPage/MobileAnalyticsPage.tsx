@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { startOfWeek, endOfWeek, format, getWeek } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -16,10 +16,6 @@ import './MobileAnalyticsPage.css';
 
 const MobileAnalyticsPage = observer(() => {
   const { analyticsStore, authStore } = useStores();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const startY = useRef<number>(0);
-  const currentY = useRef<number>(0);
 
   // Инициализация: установка serviceCenterUuid и загрузка данных
   useEffect(() => {
@@ -35,52 +31,6 @@ const MobileAnalyticsPage = observer(() => {
       analyticsStore.fetchAll();
     }
   }, [analyticsStore.periodType, analyticsStore.currentDate, analyticsStore]);
-
-  // Pull-to-refresh implementation
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (container.scrollTop === 0) {
-        startY.current = e.touches[0].clientY;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (container.scrollTop === 0 && !analyticsStore.isLoading) {
-        currentY.current = e.touches[0].clientY;
-        const diff = currentY.current - startY.current;
-
-        if (diff > 0 && diff < 100) {
-          e.preventDefault();
-        }
-      }
-    };
-
-    const handleTouchEnd = async () => {
-      const diff = currentY.current - startY.current;
-
-      if (diff > 80 && !analyticsStore.isLoading) {
-        setIsRefreshing(true);
-        await analyticsStore.fetchAll();
-        setIsRefreshing(false);
-      }
-
-      startY.current = 0;
-      currentY.current = 0;
-    };
-
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [analyticsStore]);
 
   // Обработчики
   const handlePeriodChange = (period: 'month' | 'week') => {
@@ -174,10 +124,7 @@ const MobileAnalyticsPage = observer(() => {
     analyticsStore.periodType === 'month' ? groupDataByWeeks(rawChartData) : rawChartData;
 
   return (
-    <div className="mobile-analytics-page" ref={scrollContainerRef}>
-      {/* Pull-to-refresh indicator */}
-      {isRefreshing && <div className="mobile-analytics-page__refresh-indicator">Обновление...</div>}
-
+    <div className="mobile-analytics-page">
       {/* Content */}
       <div className="mobile-analytics-page__content">
         {/* Controls */}

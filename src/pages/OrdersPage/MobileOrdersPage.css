@@ -1,7 +1,7 @@
 .mobile-orders-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: #F9F8F5;
   overflow: hidden;
 }
@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 12px 16px 16px 16px; /* Уменьшен padding-bottom до 16px */
+  padding: 12px 16px 0 16px; /* Убрали padding-bottom */
   min-height: 0;
 }
 
@@ -30,6 +30,7 @@
   flex: 1; /* Растягиваем на всю доступную высоту */
   min-height: 0; /* Важно для работы overflow в дочерних элементах */
   overflow: hidden;
+  margin-bottom: 16px; /* Отступ снизу */
 }
 
 .mobile-orders-page__form-header {
@@ -65,6 +66,23 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  
+  /* iOS specific */
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-orders-page__add-section:active .mobile-orders-page__add-text {
+  opacity: 0.7;
+}
+
+.mobile-orders-page__add-section:active .mobile-orders-page__add-btn {
+  opacity: 0.8;
 }
 
 .mobile-orders-page__add-text {
@@ -73,6 +91,7 @@
   font-weight: 500;
   line-height: 1.2;
   color: #302F2D;
+  transition: opacity 0.2s;
 }
 
 .mobile-orders-page__add-btn {
@@ -84,19 +103,9 @@
   border-radius: 20px;
   background-color: #302F2D;
   color: #FFFFFF;
-  border: none;
-  cursor: pointer;
-  padding: 0;
   flex-shrink: 0;
-  
-  /* iOS specific */
-  -webkit-appearance: none;
-  appearance: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.mobile-orders-page__add-btn:active {
-  opacity: 0.8;
+  pointer-events: none;
+  transition: opacity 0.2s;
 }
 
 .mobile-orders-page__add-icon {
@@ -106,14 +115,12 @@
 }
 
 .mobile-orders-page__slots-container {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - var(--mobile-header-height) - 200px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 0 16px 16px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-height: 0;
 }
 
 .mobile-orders-page__loading {

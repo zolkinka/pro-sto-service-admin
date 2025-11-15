@@ -1,16 +1,18 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useStores } from '@/hooks/useStores';
 import { ROUTES } from '@/constants/routes';
 import { MobileHeader } from '@/mobile-components/MobileHeader/MobileHeader';
+import { MobileMenu } from '@/mobile-components/MobileMenu/MobileMenu';
 import AppSwitch from '@/components/ui/AppSwitch/AppSwitch';
 import MobileTimePicker from '@/mobile-components/MobileTimePicker/MobileTimePicker';
 import MobileDayScheduleRow from '@/mobile-components/MobileDayScheduleRow/MobileDayScheduleRow';
 import MobileSpecialDatesTable from '@/mobile-components/MobileSpecialDatesTable/MobileSpecialDatesTable';
 import MobileSpecialDateModal from '@/mobile-components/MobileSpecialDateModal/MobileSpecialDateModal';
-import { DAY_NAMES, DAYS_ORDER, formatTime } from './utils';
+import MobileButton from '@/mobile-components/MobileButton/MobileButton';
+import { DAY_NAMES, DAYS_ORDER, formatTime, parseTime, validateTimeRange } from './utils';
 import type { UpdateRegularScheduleDto } from '../../../services/api-client/types.gen';
 import './MobileSchedulePage.css';
 
@@ -21,7 +23,8 @@ interface DayScheduleFormData {
 }
 
 const MobileSchedulePage: React.FC = observer(() => {
-  const { operatingHoursStore, authStore } = useStores();
+  const rootStore = useStores();
+  const { operatingHoursStore, authStore } = rootStore;
   const navigate = useNavigate();
   const [uniformSchedule, setUniformSchedule] = useState(true);
   const [uniformOpenTime, setUniformOpenTime] = useState('09:00');
@@ -29,9 +32,16 @@ const MobileSchedulePage: React.FC = observer(() => {
   const [weekSchedule, setWeekSchedule] = useState<Record<string, DayScheduleFormData>>({});
   const [isSpecialDateModalOpen, setIsSpecialDateModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const serviceCenterUuid = authStore.user?.service_center_uuid;
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const originalDataRef = useRef<{
+    uniformSchedule: boolean;
+    uniformOpenTime: string;
+    uniformCloseTime: string;
+    weekSchedule: Record<string, DayScheduleFormData>;
+  } | null>(null);
 
   // Инициализация данных
   useEffect(() => {
@@ -60,11 +70,14 @@ const MobileSchedulePage: React.FC = observer(() => {
       );
     });
 
+    const uniformOpen = formatTime(firstDay.open_time);
+    const uniformClose = formatTime(firstDay.close_time);
+
     setUniformSchedule(allSameTime);
 
     if (allSameTime && !firstDay.is_closed) {
-      setUniformOpenTime(formatTime(firstDay.open_time));
-      setUniformCloseTime(formatTime(firstDay.close_time));
+      setUniformOpenTime(uniformOpen);
+      setUniformCloseTime(uniformClose);
     }
 
     // Инициализация недельного расписания
@@ -79,82 +92,146 @@ const MobileSchedulePage: React.FC = observer(() => {
       }
     });
     setWeekSchedule(schedule);
+
+    // Сохраняем оригинальные данные для отслеживания изменений
+    originalDataRef.current = {
+      uniformSchedule: allSameTime,
+      uniformOpenTime: uniformOpen,
+      uniformCloseTime: uniformClose,
+      weekSchedule: JSON.parse(JSON.stringify(schedule)),
+    };
+    
+    // Сбрасываем флаг изменений при загрузке новых данных
+    setHasUnsavedChanges(false);
   }, [operatingHoursStore.regularSchedule]);
 
-  // Автосохранение с дебаунсом
-  const saveSchedule = useCallback(async () => {
+  // Отслеживание изменений
+  useEffect(() => {
+    if (!originalDataRef.current) return;
+
+    const original = originalDataRef.current;
+    const hasChanges = 
+      uniformSchedule !== original.uniformSchedule ||
+      uniformOpenTime !== original.uniformOpenTime ||
+      uniformCloseTime !== original.uniformCloseTime ||
+      JSON.stringify(weekSchedule) !== JSON.stringify(original.weekSchedule);
+
+    setHasUnsavedChanges(hasChanges);
+  }, [uniformSchedule, uniformOpenTime, uniformCloseTime, weekSchedule]);
+
+  // Валидация данных
+  const validate = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    if (uniformSchedule) {
+      if (!uniformOpenTime) {
+        errors.push('Укажите время открытия');
+      } else if (!uniformCloseTime) {
+        errors.push('Укажите время закрытия');
+      } else if (!validateTimeRange(uniformOpenTime, uniformCloseTime)) {
+        errors.push('Время закрытия должно быть позже времени открытия');
+      }
+    } else {
+      DAYS_ORDER.forEach(day => {
+        const daySchedule = weekSchedule[day];
+        
+        if (!daySchedule) return;
+        if (daySchedule.isOpen === false) return;
+        
+        if (!daySchedule.openTime) {
+          errors.push(`${DAY_NAMES[day]}: укажите время открытия`);
+        } else if (!daySchedule.closeTime) {
+          errors.push(`${DAY_NAMES[day]}: укажите время закрытия`);
+        } else if (!validateTimeRange(daySchedule.openTime, daySchedule.closeTime)) {
+          errors.push(`${DAY_NAMES[day]}: время закрытия должно быть позже времени открытия`);
+        }
+      });
+    }
+
+    return { isValid: errors.length === 0, errors };
+  };
+
+  // Обработчик сохранения
+  const handleSave = async () => {
     if (!serviceCenterUuid) return;
 
-    const updateData: UpdateRegularScheduleDto = {
-      monday: uniformSchedule 
-        ? { is_closed: false, open_time: uniformOpenTime, close_time: uniformCloseTime }
-        : weekSchedule.monday 
-          ? { is_closed: !weekSchedule.monday.isOpen, open_time: weekSchedule.monday.isOpen ? weekSchedule.monday.openTime : undefined, close_time: weekSchedule.monday.isOpen ? weekSchedule.monday.closeTime : undefined }
-          : { is_closed: true },
-      tuesday: uniformSchedule 
-        ? { is_closed: false, open_time: uniformOpenTime, close_time: uniformCloseTime }
-        : weekSchedule.tuesday 
-          ? { is_closed: !weekSchedule.tuesday.isOpen, open_time: weekSchedule.tuesday.isOpen ? weekSchedule.tuesday.openTime : undefined, close_time: weekSchedule.tuesday.isOpen ? weekSchedule.tuesday.closeTime : undefined }
-          : { is_closed: true },
-      wednesday: uniformSchedule 
-        ? { is_closed: false, open_time: uniformOpenTime, close_time: uniformCloseTime }
-        : weekSchedule.wednesday 
-          ? { is_closed: !weekSchedule.wednesday.isOpen, open_time: weekSchedule.wednesday.isOpen ? weekSchedule.wednesday.openTime : undefined, close_time: weekSchedule.wednesday.isOpen ? weekSchedule.wednesday.closeTime : undefined }
-          : { is_closed: true },
-      thursday: uniformSchedule 
-        ? { is_closed: false, open_time: uniformOpenTime, close_time: uniformCloseTime }
-        : weekSchedule.thursday 
-          ? { is_closed: !weekSchedule.thursday.isOpen, open_time: weekSchedule.thursday.isOpen ? weekSchedule.thursday.openTime : undefined, close_time: weekSchedule.thursday.isOpen ? weekSchedule.thursday.closeTime : undefined }
-          : { is_closed: true },
-      friday: uniformSchedule 
-        ? { is_closed: false, open_time: uniformOpenTime, close_time: uniformCloseTime }
-        : weekSchedule.friday 
-          ? { is_closed: !weekSchedule.friday.isOpen, open_time: weekSchedule.friday.isOpen ? weekSchedule.friday.openTime : undefined, close_time: weekSchedule.friday.isOpen ? weekSchedule.friday.closeTime : undefined }
-          : { is_closed: true },
-      saturday: uniformSchedule 
-        ? { is_closed: false, open_time: uniformOpenTime, close_time: uniformCloseTime }
-        : weekSchedule.saturday 
-          ? { is_closed: !weekSchedule.saturday.isOpen, open_time: weekSchedule.saturday.isOpen ? weekSchedule.saturday.openTime : undefined, close_time: weekSchedule.saturday.isOpen ? weekSchedule.saturday.closeTime : undefined }
-          : { is_closed: true },
-      sunday: uniformSchedule 
-        ? { is_closed: false, open_time: uniformOpenTime, close_time: uniformCloseTime }
-        : weekSchedule.sunday 
-          ? { is_closed: !weekSchedule.sunday.isOpen, open_time: weekSchedule.sunday.isOpen ? weekSchedule.sunday.openTime : undefined, close_time: weekSchedule.sunday.isOpen ? weekSchedule.sunday.closeTime : undefined }
-          : { is_closed: true },
-      timezone: operatingHoursStore.timezone,
-    };
+    const validation = validate();
+    if (!validation.isValid) {
+      rootStore.toastStore.showError(
+        validation.errors.join('. ')
+      );
+      return;
+    }
+
+    setIsSaving(true);
 
     try {
-      await operatingHoursStore.updateRegularSchedule(serviceCenterUuid, updateData);
+      const timezone = operatingHoursStore.timezone || 'Europe/Moscow';
+      const updateData: Record<string, { open_time?: string; close_time?: string; is_closed: boolean }> = {};
+
+      if (uniformSchedule) {
+        const openTime = parseTime(uniformOpenTime);
+        const closeTime = parseTime(uniformCloseTime);
+
+        DAYS_ORDER.forEach(day => {
+          updateData[day] = {
+            open_time: openTime ? `${openTime.hour.toString().padStart(2, '0')}:${openTime.minute.toString().padStart(2, '0')}` : '',
+            close_time: closeTime ? `${closeTime.hour.toString().padStart(2, '0')}:${closeTime.minute.toString().padStart(2, '0')}` : '',
+            is_closed: false,
+          };
+        });
+      } else {
+        DAYS_ORDER.forEach(day => {
+          const daySchedule = weekSchedule[day];
+          
+          if (!daySchedule || !daySchedule.isOpen) {
+            updateData[day] = { is_closed: true };
+          } else {
+            const openTime = parseTime(daySchedule.openTime);
+            const closeTime = parseTime(daySchedule.closeTime);
+
+            updateData[day] = {
+              open_time: openTime ? `${openTime.hour.toString().padStart(2, '0')}:${openTime.minute.toString().padStart(2, '0')}` : '00:00',
+              close_time: closeTime ? `${closeTime.hour.toString().padStart(2, '0')}:${closeTime.minute.toString().padStart(2, '0')}` : '00:00',
+              is_closed: false,
+            };
+          }
+        });
+      }
+
+      const payload = {
+        ...updateData,
+        timezone,
+      } as unknown as UpdateRegularScheduleDto;
+
+      await operatingHoursStore.updateRegularSchedule(serviceCenterUuid, payload);
+      
+      // Обновляем оригинальные данные после успешного сохранения
+      originalDataRef.current = {
+        uniformSchedule,
+        uniformOpenTime,
+        uniformCloseTime,
+        weekSchedule: JSON.parse(JSON.stringify(weekSchedule)),
+      };
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Failed to save schedule:', error);
+    } finally {
+      setIsSaving(false);
     }
-  }, [serviceCenterUuid, uniformSchedule, uniformOpenTime, uniformCloseTime, weekSchedule, operatingHoursStore]);
-
-  const debouncedSave = useCallback(() => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      saveSchedule();
-    }, 1000);
-  }, [saveSchedule]);
+  };
 
   // Обработчики изменений
   const handleUniformScheduleChange = (checked: boolean) => {
     setUniformSchedule(checked);
-    debouncedSave();
   };
 
   const handleUniformOpenTimeChange = (time: string) => {
     setUniformOpenTime(time);
-    debouncedSave();
   };
 
   const handleUniformCloseTimeChange = (time: string) => {
     setUniformCloseTime(time);
-    debouncedSave();
   };
 
   const handleDayToggle = (day: string, isOpen: boolean) => {
@@ -165,7 +242,6 @@ const MobileSchedulePage: React.FC = observer(() => {
         isOpen,
       },
     }));
-    debouncedSave();
   };
 
   const handleDayOpenTimeChange = (day: string, time: string) => {
@@ -176,7 +252,6 @@ const MobileSchedulePage: React.FC = observer(() => {
         openTime: time,
       },
     }));
-    debouncedSave();
   };
 
   const handleDayCloseTimeChange = (day: string, time: string) => {
@@ -187,7 +262,6 @@ const MobileSchedulePage: React.FC = observer(() => {
         closeTime: time,
       },
     }));
-    debouncedSave();
   };
 
   const handleOpenSpecialDateModal = () => {
@@ -225,6 +299,10 @@ const MobileSchedulePage: React.FC = observer(() => {
 
   const handleMenuClick = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleMenuClose = () => {
+    setIsMenuOpen(false);
   };
 
   const handleNotificationClick = () => {
@@ -344,6 +422,21 @@ const MobileSchedulePage: React.FC = observer(() => {
         onSave={handleSaveSpecialDate}
         existingDates={existingSpecialDates}
       />
+
+      {hasUnsavedChanges && (
+        <div className="mobile-schedule-page__save-button-container">
+          <MobileButton
+            onClick={handleSave}
+            loading={isSaving}
+            disabled={isSaving}
+            fullWidth
+          >
+            Сохранить
+          </MobileButton>
+        </div>
+      )}
+
+      <MobileMenu isOpen={isMenuOpen} onClose={handleMenuClose} />
     </div>
   );
 });

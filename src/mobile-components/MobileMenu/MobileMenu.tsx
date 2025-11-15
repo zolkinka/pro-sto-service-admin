@@ -31,7 +31,7 @@ export const MobileMenu = observer(({ isOpen, onClose }: MobileMenuProps) => {
   };
 
   const handleNotifications = () => {
-    navigate(ROUTES.SETTINGS);
+    navigate(ROUTES.NOTIFICATIONS);
     onClose();
   };
 

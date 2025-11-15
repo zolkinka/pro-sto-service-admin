@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ToastProvider, useToast } from '@/components/ui/AppToast';
 import { toastStore } from '@/stores/ToastStore';
-import { PlatformIndicator } from '@/components/PlatformIndicator';
 import AppRouter from '@/router';
 
 // Компонент для инициализации ToastStore
@@ -22,8 +21,6 @@ const App = observer(() => {
     <ToastProvider position="top-right" maxToasts={3}>
       <ToastInitializer />
       <AppRouter />
-      {/* Индикатор платформы для отладки */}
-      <PlatformIndicator />
     </ToastProvider>
   );
 });

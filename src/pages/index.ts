@@ -7,6 +7,7 @@ export { default as MobileServicesPage } from './ServicesPage/MobileServicesPage
 export { OrdersPage, MobileOrdersPage } from './OrdersPage';
 export { AnalyticsPage, MobileAnalyticsPage } from './AnalyticsPage';
 export { SchedulePage, MobileSchedulePage } from './SchedulePage';
+export { ScheduleEditPage } from './SchedulePage/ScheduleEditPage';
 export { PaymentMockPage } from './PaymentMockPage';
 export { default as SettingsPage } from './SettingsPage';
 export { MobileNotificationsPage } from './NotificationsPage/MobileNotificationsPage';

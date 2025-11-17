@@ -1,6 +1,6 @@
 import React from 'react';
 import AppTimePicker from '@/components/ui/AppTimePicker/AppTimePicker';
-import AppCheckbox from '@/components/ui/AppCheckbox/AppCheckbox';
+import AppSwitch from '@/components/ui/AppSwitch/AppSwitch';
 import './SchedulePage.css';
 
 interface DayScheduleRowProps {
@@ -18,15 +18,15 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChang
     onChange({ ...value, close: time });
   };
 
-  const handleWorkingDayToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...value, isClosed: !event.target.checked });
+  const handleWorkingDayToggle = (checked: boolean) => {
+    onChange({ ...value, isClosed: !checked });
   };
 
   return (
     <div className="schedule-page__day-row">
       <span className="schedule-page__day-name">{dayName}</span>
       <div className="schedule-page__day-controls">
-        <AppCheckbox
+        <AppSwitch
           checked={!value.isClosed}
           onChange={handleWorkingDayToggle}
           size="M"

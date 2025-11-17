@@ -104,6 +104,18 @@ const SchedulePage: React.FC = observer(() => {
     }
   };
 
+  const handleDeleteSpecialDate = async (uuid: string) => {
+    if (!serviceCenterUuid) {
+      return;
+    }
+
+    try {
+      await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, uuid);
+    } catch (error) {
+      console.error('Failed to delete special date:', error);
+    }
+  };
+
   if (!serviceCenterUuid) {
     return (
       <div className="schedule-page">
@@ -133,15 +145,16 @@ const SchedulePage: React.FC = observer(() => {
         {isEditing ? (
           <OperatingHoursForm
             schedule={operatingHoursStore.regularSchedule}
+            specialDates={operatingHoursStore.specialDates}
             onSave={handleSave}
             onOpenHolidayModal={handleOpenHolidayModal}
+            onDeleteSpecialDate={handleDeleteSpecialDate}
           />
         ) : (
           <OperatingHoursView
             schedule={operatingHoursStore.regularSchedule}
             specialDates={operatingHoursStore.specialDates}
             onEdit={handleEdit}
-            onOpenHolidayModal={handleOpenHolidayModal}
           />
         )}
       </div>

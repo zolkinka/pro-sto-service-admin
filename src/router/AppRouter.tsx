@@ -23,6 +23,8 @@ import {
   PaymentMockPage,
   MobileNotificationsPage,
   MobileOrderDetailsPage
+  ,
+  ScheduleEditPage
 } from '@/pages';
 import { MobileCreateBooking } from '@/mobile-components';
 import ServicesPageWrapper from '@/pages/ServicesPage';
@@ -138,6 +140,17 @@ const AppRouter = observer(() => {
                 />
               </PrivateRoute>
             } 
+          />
+          <Route 
+            path={ROUTES.SCHEDULE_EDIT}
+            element={
+              <PrivateRoute>
+                <PlatformRoute 
+                  desktop={ScheduleEditPage}
+                  mobile={MobileSchedulePage}
+                />
+              </PrivateRoute>
+            }
           />
           <Route path={ROUTES.SETTINGS} element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
           {/* Редирект на главную для desktop */}

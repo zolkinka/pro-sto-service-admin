@@ -7,6 +7,7 @@ export const ROUTES = {
   ORDERS: '/orders',
   ANALYTICS: '/analytics',
   SCHEDULE: '/schedule',
+  SCHEDULE_EDIT: '/schedule/edit',
   SETTINGS: '/settings',
   NOTIFICATIONS: '/notifications',
   PAYMENT_MOCK: '/payment-mock/:bookingUuid',

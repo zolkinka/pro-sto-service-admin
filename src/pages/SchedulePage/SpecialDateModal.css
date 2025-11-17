@@ -1,0 +1,239 @@
+.special-date-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.special-date-modal__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(48, 47, 45, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+.special-date-modal__content {
+  position: relative;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(30, 27, 21, 0.12);
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.special-date-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid #f4f3f0;
+}
+
+.special-date-modal__title {
+  font-family: 'Onest', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #302f2d;
+  margin: 0;
+}
+
+.special-date-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f4f3f0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+  color: #53514f;
+  transition: background 0.2s;
+}
+
+.special-date-modal__close:hover {
+  background: #efeeeb;
+}
+
+.special-date-modal__body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.special-date-modal__section {
+  margin-bottom: 24px;
+}
+
+.special-date-modal__section:last-child {
+  margin-bottom: 0;
+}
+
+/* Календарь */
+.special-date-calendar {
+  width: 100%;
+}
+
+.special-date-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.special-date-calendar__nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #f4f3f0;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #53514f;
+  transition: background 0.2s;
+}
+
+.special-date-calendar__nav-button:hover {
+  background: #efeeeb;
+}
+
+.special-date-calendar__month {
+  font-family: 'Onest', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #302f2d;
+  text-transform: capitalize;
+}
+
+.special-date-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.special-date-calendar__weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #888684;
+}
+
+.special-date-calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.special-date-calendar__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #302f2d;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.special-date-calendar__day:hover:not(.special-date-calendar__day_empty):not(.special-date-calendar__day_other-month) {
+  background: #f9f8f5;
+}
+
+.special-date-calendar__day_selected {
+  background: #302f2d !important;
+  color: white !important;
+}
+
+.special-date-calendar__day_other-month {
+  color: #b2b1ae;
+  cursor: default;
+}
+
+.special-date-calendar__day_empty {
+  cursor: default;
+}
+
+/* Форма */
+.special-date-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.special-date-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.special-date-modal__label {
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #53514f;
+}
+
+/* Поля времени */
+.special-date-modal__time-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.special-date-modal__time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.special-date-modal__time-separator {
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #888684;
+  margin-top: 20px; /* Выравнивание с полями */
+}
+
+/* Футер */
+.special-date-modal__footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #f4f3f0;
+}
+
+.special-date-modal__footer button {
+  flex: 1;
+}

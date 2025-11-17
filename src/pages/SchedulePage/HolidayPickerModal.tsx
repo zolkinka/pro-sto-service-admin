@@ -23,6 +23,11 @@ const HolidayPickerModal: React.FC<HolidayPickerModalProps> = ({
   const [selectedDates, setSelectedDates] = useState<Date[]>(existingHolidays);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Обновляем selectedDates при изменении existingHolidays
+  React.useEffect(() => {
+    setSelectedDates(existingHolidays);
+  }, [existingHolidays]);
+
   React.useEffect(() => {
     // Блокируем скролл при открытии модалки
     if (isOpen) {

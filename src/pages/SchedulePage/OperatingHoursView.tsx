@@ -1,5 +1,5 @@
 import React from 'react';
-import { format, parseISO, isAfter, startOfDay } from 'date-fns';
+import { format, parseISO, isAfter, isSameDay, startOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import AppButton from '@/components/ui/AppButton/AppButton';
 import { EditIcon } from '@/components/ui/icons';
@@ -10,16 +10,14 @@ interface OperatingHoursViewProps {
   schedule: OperatingHoursResponseDto[];
   specialDates: OperatingHoursResponseDto[];
   onEdit: () => void;
-  onOpenHolidayModal: () => void;
 }
 
 const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ 
   schedule, 
   specialDates,
-  onEdit,
-  onOpenHolidayModal 
+  onEdit
 }) => {
-  // Создаем мапу дней для быстрого доступа
+  // Мапа дней недели для быстрого доступа
   const scheduleMap = schedule.reduce((acc, day) => {
     if (day.day_of_week) {
       acc[day.day_of_week] = day;
@@ -27,134 +25,111 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({
     return acc;
   }, {} as Record<string, OperatingHoursResponseDto>);
 
-  // Форматируем специальные даты для отображения
-  const formatSpecialDates = () => {
-    if (!specialDates || specialDates.length === 0) {
-      return 'Не указаны';
-    }
-
-    const today = startOfDay(new Date());
-    
-    // Фильтруем только будущие даты и парсим их
-    const futureDates = specialDates
-      .filter(d => d.specific_date && d.is_closed)
-      .map(d => {
-        try {
-          const date = parseISO(d.specific_date!);
-          return { date, dateStr: d.specific_date! };
-        } catch (error) {
-          console.error('Error parsing date:', error);
-          return null;
-        }
-      })
-      .filter(d => d !== null && isAfter(d.date, today))
-      .sort((a, b) => a!.date.getTime() - b!.date.getTime());
-
-    if (futureDates.length === 0) {
-      return 'Не указаны';
-    }
-
-    // Группируем даты по месяцам
-    const datesByMonth: Record<string, number[]> = {};
-    
-    futureDates.forEach(item => {
-      const monthYear = format(item!.date, 'LLLL', { locale: ru }); // например "ноябрь"
-      const day = item!.date.getDate();
-      
-      if (!datesByMonth[monthYear]) {
-        datesByMonth[monthYear] = [];
+  // Формируем строки для таблицы обычных дней
+  const dayRows = DAYS_ORDER.map(day => {
+    const daySchedule = scheduleMap[day];
+    const dayName = DAY_NAMES[day] || day;
+    let timeDisplay = '';
+    if (daySchedule) {
+      if (daySchedule.is_closed) {
+        timeDisplay = 'Выходной';
+      } else {
+        const openTime = formatTime(daySchedule.open_time);
+        const closeTime = formatTime(daySchedule.close_time);
+        timeDisplay = `${openTime}—${closeTime}`;
       }
-      datesByMonth[monthYear].push(day);
+    }
+    return { label: dayName, value: timeDisplay, type: 'regular', key: day };
+  });
+
+  // Формируем строки для таблицы специальных дат
+  const today = startOfDay(new Date());
+  const specialDateRows = specialDates
+    .filter(d => d.specific_date)
+    .map(d => {
+      try {
+        const date = parseISO(d.specific_date!);
+        return { ...d, date };
+      } catch {
+        return null;
+      }
+    })
+    .filter(d => d !== null && (isSameDay(d!.date, today) || isAfter(d!.date, today)))
+    .sort((a, b) => a!.date.getTime() - b!.date.getTime())
+    .map(d => {
+      const formattedDate = format(d!.date, 'd MMMM', { locale: ru });
+      let value = '';
+      if (d!.is_closed) {
+        value = 'Выходной';
+      } else {
+        value = `${formatTime(d!.open_time)}—${formatTime(d!.close_time)}`;
+      }
+      return { label: formattedDate, value, type: 'special', key: d!.specific_date! };
     });
 
-    // Форматируем вывод: "1, 2, 4, 6 ноября, 2, 5, 8 декабря"
-    // Конвертируем название месяца в родительный падеж
-    const monthToGenitive: Record<string, string> = {
-      'январь': 'января',
-      'февраль': 'февраля',
-      'март': 'марта',
-      'апрель': 'апреля',
-      'май': 'мая',
-      'июнь': 'июня',
-      'июль': 'июля',
-      'август': 'августа',
-      'сентябрь': 'сентября',
-      'октябрь': 'октября',
-      'ноябрь': 'ноября',
-      'декабрь': 'декабря',
-    };
-
-    const result = Object.entries(datesByMonth)
-      .map(([month, days]) => {
-        const genitiveMonth = monthToGenitive[month] || month;
-        return `${days.join(', ')} ${genitiveMonth}`;
-      })
-      .join('\n');
-
-    return result;
-  };
+  // Итоговые строки для таблицы
+  const tableRows = [
+    ...dayRows
+  ];
 
   return (
     <div className="schedule-page__view-wrapper">
-      {/* Основное расписание */}
-      <div className="schedule-page__view-section">
-        <div className="schedule-page__view-section-content">
-          <div className="schedule-page__day-schedule-list">
-            {DAYS_ORDER.map(day => {
-              const daySchedule = scheduleMap[day];
-              const dayName = DAY_NAMES[day] || day;
-              
-              let timeDisplay = '';
-              if (daySchedule) {
-                if (daySchedule.is_closed) {
-                  timeDisplay = 'Выходной';
-                } else {
-                  const openTime = formatTime(daySchedule.open_time);
-                  const closeTime = formatTime(daySchedule.close_time);
-                  timeDisplay = `${openTime}—${closeTime}`;
-                }
-              }
+      <div className="schedule-page__view-card">
+        <div className="schedule-page__view-section">
+          <div className="schedule-page__view-section-content">
+            <h2 className="schedule-page__card-title">Режим работы</h2>
+            <table className="schedule-page__table">
+              <thead>
+                <tr>
+                  <th className="schedule-page__table-col schedule-page__table-col-label">День недели</th>
+                  <th className="schedule-page__table-col schedule-page__table-col-value">Режим работы</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dayRows.map(row => (
+                  <tr key={row.key}>
+                    <td className="schedule-page__table-cell schedule-page__table-cell-label">{row.label}</td>
+                    <td className="schedule-page__table-cell schedule-page__table-cell-value">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-              return (
-                <div key={day} className="schedule-page__day-schedule-item">
-                  <p className="schedule-page__day-name">{dayName}</p>
-                  <p className="schedule-page__day-time">{timeDisplay}</p>
-                </div>
-              );
-            })}
+            {/* Таблица специальных дат */}
+            {specialDateRows.length > 0 && (
+              <div className="schedule-page__special-dates-section">
+                <h3 className="schedule-page__section-subtitle">Выходные и сокращенные дни</h3>
+                <table className="schedule-page__table">
+                  <thead>
+                    <tr>
+                      <th className="schedule-page__table-col schedule-page__table-col-label">Дата</th>
+                      <th className="schedule-page__table-col schedule-page__table-col-value">Режим работы</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {specialDateRows.map(row => (
+                      <tr key={row.key} className="schedule-page__table-row-special">
+                        <td className="schedule-page__table-cell schedule-page__table-cell-label">{row.label}</td>
+                        <td className="schedule-page__table-cell schedule-page__table-cell-value">{row.value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-        <div className="schedule-page__edit-button-wrapper">
-          <AppButton 
-            size="M" 
-            variant="secondary" 
-            onClick={onEdit}
-            className="schedule-page__edit-button"
-            onlyIcon
-            iconLeft={<EditIcon />}
-          />
-        </div>
-      </div>
-
-      {/* Выходные и праздники */}
-      <div className="schedule-page__view-section">
-        <div className="schedule-page__view-section-content">
-          <div className="schedule-page__day-schedule-list">
-            <div className="schedule-page__day-schedule-item">
-              <p className="schedule-page__day-name">Выходные</p>
-              <p className="schedule-page__day-time" style={{ whiteSpace: 'pre-line' }}>{formatSpecialDates()}</p>
-            </div>
+          <div className="schedule-page__edit-button-wrapper">
+            <AppButton 
+              size="M" 
+              variant="secondary" 
+              onClick={() => {
+                window.location.href = '/schedule/edit';
+              }}
+              className="schedule-page__edit-button"
+              onlyIcon
+              iconLeft={<EditIcon />}
+            />
           </div>
-        </div>
-        <div className="schedule-page__edit-button-wrapper">
-          <AppButton 
-            size="M" 
-            variant="secondary" 
-            onClick={onOpenHolidayModal}
-            className="schedule-page__edit-button"
-            onlyIcon
-            iconLeft={<EditIcon />}
-          />
         </div>
       </div>
     </div>

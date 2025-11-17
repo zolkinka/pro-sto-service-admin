@@ -212,6 +212,17 @@ const ViewBookingModal = observer(({
 
         {/* Блок информации об автомобиле */}
         <div className="view-booking-modal__car-section">
+          <div className="view-booking-modal__car-image">
+            {booking.car.generated_image ? (
+              <img
+                src={`${import.meta.env.VITE_BASE_STATIC_PATH}${booking.car.generated_image}`}
+                alt={`${booking.car.make} ${booking.car.model}`}
+                className="view-booking-modal__car-photo"
+              />
+            ) : (
+              <div className="view-booking-modal__car-placeholder" />
+            )}
+          </div>
           <div className="view-booking-modal__car-info">
             <div className="view-booking-modal__car-name">{booking.car.make} {booking.car.model}</div>
             <div className="view-booking-modal__car-plate-container">

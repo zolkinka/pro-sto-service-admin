@@ -12,6 +12,9 @@ const TopServicesTable: React.FC<TopServicesTableProps> = ({
   if (loading) {
     return (
       <div className={classNames('top-services-table', className)}>
+        <div className="top-services-table__title">
+          <h3 className="top-services-table__title-text">Топ услуги</h3>
+        </div>
         <div className="top-services-table__header">
           <div className="top-services-table__header-cell">Услуга</div>
           <div className="top-services-table__header-cell">Кол-во записей</div>
@@ -40,6 +43,9 @@ const TopServicesTable: React.FC<TopServicesTableProps> = ({
   if (services.length === 0) {
     return (
       <div className={classNames('top-services-table', 'top-services-table_empty', className)}>
+        <div className="top-services-table__title">
+          <h3 className="top-services-table__title-text">Топ услуги</h3>
+        </div>
         <div className="top-services-table__header">
           <div className="top-services-table__header-cell">Услуга</div>
           <div className="top-services-table__header-cell">Кол-во записей</div>
@@ -55,6 +61,9 @@ const TopServicesTable: React.FC<TopServicesTableProps> = ({
   // Обычное состояние с данными
   return (
     <div className={classNames('top-services-table', className)}>
+      <div className="top-services-table__title">
+        <h3 className="top-services-table__title-text">Топ услуги</h3>
+      </div>
       <div className="top-services-table__header">
         <div className="top-services-table__header-cell">Услуга</div>
         <div className="top-services-table__header-cell">Кол-во записей</div>

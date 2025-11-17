@@ -25,7 +25,7 @@ export const isFormData = (value: unknown): value is FormData => {
 };
 
 export const isSuccess = (status: number): boolean => {
-	return status >= 200 && status < 300;
+	return (status >= 200 && status < 300) || status === 304;
 };
 
 export const base64 = (str: string): string => {

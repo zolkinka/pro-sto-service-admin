@@ -148,21 +148,16 @@ export class AnalyticsStore {
       return;
     }
 
-    try {
-      const response = await adminAnalyticsGetStats({
-        serviceCenterUuid: this.serviceCenterUuid,
-        dateFrom: this.dateFrom.toISOString(),
-        dateTo: this.dateTo.toISOString(),
-        period: this.periodType,
-      });
+    const response = await adminAnalyticsGetStats({
+      serviceCenterUuid: this.serviceCenterUuid,
+      dateFrom: this.dateFrom.toISOString(),
+      dateTo: this.dateTo.toISOString(),
+      period: this.periodType,
+    });
 
-      runInAction(() => {
-        this.stats = response;
-      });
-    } catch (error) {
-      console.error('Ошибка при загрузке статистики:', error);
-      toastStore.showError('Не удалось загрузить статистику');
-    }
+    runInAction(() => {
+      this.stats = response;
+    });
   }
 
   /**
@@ -174,21 +169,16 @@ export class AnalyticsStore {
       return;
     }
 
-    try {
-      const response = await adminAnalyticsGetTopServices({
-        serviceCenterUuid: this.serviceCenterUuid,
-        dateFrom: this.dateFrom.toISOString(),
-        dateTo: this.dateTo.toISOString(),
-        limit: 10,
-      });
+    const response = await adminAnalyticsGetTopServices({
+      serviceCenterUuid: this.serviceCenterUuid,
+      dateFrom: this.dateFrom.toISOString(),
+      dateTo: this.dateTo.toISOString(),
+      limit: 10,
+    });
 
-      runInAction(() => {
-        this.topServices = response.top_services;
-      });
-    } catch (error) {
-      console.error('Ошибка при загрузке топ услуг:', error);
-      toastStore.showError('Не удалось загрузить топ услуги');
-    }
+    runInAction(() => {
+      this.topServices = response.top_services;
+    });
   }
 
   /**
@@ -200,21 +190,16 @@ export class AnalyticsStore {
       return;
     }
 
-    try {
-      const response = await adminAnalyticsGetLoadChart({
-        serviceCenterUuid: this.serviceCenterUuid,
-        dateFrom: this.dateFrom.toISOString(),
-        dateTo: this.dateTo.toISOString(),
-        period: this.periodType,
-      });
+    const response = await adminAnalyticsGetLoadChart({
+      serviceCenterUuid: this.serviceCenterUuid,
+      dateFrom: this.dateFrom.toISOString(),
+      dateTo: this.dateTo.toISOString(),
+      period: this.periodType,
+    });
 
-      runInAction(() => {
-        this.loadChartData = response;
-      });
-    } catch (error) {
-      console.error('Ошибка при загрузке данных графика:', error);
-      toastStore.showError('Не удалось загрузить данные графика');
-    }
+    runInAction(() => {
+      this.loadChartData = response;
+    });
   }
 
   /**

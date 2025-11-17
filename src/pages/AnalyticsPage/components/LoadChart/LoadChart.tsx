@@ -52,7 +52,11 @@ const LoadChart: React.FC<LoadChartProps> = ({
 
     return (
       <div className={classNames('load-chart', 'load-chart_loading', className)}>
-        <div className="load-chart__y-axis">
+        <div className="load-chart__title">
+          <h3 className="load-chart__title-text">Загрузка</h3>
+        </div>
+        <div className="load-chart__chart-container">
+          <div className="load-chart__y-axis">
           {yAxisValues.map((_, index) => (
             <div key={index} className="load-chart__y-label">
               <div className="load-chart__skeleton load-chart__skeleton_label" />
@@ -75,6 +79,7 @@ const LoadChart: React.FC<LoadChartProps> = ({
             ))}
           </div>
         </div>
+        </div>
       </div>
     );
   }
@@ -83,6 +88,9 @@ const LoadChart: React.FC<LoadChartProps> = ({
   if (data.length === 0) {
     return (
       <div className={classNames('load-chart', 'load-chart_empty', className)}>
+        <div className="load-chart__title">
+          <h3 className="load-chart__title-text">Загрузка</h3>
+        </div>
         <div className="load-chart__empty-state">
           <p className="load-chart__empty-text">Нет данных для отображения</p>
         </div>
@@ -92,7 +100,11 @@ const LoadChart: React.FC<LoadChartProps> = ({
 
   return (
     <div className={classNames('load-chart', className)}>
-      <div className="load-chart__y-axis">
+      <div className="load-chart__title">
+        <h3 className="load-chart__title-text">Загрузка</h3>
+      </div>
+      <div className="load-chart__chart-container">
+        <div className="load-chart__y-axis">
         {yAxisValues.map((value, index) => (
           <div key={index} className="load-chart__y-label">
             {Math.round(value)}
@@ -132,6 +144,7 @@ const LoadChart: React.FC<LoadChartProps> = ({
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

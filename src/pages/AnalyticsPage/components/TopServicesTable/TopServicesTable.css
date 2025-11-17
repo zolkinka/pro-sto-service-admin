@@ -2,37 +2,61 @@
 
 .top-services-table {
   width: 100%;
+  height: 100%;
   background-color: #FFFFFF;
-  border-radius: var(--border-radius-2xl);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--border-radius-lg);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Title Section */
+.top-services-table__title {
+  background-color: var(--color-gray-100);
+  padding: var(--spacing-md) var(--spacing-lg);
+  height: 65px;
+  display: flex;
+  align-items: center;
+}
+
+.top-services-table__title-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+  margin: 0;
+  line-height: 1.2;
+  opacity: 0.8;
 }
 
 /* Header */
 .top-services-table__header {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
-  background-color: var(--color-gray-100);
-  height: 65px;
+  min-height: 43px;
   align-items: center;
-  padding: 0 var(--spacing-lg);
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .top-services-table__header-cell {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-gray-800);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-600);
   text-align: left;
 }
 
 .top-services-table__header-cell:nth-child(2),
 .top-services-table__header-cell:nth-child(3) {
-  text-align: center;
+  text-align: right;
 }
 
 /* Body */
 .top-services-table__body {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .top-services-table__row {
@@ -63,12 +87,12 @@
 }
 
 .top-services-table__cell_count {
-  text-align: center;
+  text-align: right;
   font-weight: var(--font-weight-normal);
 }
 
 .top-services-table__cell_revenue {
-  text-align: center;
+  text-align: right;
   font-weight: var(--font-weight-semibold);
   color: var(--color-green-400);
 }

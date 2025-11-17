@@ -1259,6 +1259,10 @@ export type NotificationResponseDto = {
      */
     title: string;
     /**
+     * Подзаголовок уведомления
+     */
+    subtitle: (string) | null;
+    /**
      * Текст уведомления
      */
     body: string;

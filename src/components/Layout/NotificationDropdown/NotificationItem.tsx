@@ -1,22 +1,6 @@
 import { observer } from 'mobx-react-lite';
-import type { NotificationItemProps, NotificationData } from './NotificationDropdown.types';
+import type { NotificationItemProps } from './NotificationDropdown.types';
 import './NotificationItem.css';
-
-/**
- * Получить заголовок уведомления в зависимости от типа
- */
-const getNotificationTitle = (type: string): string => {
-  switch (type) {
-    case 'new_booking':
-      return 'Новая запись';
-    case 'booking_cancelled':
-      return 'Отмена записи';
-    case 'status_change':
-      return 'Мойка завершена';
-    default:
-      return 'Уведомление';
-  }
-};
 
 /**
  * Форматировать дату в формат DD.MM.YY
@@ -29,23 +13,8 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`;
 };
 
-/**
- * Парсинг данных из поля data уведомления
- */
-const parseNotificationData = (data: Record<string, unknown> | null): NotificationData => {
-  if (!data) return {};
-  
-  return {
-    licensePlate: data.license_plate as string | undefined,
-    region: data.region as string | undefined,
-    bookingUuid: data.booking_uuid as string | undefined,
-  };
-};
-
 const NotificationItem = observer(({ notification, onClick }: NotificationItemProps) => {
-  const title = getNotificationTitle(notification.type);
   const date = formatDate(notification.createdAt);
-  const parsedData = parseNotificationData(notification.data as Record<string, unknown> | null);
 
   const handleClick = () => {
     onClick(notification.uuid);
@@ -58,18 +27,12 @@ const NotificationItem = observer(({ notification, onClick }: NotificationItemPr
     >
       <div className="notification-item__content">
         <div className="notification-item__header">
-          <p className="notification-item__title">{title}</p>
-          {parsedData.licensePlate && (
+          <p className="notification-item__title">{notification.title}</p>
+          {notification.subtitle && (
             <div className="notification-item__license">
               <span className="notification-item__license-plate">
-                {parsedData.licensePlate}
+                {notification.subtitle}
               </span>
-              {parsedData.region && (
-                <>
-                  <span className="notification-item__divider" />
-                  <span className="notification-item__region">{parsedData.region}</span>
-                </>
-              )}
             </div>
           )}
         </div>

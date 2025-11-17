@@ -59,10 +59,6 @@ export const MobileNotificationCard = observer(({ notification }: MobileNotifica
     }
   };
 
-  // Получаем данные для отображения
-  const clientName = String(notification.data?.clientName || '');
-  const serviceName = String(notification.data?.serviceName || '');
-  
   // Форматируем дату
   const formattedDate = format(parseISO(notification.createdAt), 'dd.MM.yy');
 
@@ -77,11 +73,9 @@ export const MobileNotificationCard = observer(({ notification }: MobileNotifica
       <div className="notification-card__content">
         <div className="notification-card__header">
           <span className="notification-card__title">{notification.title}</span>
-          {(clientName || serviceName) && (
+          {notification.subtitle && (
             <div className="notification-card__meta">
-              {clientName && <span className="notification-card__client">{clientName}</span>}
-              {clientName && serviceName && <span className="notification-card__divider" />}
-              {serviceName && <span className="notification-card__service">{serviceName}</span>}
+              <span className="notification-card__client">{notification.subtitle}</span>
             </div>
           )}
         </div>

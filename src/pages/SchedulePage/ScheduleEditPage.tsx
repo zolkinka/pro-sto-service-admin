@@ -100,8 +100,8 @@ export const ScheduleEditPage: React.FC = observer(() => {
           await operatingHoursStore.createSpecialDate(serviceCenterUuid, {
             specific_date: localDate.specific_date,
             is_closed: localDate.is_closed,
-            open_time: localDate.open_time,
-            close_time: localDate.close_time,
+            open_time: localDate.open_time as string | undefined,
+            close_time: localDate.close_time as string | undefined,
             timezone: operatingHoursStore.timezone,
           });
         } else {
@@ -117,8 +117,8 @@ export const ScheduleEditPage: React.FC = observer(() => {
             await operatingHoursStore.createSpecialDate(serviceCenterUuid, {
               specific_date: localDate.specific_date,
               is_closed: localDate.is_closed,
-              open_time: localDate.open_time,
-              close_time: localDate.close_time,
+              open_time: localDate.open_time as string | undefined,
+              close_time: localDate.close_time as string | undefined,
               timezone: operatingHoursStore.timezone,
             });
           }
@@ -155,11 +155,15 @@ export const ScheduleEditPage: React.FC = observer(() => {
     );
     
     const newDate: OperatingHoursResponseDto = {
+      uuid: localSpecialDates[existingIndex]?.uuid || '',
+      service_center_uuid: operatingHoursStore.regularSchedule[0]?.service_center_uuid || '',
       specific_date: formattedDate,
       is_closed: data.isHoliday,
-      open_time: data.isHoliday ? '00:00' : data.openTime || '09:00',
-      close_time: data.isHoliday ? '00:00' : data.closeTime || '18:00',
+      open_time: (data.isHoliday ? '00:00' : data.openTime || '09:00') as any,
+      close_time: (data.isHoliday ? '00:00' : data.closeTime || '18:00') as any,
       timezone: operatingHoursStore.timezone,
+      created_at: localSpecialDates[existingIndex]?.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
     
     if (existingIndex >= 0) {

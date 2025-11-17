@@ -6,7 +6,13 @@ import { useStores } from '@/hooks';
 import { AppTag } from '@/components/ui/AppTag';
 import { NotificationIcon } from '@/components/ui/icons';
 import type { BookingStatus } from '@/stores/BookingsStore';
+import type { BookingCarDto } from '../../../../../services/api-client/types.gen';
 import './ViewBookingModal.css';
+
+// Расширенный тип для автомобиля с дополнительными полями
+type BookingCarWithImage = BookingCarDto & {
+  generated_image?: string;
+};
 
 interface ViewBookingModalProps {
   isOpen: boolean;
@@ -213,9 +219,9 @@ const ViewBookingModal = observer(({
         {/* Блок информации об автомобиле */}
         <div className="view-booking-modal__car-section">
           <div className="view-booking-modal__car-image">
-            {booking.car.generated_image ? (
+            {(booking.car as BookingCarWithImage).generated_image ? (
               <img
-                src={`${import.meta.env.VITE_BASE_STATIC_PATH}${booking.car.generated_image}`}
+                src={`${import.meta.env.VITE_BASE_STATIC_PATH}${(booking.car as BookingCarWithImage).generated_image}`}
                 alt={`${booking.car.make} ${booking.car.model}`}
                 className="view-booking-modal__car-photo"
               />

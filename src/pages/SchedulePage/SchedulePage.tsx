@@ -5,7 +5,6 @@ import { useStores } from '@/hooks/useStores';
 import OperatingHoursView from './OperatingHoursView';
 import OperatingHoursForm from './OperatingHoursForm';
 import HolidayPickerModal from './HolidayPickerModal';
-import type { UpdateRegularScheduleDto } from '../../../services/api-client/types.gen';
 import './SchedulePage.css';
 
 const SchedulePage: React.FC = observer(() => {
@@ -29,22 +28,6 @@ const SchedulePage: React.FC = observer(() => {
 
   const handleEdit = () => {
     setIsEditing(true);
-  };
-
-  const handleSave = async (data: UpdateRegularScheduleDto) => {
-    if (!serviceCenterUuid) {
-      return;
-    }
-    
-    try {
-      await operatingHoursStore.updateRegularSchedule(serviceCenterUuid as string, data);
-      // Закрываем форму только при успешном сохранении
-      setIsEditing(false);
-    } catch (error) {
-      // Ошибка уже обработана в store и показана пользователю
-      // Форма остается открытой
-      console.error('Failed to save operating hours:', error);
-    }
   };
 
   const handleOpenHolidayModal = () => {
@@ -146,7 +129,6 @@ const SchedulePage: React.FC = observer(() => {
           <OperatingHoursForm
             schedule={operatingHoursStore.regularSchedule}
             specialDates={operatingHoursStore.specialDates}
-            onSave={handleSave}
             onOpenHolidayModal={handleOpenHolidayModal}
             onDeleteSpecialDate={handleDeleteSpecialDate}
           />

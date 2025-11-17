@@ -9,13 +9,12 @@ import { formatTime, DAY_NAMES, DAYS_ORDER } from './utils';
 interface OperatingHoursViewProps {
   schedule: OperatingHoursResponseDto[];
   specialDates: OperatingHoursResponseDto[];
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
 const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({ 
   schedule, 
-  specialDates,
-  onEdit
+  specialDates
 }) => {
   // Мапа дней недели для быстрого доступа
   const scheduleMap = schedule.reduce((acc, day) => {
@@ -66,11 +65,6 @@ const OperatingHoursView: React.FC<OperatingHoursViewProps> = ({
       }
       return { label: formattedDate, value, type: 'special', key: d!.specific_date! };
     });
-
-  // Итоговые строки для таблицы
-  const tableRows = [
-    ...dayRows
-  ];
 
   return (
     <div className="schedule-page__view-wrapper">

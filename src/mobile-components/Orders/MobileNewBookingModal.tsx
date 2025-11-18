@@ -114,6 +114,10 @@ export const MobileNewBookingModal = observer(({
   // Получаем комментарий
   const clientComment = typeof booking.client_comment === 'string' ? booking.client_comment : null;
 
+  // Подсчет итоговой стоимости
+  const totalPrice = booking.service.price + 
+    (booking.additionalServices?.reduce((sum, service) => sum + service.price, 0) || 0);
+
   return (
     <div className="mobile-new-booking-modal">
       <div className="mobile-new-booking-modal__backdrop" onClick={onClose} />
@@ -185,6 +189,14 @@ export const MobileNewBookingModal = observer(({
                   ))}
                 </>
               )}
+            </div>
+
+            <div className="mobile-new-booking-modal__divider" />
+
+            {/* Total */}
+            <div className="mobile-new-booking-modal__total">
+              <span className="mobile-new-booking-modal__total-label">Итого</span>
+              <span className="mobile-new-booking-modal__total-price">{totalPrice}₽</span>
             </div>
           </div>
 

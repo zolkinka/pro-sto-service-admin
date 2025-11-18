@@ -23,7 +23,6 @@ import {
   adminSearchClients,
   adminSearchCars,
 } from '../../../services/api-client';
-import { MobileConfirmBookingModal } from '@/mobile-components/Orders/MobileConfirmBookingModal';
 import './MobileCreateBooking.css';
 
 // Иконка часов для поля времени
@@ -57,7 +56,7 @@ interface CarModel {
 export const MobileCreateBooking = observer(() => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { servicesStore, toastStore, authStore, bookingsStore } = useStores();
+  const { servicesStore, toastStore, authStore } = useStores();
   
   const locationState = location.state as LocationState | null;
   
@@ -115,10 +114,6 @@ export const MobileCreateBooking = observer(() => {
   // Available time slots state
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
-
-  // Confirm modal
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [createdBookingUuid, setCreatedBookingUuid] = useState<string | null>(null);
 
   // Load makes on mount
   useEffect(() => {
@@ -482,7 +477,7 @@ export const MobileCreateBooking = observer(() => {
         ? selectedAdditionalServices.map(service => String(service.value))
         : [];
 
-      const bookingResponse = await adminCreateBooking({
+      await adminCreateBooking({
         requestBody: {
           service_center_uuid: authStore.user.service_center_uuid,
           client_uuid: clientResponse.uuid,
@@ -497,10 +492,8 @@ export const MobileCreateBooking = observer(() => {
 
       toastStore.showSuccess('Запись успешно создана');
       
-      // Show confirm modal
-      setCreatedBookingUuid(bookingResponse.uuid);
-      await bookingsStore.fetchBookingDetails(bookingResponse.uuid);
-      setShowConfirmModal(true);
+      // Navigate back to orders page
+      navigate('/orders');
     } catch (error: unknown) {
       console.error('Failed to create booking:', error);
       
@@ -516,21 +509,6 @@ export const MobileCreateBooking = observer(() => {
       }
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleConfirmModalClose = () => {
-    setShowConfirmModal(false);
-    navigate('/orders');
-  };
-
-  const handleCancelBooking = async () => {
-    if (!createdBookingUuid) return;
-
-    const success = await bookingsStore.updateBookingStatus(createdBookingUuid, 'cancelled');
-    if (success) {
-      setShowConfirmModal(false);
-      navigate('/orders');
     }
   };
 
@@ -670,15 +648,6 @@ export const MobileCreateBooking = observer(() => {
           {totalCost > 0 ? `Создать заказ ${totalCost}₽` : 'Создать заказ'}
         </AppButton>
       </div>
-
-      {bookingsStore.selectedBooking && (
-        <MobileConfirmBookingModal
-          isOpen={showConfirmModal}
-          onClose={handleConfirmModalClose}
-          onCancel={handleCancelBooking}
-          booking={bookingsStore.selectedBooking}
-        />
-      )}
     </div>
   );
 });

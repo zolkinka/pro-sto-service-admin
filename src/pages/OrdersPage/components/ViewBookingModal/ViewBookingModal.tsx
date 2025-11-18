@@ -188,6 +188,10 @@ const ViewBookingModal = observer(({
   // Получаем комментарий как строку (client_comment может быть строкой или null, но типизирован как object | null)
   const clientComment = typeof booking.client_comment === 'string' ? booking.client_comment : null;
 
+  // Подсчет итоговой стоимости
+  const totalPrice = booking.service.price + 
+    (booking.additionalServices?.reduce((sum, service) => sum + service.price, 0) || 0);
+
   return (
     <div className="view-booking-modal">
       <div className="view-booking-modal__header">
@@ -279,6 +283,14 @@ const ViewBookingModal = observer(({
                 ))}
               </>
             )}
+          </div>
+
+          <div className="view-booking-modal__divider" />
+
+          {/* Итого */}
+          <div className="view-booking-modal__total">
+            <span className="view-booking-modal__total-label">Итого</span>
+            <span className="view-booking-modal__total-price">{totalPrice}₽</span>
           </div>
         </div>
 

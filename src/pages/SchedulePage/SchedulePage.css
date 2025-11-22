@@ -434,42 +434,7 @@
 }
 
 .schedule-page__skeleton-content {
-  height: 200px;
-}
-
-/* Skeleton */
-.schedule-page__skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
-  background-size: 200% 100%;
-  animation: schedule-page-skeleton-loading 1.5s infinite;
-  border-radius: 8px;
-}
-
-@keyframes schedule-page-skeleton-loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.schedule-page__skeleton-title {
-  height: 32px;
-  width: 200px;
-  margin-bottom: 24px;
-}
-
-.schedule-page__skeleton-tabs {
-  height: 48px;
-  margin-bottom: 28px;
-}
-
-.schedule-page__skeleton-content {
-  height: 200px;
+  width: 500px;
+  height: 400px;
+  border-radius: 16px;
 }

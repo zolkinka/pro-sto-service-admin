@@ -25,7 +25,9 @@ const messaging = firebase.messaging();
 // Обработка фоновых сообщений
 // Срабатывает когда приложение неактивно или закрыто
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message:', payload);
+  console.log('[firebase-messaging-sw.js] 📨 Received background message:', payload);
+  console.log('[firebase-messaging-sw.js] Notification data:', payload.notification);
+  console.log('[firebase-messaging-sw.js] Custom data:', payload.data);
 
   const notificationTitle = payload.notification?.title || 'Pro-STO';
   const notificationOptions = {
@@ -37,6 +39,8 @@ messaging.onBackgroundMessage((payload) => {
     requireInteraction: false,
     vibrate: [200, 100, 200],
   };
+
+  console.log('[firebase-messaging-sw.js] 🔔 Showing notification:', notificationTitle, notificationOptions);
 
   // Показываем уведомление
   return self.registration.showNotification(notificationTitle, notificationOptions);

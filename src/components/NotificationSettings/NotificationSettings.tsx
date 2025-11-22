@@ -127,11 +127,32 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = observer(({
   /**
    * Обработчик тестового уведомления
    */
-  const handleTestNotification = () => {
-    if (permission === 'granted') {
-      toastStore.showInfo('Тестовое уведомление отправлено', 'Уведомление');
-    } else {
+  const handleTestNotification = async () => {
+    if (permission !== 'granted') {
       toastStore.showWarning('Сначала разрешите уведомления');
+      return;
+    }
+
+    try {
+      // Показываем браузерное уведомление для теста
+      const notification = new Notification('Тестовое уведомление', {
+        body: 'Это тестовое уведомление из Pro-STO',
+        icon: '/logo.png',
+        badge: '/badge.png',
+        tag: 'test-notification',
+        requireInteraction: false,
+      });
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
+      console.log('Test notification shown');
+      toastStore.showSuccess('Тестовое уведомление показано');
+    } catch (error) {
+      console.error('Error showing test notification:', error);
+      toastStore.showError('Не удалось показать тестовое уведомление');
     }
   };
 

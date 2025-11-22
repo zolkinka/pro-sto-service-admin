@@ -108,21 +108,26 @@ class NotificationService {
    */
   async getToken(): Promise<string | null> {
     try {
+      console.log('🔑 Starting FCM token retrieval...');
+      
       const supported = await this.isSupported();
       if (!supported) {
+        console.warn('⚠️ FCM not supported');
         return null;
       }
 
       // Проверяем разрешение
       const permission = Notification.permission;
+      console.log('📱 Notification permission:', permission);
+      
       if (permission !== 'granted') {
-        console.warn('Notification permission not granted');
+        console.warn('⚠️ Notification permission not granted');
         return null;
       }
 
       const messaging = getFirebaseMessaging();
       if (!messaging) {
-        console.error('Failed to initialize Firebase Messaging');
+        console.error('❌ Failed to initialize Firebase Messaging');
         return null;
       }
 
@@ -131,10 +136,15 @@ class NotificationService {
       
       if (!registration) {
         // Если регистрации нет, создаем ее
+        console.log('📝 Registering Service Worker...');
         registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        console.log('Service Worker registered in getToken:', registration);
+        console.log('✅ Service Worker registered in getToken:', registration);
+      } else {
+        console.log('✅ Service Worker already registered');
       }
 
+      console.log('🔑 Requesting FCM token with VAPID key...');
+      
       // Получаем токен
       const token = await getToken(messaging, {
         vapidKey: VAPID_KEY,
@@ -142,15 +152,16 @@ class NotificationService {
       });
 
       if (token) {
-        console.log('FCM Token received:', token);
+        console.log('✅ FCM Token received:', token.substring(0, 20) + '...');
+        console.log('Full token for debugging:', token);
         this.currentToken = token;
         return token;
       } else {
-        console.warn('No FCM token available');
+        console.warn('⚠️ No FCM token available');
         return null;
       }
     } catch (error) {
-      console.error('Error getting FCM token:', error);
+      console.error('❌ Error getting FCM token:', error);
       throw error;
     }
   }
@@ -165,6 +176,13 @@ class NotificationService {
       const deviceType = this.getDeviceType();
       const deviceName = this.getDeviceName();
 
+      console.log('Sending token to server:', {
+        token: token.substring(0, 20) + '...',
+        deviceId,
+        deviceType,
+        deviceName,
+      });
+
       await registerNotificationToken({
         requestBody: {
           token,
@@ -174,9 +192,9 @@ class NotificationService {
         },
       });
 
-      console.log('Token successfully sent to server');
+      console.log('✅ Token successfully sent to server');
     } catch (error) {
-      console.error('Error sending token to server:', error);
+      console.error('❌ Error sending token to server:', error);
       throw error;
     }
   }
@@ -188,15 +206,17 @@ class NotificationService {
     try {
       const deviceId = this.getDeviceId();
 
+      console.log('Removing token from server for device:', deviceId);
+
       await unregisterNotificationToken({
         requestBody: {
           deviceId,
         },
       });
 
-      console.log('Token successfully removed from server');
+      console.log('✅ Token successfully removed from server');
     } catch (error) {
-      console.error('Error removing token from server:', error);
+      console.error('❌ Error removing token from server:', error);
       throw error;
     }
   }
@@ -286,55 +306,65 @@ class NotificationService {
    */
   async initialize(): Promise<boolean> {
     try {
+      console.log('🚀 Initializing notification service...');
+      
       const supported = await this.isSupported();
       if (!supported) {
-        console.warn('Notifications are not supported, skipping initialization');
+        console.warn('⚠️ Notifications are not supported, skipping initialization');
         return false;
       }
 
       // Всегда регистрируем Service Worker при инициализации
+      console.log('📝 Registering Service Worker...');
       await this.registerServiceWorker();
 
       // Загружаем настройки с сервера
+      console.log('⚙️ Loading notification settings from server...');
       await this.loadSettingsFromServer();
+      console.log('📋 Current settings:', this.settings);
 
       // Если уведомления отключены, не продолжаем инициализацию (но SW уже зарегистрирован)
       if (!this.settings.enabled) {
-        console.log('Notifications are disabled in settings, Service Worker registered but tokens not requested');
+        console.log('🔕 Notifications are disabled in settings, Service Worker registered but tokens not requested');
         return false;
       }
 
       // Проверяем, есть ли уже разрешение
       const currentPermission = Notification.permission;
+      console.log('🔐 Current notification permission:', currentPermission);
+      
       if (currentPermission === 'denied') {
-        console.warn('Notification permission denied by user');
+        console.warn('⛔ Notification permission denied by user');
         return false;
       }
 
       // Если разрешения еще нет, не запрашиваем его автоматически
       // Пользователь должен сам включить уведомления через настройки
       if (currentPermission !== 'granted') {
-        console.log('Notification permission not granted yet, waiting for user action');
+        console.log('⏳ Notification permission not granted yet, waiting for user action');
         return false;
       }
 
       // Получаем токен (SW уже зарегистрирован выше)
+      console.log('🎟️ Getting FCM token...');
       const token = await this.getToken();
       if (!token) {
-        console.error('Failed to get FCM token');
+        console.error('❌ Failed to get FCM token');
         return false;
       }
 
       // Отправляем токен на сервер
+      console.log('📤 Sending token to server...');
       await this.sendTokenToServer(token);
 
       // Настраиваем обработчик сообщений переднего плана
+      console.log('🎧 Setting up foreground message handler...');
       this.setupForegroundMessageHandler();
 
-      console.log('Notification service initialized successfully');
+      console.log('✅ Notification service initialized successfully');
       return true;
     } catch (error) {
-      console.error('Error initializing notification service:', error);
+      console.error('❌ Error initializing notification service:', error);
       return false;
     }
   }
@@ -423,11 +453,16 @@ class NotificationService {
    */
   private async loadSettingsFromServer(): Promise<void> {
     try {
+      console.log('📥 Loading settings from server...');
       const serverSettings = await getNotificationSettings();
+      console.log('📦 Server settings received:', serverSettings);
       
-      // Маппим серверные настройки на клиентские
+      // enabled определяется наличием разрешения браузера
+      // Если пользователь дал разрешение, значит уведомления включены
+      const isPermissionGranted = 'Notification' in window && Notification.permission === 'granted';
+      
       this.settings = {
-        enabled: true, // Если настройки есть на сервере, считаем что включены
+        enabled: isPermissionGranted,
         types: {
           [NotificationType.NEW_BOOKING]: serverSettings.newBooking ?? true,
           [NotificationType.STATUS_CHANGE]: serverSettings.statusChange ?? true,
@@ -436,10 +471,12 @@ class NotificationService {
         },
       };
 
+      console.log('✅ Settings loaded:', this.settings);
+
       // Также сохраняем в localStorage для кэша
       this.saveSettingsToLocalStorage();
     } catch (error) {
-      console.error('Error loading notification settings from server:', error);
+      console.error('❌ Error loading notification settings from server:', error);
       // В случае ошибки загружаем из localStorage
       this.loadSettingsFromLocalStorage();
     }

@@ -54,7 +54,7 @@ const CreateBookingModal = observer(({
   const { servicesStore, toastStore, authStore } = useStores();
 
   // Form state
-  const [phone, setPhone] = useState(''); // Храним введенный телефон
+  const [phone, setPhone] = useState('+7'); // Храним введенный телефон
   const [licensePlate, setLicensePlate] = useState('');
   const [selectedMake, setSelectedMake] = useState<SelectOption | null>(null);
   const [selectedModel, setSelectedModel] = useState<SelectOption | null>(null);
@@ -68,7 +68,7 @@ const CreateBookingModal = observer(({
   const [selectedClient, setSelectedClient] = useState<ClientSearchResultDto | null>(null);
   const [clientName, setClientName] = useState<string>('');
   const [selectedCar, setSelectedCar] = useState<CarSearchResultDto | null>(null);
-  const [phoneAutocompleteValue, setPhoneAutocompleteValue] = useState<AutocompleteOption | undefined>();
+  const [phoneAutocompleteValue, setPhoneAutocompleteValue] = useState<AutocompleteOption | undefined>({ label: '+7', value: null, isCustom: true });
   const [carAutocompleteValue, setCarAutocompleteValue] = useState<AutocompleteOption | undefined>();
   const [clientCarsOptions, setClientCarsOptions] = useState<AutocompleteOption[]>([]); // Опции автомобилей выбранного клиента
   
@@ -96,6 +96,9 @@ const CreateBookingModal = observer(({
       }
       // Сбрасываем флаг первой загрузки при открытии
       isFirstLoad.current = true;
+      // Сбрасываем значение телефона на "+7" при открытии модального окна
+      setPhone('+7');
+      setPhoneAutocompleteValue({ label: '+7', value: null, isCustom: true });
     }
   }, [isOpen, initialDate, initialTime]);
 
@@ -584,7 +587,7 @@ const CreateBookingModal = observer(({
         <div className="create-booking-modal__field-row">
           <div className="create-booking-modal__field">
             <AppAutocomplete
-              label="Поиск по телефону"
+              label="Номер телефона"
               placeholder="+7"
               value={phoneAutocompleteValue}
               onSearch={searchClients}

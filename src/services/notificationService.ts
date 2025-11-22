@@ -104,7 +104,7 @@ class NotificationService {
 
   /**
    * Получение FCM токена устройства
-   * Регистрирует Service Worker и получает токен для отправки push-уведомлений
+   * Получает токен для отправки push-уведомлений
    */
   async getToken(): Promise<string | null> {
     try {
@@ -126,11 +126,14 @@ class NotificationService {
         return null;
       }
 
-      // Регистрируем Service Worker
-      const registration = await navigator.serviceWorker.register(
-        '/firebase-messaging-sw.js'
-      );
-      console.log('Service Worker registered:', registration);
+      // Получаем существующую регистрацию Service Worker или создаем новую
+      let registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      
+      if (!registration) {
+        // Если регистрации нет, создаем ее
+        registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        console.log('Service Worker registered in getToken:', registration);
+      }
 
       // Получаем токен
       const token = await getToken(messaging, {
@@ -249,6 +252,35 @@ class NotificationService {
   }
 
   /**
+   * Регистрация Service Worker
+   * Вызывается при старте приложения, чтобы Service Worker был готов принимать фоновые уведомления
+   */
+  async registerServiceWorker(): Promise<boolean> {
+    try {
+      if (!('serviceWorker' in navigator)) {
+        console.warn('Service Worker is not supported');
+        return false;
+      }
+
+      const supported = await this.isSupported();
+      if (!supported) {
+        return false;
+      }
+
+      // Регистрируем Service Worker
+      const registration = await navigator.serviceWorker.register(
+        '/firebase-messaging-sw.js'
+      );
+      console.log('Service Worker registered successfully:', registration);
+
+      return true;
+    } catch (error) {
+      console.error('Error registering Service Worker:', error);
+      return false;
+    }
+  }
+
+  /**
    * Инициализация уведомлений
    * Запрашивает разрешение, получает токен и настраивает обработчики
    */
@@ -260,23 +292,33 @@ class NotificationService {
         return false;
       }
 
+      // Всегда регистрируем Service Worker при инициализации
+      await this.registerServiceWorker();
+
       // Загружаем настройки с сервера
       await this.loadSettingsFromServer();
 
-      // Если уведомления отключены, не инициализируем
+      // Если уведомления отключены, не продолжаем инициализацию (но SW уже зарегистрирован)
       if (!this.settings.enabled) {
-        console.log('Notifications are disabled in settings');
+        console.log('Notifications are disabled in settings, Service Worker registered but tokens not requested');
         return false;
       }
 
-      // Запрашиваем разрешение
-      const permission = await this.requestPermission();
-      if (permission !== 'granted') {
-        console.warn('Notification permission denied');
+      // Проверяем, есть ли уже разрешение
+      const currentPermission = Notification.permission;
+      if (currentPermission === 'denied') {
+        console.warn('Notification permission denied by user');
         return false;
       }
 
-      // Получаем токен
+      // Если разрешения еще нет, не запрашиваем его автоматически
+      // Пользователь должен сам включить уведомления через настройки
+      if (currentPermission !== 'granted') {
+        console.log('Notification permission not granted yet, waiting for user action');
+        return false;
+      }
+
+      // Получаем токен (SW уже зарегистрирован выше)
       const token = await this.getToken();
       if (!token) {
         console.error('Failed to get FCM token');

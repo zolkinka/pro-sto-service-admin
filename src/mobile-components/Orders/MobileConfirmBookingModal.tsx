@@ -47,7 +47,10 @@ export const MobileConfirmBookingModal: React.FC<MobileConfirmBookingModalProps>
         </div>
 
         <div className="mobile-confirm-booking-modal__content">
-          {booking.car && 'generated_image' in booking.car && (booking.car as CarDtoWithImage).generated_image && (
+          {booking.car && 
+           'generated_image' in booking.car && 
+           (booking.car as CarDtoWithImage).generated_image && 
+           (booking.car as CarDtoWithImage).generated_image!.trim() !== '' && (
             <div className="mobile-confirm-booking-modal__car-image">
               <img 
                 src={(booking.car as CarDtoWithImage).generated_image!} 

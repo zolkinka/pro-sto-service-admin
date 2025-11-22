@@ -20,8 +20,7 @@
 .app-time-picker__arrow {
   position: absolute;
   right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,7 +30,7 @@
 }
 
 .app-time-picker__arrow_open {
-  transform: translateY(-50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .app-time-picker__dropdown {

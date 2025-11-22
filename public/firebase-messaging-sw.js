@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 // Service Worker для обработки фоновых уведомлений Firebase Cloud Messaging
 // Этот файл должен находиться в public/ директории
 
@@ -7,15 +6,14 @@ importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
 // Конфигурация Firebase
-// ВАЖНО: В production эти значения должны быть заменены на реальные
-// или загружены из переменных окружения через build script
+// Эти значения должны совпадать с конфигурацией в основном приложении
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: 'AIzaSyAJNYZVxdjvvbVtCx-QcPzHPUzRfgESWvo',
+  authDomain: 'prosto-b13d3.firebaseapp.com',
+  projectId: 'prosto-b13d3',
+  storageBucket: 'prosto-b13d3.firebasestorage.app',
+  messagingSenderId: '976005377903',
+  appId: '1:976005377903:web:51020e03cc75058ab9c29a',
 };
 
 // Инициализация Firebase в Service Worker

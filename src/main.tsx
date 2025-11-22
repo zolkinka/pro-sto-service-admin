@@ -5,6 +5,7 @@ import { StoreProvider } from '@/stores/StoreContext';
 import { OpenAPI } from '../services/api-client';
 import { authStore } from '@/stores/AuthStore';
 import { setupApiInterceptors } from '@/utils/setupApiInterceptors';
+import { initializeFirebase } from '@/services/firebase';
 import App from './App';
 
 // Import global styles
@@ -18,6 +19,9 @@ OpenAPI.BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5201';
 
 // Настройка interceptors для автоматического обновления токенов
 setupApiInterceptors(authStore);
+
+// Инициализация Firebase при старте приложения
+initializeFirebase();
 
 const root = document.getElementById('root');
 

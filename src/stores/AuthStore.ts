@@ -7,6 +7,7 @@ import {
 } from '../../services/api-client';
 import type { AdminUserDto } from '../../services/api-client';
 import { toastStore } from './ToastStore';
+import { notificationService } from '@/services/notificationService';
 
 /**
  * Store для управления аутентификацией администраторов
@@ -51,6 +52,11 @@ export class AuthStore {
         OpenAPI.TOKEN = accessToken;
         
         this.setupTokenRefresh();
+
+        // Инициализируем уведомления после восстановления сессии
+        notificationService.initialize().catch((error) => {
+          console.error('Failed to initialize notifications after auth restore:', error);
+        });
       } catch (error) {
         console.error('Ошибка при парсинге данных пользователя:', error);
         this.logout();
@@ -111,6 +117,11 @@ export class AuthStore {
       OpenAPI.TOKEN = response.accessToken;
 
       this.setupTokenRefresh();
+
+      // Инициализируем уведомления после успешной авторизации
+      notificationService.initialize().catch((error) => {
+        console.error('Failed to initialize notifications after login:', error);
+      });
     } catch (error) {
       runInAction(() => {
         this.isLoading = false;

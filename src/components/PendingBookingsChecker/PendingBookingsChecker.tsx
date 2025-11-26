@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { MessagePayload } from 'firebase/messaging';
 import { useStores } from '@/hooks';
@@ -7,9 +7,17 @@ import ViewBookingModal from '@/pages/OrdersPage/components/ViewBookingModal/Vie
 import { MobileNewBookingModal } from '@/mobile-components/Orders/MobileNewBookingModal';
 import { notificationService } from '@/services/notificationService';
 
+// Интервал polling в миллисекундах (1 минута)
+const POLLING_INTERVAL_MS = 60 * 1000;
+
 /**
  * Компонент для глобальной проверки новых заказов (pending_confirmation)
  * Показывает модальное окно с новыми заказами на любой странице приложения
+ * 
+ * Функционал:
+ * - Загрузка pending заказов при старте приложения
+ * - Polling каждую минуту для проверки новых заказов
+ * - Обработка push-уведомлений о новых бронированиях
  */
 export const PendingBookingsChecker = observer(() => {
   const { bookingsStore, authStore } = useStores();
@@ -19,6 +27,21 @@ export const PendingBookingsChecker = observer(() => {
   const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasCheckedOnStartup, setHasCheckedOnStartup] = useState(false);
+  
+  // Ref для хранения интервала polling
+  const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Функция для загрузки pending заказов
+  const loadPendingBookings = useCallback(() => {
+    const serviceCenterUuid = authStore.user?.service_center_uuid;
+    
+    if (serviceCenterUuid) {
+      // Устанавливаем UUID сервисного центра в store (если еще не установлен)
+      bookingsStore.setServiceCenterUuid(serviceCenterUuid);
+      // Загружаем pending бронирования
+      bookingsStore.fetchPendingBookings();
+    }
+  }, [authStore.user?.service_center_uuid, bookingsStore]);
 
   // Первоначальная загрузка pending заказов при старте приложения
   useEffect(() => {
@@ -35,28 +58,57 @@ export const PendingBookingsChecker = observer(() => {
     }
   }, [authStore.user, bookingsStore, hasCheckedOnStartup]);
 
+  // Polling для периодической проверки новых заказов (каждую минуту)
+  useEffect(() => {
+    const serviceCenterUuid = authStore.user?.service_center_uuid;
+    
+    if (!serviceCenterUuid) {
+      return;
+    }
+    
+    // Запускаем polling
+    pollingIntervalRef.current = setInterval(() => {
+      console.log('PendingBookingsChecker: Polling - проверка новых заказов');
+      loadPendingBookings();
+    }, POLLING_INTERVAL_MS);
+    
+    console.log('PendingBookingsChecker: Polling запущен с интервалом', POLLING_INTERVAL_MS / 1000, 'сек');
+    
+    // Очистка интервала при размонтировании или изменении зависимостей
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+        console.log('PendingBookingsChecker: Polling остановлен');
+      }
+    };
+  }, [authStore.user?.service_center_uuid, loadPendingBookings]);
+
   // Обработчик push-уведомлений когда приложение в фокусе
   useEffect(() => {
     const handlePushMessage = (payload: MessagePayload) => {
-      console.log('Push notification received in foreground:', payload);
+      console.log('PendingBookingsChecker: Push notification received:', payload);
       
       // Проверяем, что это уведомление о новом заказе
       const notificationType = payload.data?.type;
       
       if (notificationType === 'newBooking' || notificationType === 'new_booking') {
+        console.log('PendingBookingsChecker: Новое бронирование - загружаем pending заказы');
         // Подтягиваем свежую информацию о pending заказах
-        bookingsStore.fetchPendingBookings();
+        loadPendingBookings();
       }
     };
 
     // Подписываемся на push-уведомления
     notificationService.addMessageHandler(handlePushMessage);
+    console.log('PendingBookingsChecker: Подписка на push-уведомления активирована');
 
     // Отписываемся при размонтировании
     return () => {
       notificationService.removeMessageHandler(handlePushMessage);
+      console.log('PendingBookingsChecker: Отписка от push-уведомлений');
     };
-  }, [bookingsStore]);
+  }, [loadPendingBookings]);
 
   // Эффект для автоматического показа pending заказов
   useEffect(() => {

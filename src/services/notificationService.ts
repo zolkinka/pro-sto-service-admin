@@ -385,13 +385,23 @@ class NotificationService {
       // Вызываем пользовательские обработчики
       this.messageHandlers.forEach(handler => handler(payload));
 
-      // Показываем toast с уведомлением
-      const { notification } = payload;
-      if (notification) {
-        toastStore.showInfo(
-          notification.body || 'Новое уведомление',
-          notification.title || 'Уведомление'
-        );
+      // Проверяем тип уведомления - для новых бронирований НЕ показываем toast,
+      // так как будет показано модальное окно через PendingBookingsChecker
+      const notificationType = payload.data?.type;
+      const isNewBookingNotification = 
+        notificationType === 'newBooking' || 
+        notificationType === 'new_booking' ||
+        notificationType === 'NEW_BOOKING';
+
+      // Показываем toast только для уведомлений, которые не обрабатываются модальными окнами
+      if (!isNewBookingNotification) {
+        const { notification } = payload;
+        if (notification) {
+          toastStore.showInfo(
+            notification.body || 'Новое уведомление',
+            notification.title || 'Уведомление'
+          );
+        }
       }
     });
   }

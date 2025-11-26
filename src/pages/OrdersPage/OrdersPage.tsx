@@ -18,11 +18,6 @@ const OrdersPage = observer(() => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createBookingDate, setCreateBookingDate] = useState<Date | null>(null);
   const [createBookingTime, setCreateBookingTime] = useState<string>('');
-  
-  // Состояния для автоматического показа pending заказов
-  const [pendingBookings, setPendingBookings] = useState<string[]>([]);
-  const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
-  const [showingPendingBooking, setShowingPendingBooking] = useState(false);
 
   // Рабочие часы (динамически рассчитываются на основе заказов)
   const workingHours = useMemo(() => {
@@ -70,9 +65,6 @@ const OrdersPage = observer(() => {
       // Загружаем данные
       bookingsStore.fetchBookings();
       
-      // Загружаем pending бронирования
-      bookingsStore.fetchPendingBookings();
-      
       // Загружаем сервисы если их еще нет
       if (servicesStore.services.length === 0) {
         servicesStore.fetchServices();
@@ -80,24 +72,7 @@ const OrdersPage = observer(() => {
     }
   }, [currentDate, authStore.user, bookingsStore, servicesStore]);
 
-  // Эффект для автоматического показа pending заказов
-  useEffect(() => {
-    // После загрузки pending заказов проверяем их наличие
-    if (!bookingsStore.isLoadingPending && bookingsStore.pendingBookings.length > 0) {
-      const pendingUuids = bookingsStore.pendingBookings.map(b => b.uuid);
-      
-      if (pendingUuids.length > 0 && !showingPendingBooking) {
-        setPendingBookings(pendingUuids);
-        setCurrentPendingIndex(0);
-        setShowingPendingBooking(true);
-        setSelectedBooking(pendingUuids[0]);
-      }
-    }
-  }, [bookingsStore.pendingBookings, bookingsStore.isLoadingPending, showingPendingBooking]);
-
   const handleBookingClick = (bookingUuid: string) => {
-    // При ручном клике сбрасываем режим автоматического показа
-    setShowingPendingBooking(false);
     setSelectedBooking(bookingUuid);
   };
 
@@ -106,49 +81,9 @@ const OrdersPage = observer(() => {
     bookingsStore.clearSelectedBooking();
   };
 
-  const handleClosePendingModal = () => {
-    // Переходим к следующему pending заказу или закрываем модалку
-    if (currentPendingIndex < pendingBookings.length - 1) {
-      const nextIndex = currentPendingIndex + 1;
-      setCurrentPendingIndex(nextIndex);
-      setSelectedBooking(pendingBookings[nextIndex]);
-    } else {
-      // Все pending заказы просмотрены
-      setShowingPendingBooking(false);
-      setSelectedBooking(null);
-      setPendingBookings([]);
-      setCurrentPendingIndex(0);
-    }
-  };
-
   const handleUpdateBooking = () => {
     // Перезагружаем список заказов после обновления
     bookingsStore.fetchBookings();
-  };
-
-  const handleUpdateFromPending = () => {
-    // Перезагружаем список заказов и pending бронирований
-    bookingsStore.fetchBookings();
-    bookingsStore.fetchPendingBookings();
-    
-    // Убираем текущий заказ из локального списка pending
-    const updatedPending = pendingBookings.filter(
-      (_uuid, idx) => idx !== currentPendingIndex
-    );
-    
-    if (updatedPending.length > 0) {
-      setPendingBookings(updatedPending);
-      // Индекс остается тем же, но теперь указывает на следующий элемент
-      const nextUuid = updatedPending[currentPendingIndex] || updatedPending[0];
-      setSelectedBooking(nextUuid);
-      setCurrentPendingIndex(Math.min(currentPendingIndex, updatedPending.length - 1));
-    } else {
-      // Больше нет pending заказов
-      setShowingPendingBooking(false);
-      setSelectedBooking(null);
-      setPendingBookings([]);
-      setCurrentPendingIndex(0);
-    }
   };
 
   const handleSlotClick = (date: Date, hour: number) => {
@@ -191,12 +126,10 @@ const OrdersPage = observer(() => {
         {selectedBooking && (
           <ViewBookingModal
             isOpen={selectedBooking !== null}
-            onClose={showingPendingBooking ? handleClosePendingModal : handleCloseModal}
+            onClose={handleCloseModal}
             bookingUuid={selectedBooking}
-            onUpdate={showingPendingBooking ? handleUpdateFromPending : handleUpdateBooking}
-            showAsNewBooking={showingPendingBooking}
-            pendingCount={pendingBookings.length}
-            currentPendingIndex={currentPendingIndex}
+            onUpdate={handleUpdateBooking}
+            showAsNewBooking={false}
           />
         )}
 

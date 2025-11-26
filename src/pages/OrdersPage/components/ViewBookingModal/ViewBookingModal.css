@@ -1,3 +1,37 @@
+/* Modal backdrop wrapper для глобального использования */
+.view-booking-modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  pointer-events: none;
+}
+
+.view-booking-modal-wrapper .view-booking-modal {
+  pointer-events: auto;
+  position: relative;
+  top: auto;
+  right: auto;
+}
+
+/* Backdrop для глобального использования */
+.view-booking-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  pointer-events: auto;
+}
+
 .view-booking-modal {
   position: absolute;
   /* позиционирование справа вверху, сразу под header */
@@ -6,7 +40,7 @@
   width: 346px;
   background: #FFFFFF;
   border: 1px solid #F4F3F0;
-  border-radius: 24px;
+  border-radius: 20px;
   box-shadow: 0px 1px 2px 0px rgba(30, 27, 21, 0.05);
   z-index: 100;
   font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -59,7 +93,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 0 20px 24px;
+  padding: 0 20px 24px 20px;
 }
 
 /* Notification Block */
@@ -346,22 +380,22 @@
 /* Cancel Button */
 .view-booking-modal__cancel-button {
   width: 100%;
-  padding: 16px 20px;
-  background: #F4F3F0;
-  color: #302F2D;
+  padding: 12px 16px;
+  background: transparent;
+  color: #E83046;
   border: none;
   border-radius: 20px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1.2;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: opacity 0.2s;
   font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 50px;
+  gap: 10px;
+  height: 44px;
 }
 
 .view-booking-modal__cancel-button svg {
@@ -370,12 +404,16 @@
   flex-shrink: 0;
 }
 
+.view-booking-modal__cancel-button svg path {
+  stroke: #E83046;
+}
+
 .view-booking-modal__cancel-button:hover {
-  background: #EAEAE7;
+  opacity: 0.8;
 }
 
 .view-booking-modal__cancel-button:active {
-  background: #DDDCD8;
+  opacity: 0.6;
 }
 
 /* Skeleton Loading */

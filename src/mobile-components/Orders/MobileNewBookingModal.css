@@ -301,6 +301,10 @@
   flex-shrink: 0;
 }
 
+.mobile-new-booking-modal__cancel-button svg path {
+  stroke: #E83046;
+}
+
 .mobile-new-booking-modal__cancel-button:active {
   background-color: rgba(232, 48, 70, 0.05);
 }

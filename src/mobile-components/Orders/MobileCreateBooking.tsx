@@ -223,15 +223,13 @@ export const MobileCreateBooking = observer(() => {
       value: model.id!,
     }));
 
-  const mainServiceOptions: SelectOption[] = servicesStore.services
-    .filter(service => service.service_type === 'main')
+  const mainServiceOptions: SelectOption[] = servicesStore.mainServices
     .map(service => ({
       label: service.name,
       value: service.uuid,
     }));
 
-  const additionalServiceOptions: MultiSelectOption[] = servicesStore.services
-    .filter(service => service.service_type === 'additional')
+  const additionalServiceOptions: MultiSelectOption[] = servicesStore.additionalServices
     .map(service => ({
       label: service.name,
       value: service.uuid,
@@ -626,6 +624,7 @@ export const MobileCreateBooking = observer(() => {
             options={additionalServiceOptions}
             value={selectedAdditionalServices}
             onChange={setSelectedAdditionalServices}
+            multiline
           />
         </div>
 

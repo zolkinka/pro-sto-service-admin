@@ -257,22 +257,20 @@ const CreateBookingModal = observer(({
   }, [models]);
 
   const mainServiceOptions: SelectOption[] = useMemo(() => {
-    return servicesStore.services
-      .filter(service => service.service_type === 'main')
+    return servicesStore.mainServices
       .map(service => ({
         label: service.name,
         value: service.uuid,
       }));
-  }, [servicesStore.services]);
+  }, [servicesStore.mainServices]);
 
   const additionalServiceOptions: MultiSelectOption[] = useMemo(() => {
-    return servicesStore.services
-      .filter(service => service.service_type === 'additional')
+    return servicesStore.additionalServices
       .map(service => ({
         label: service.name,
         value: service.uuid,
       }));
-  }, [servicesStore.services]);
+  }, [servicesStore.additionalServices]);
 
   // Функция поиска клиентов по номеру телефона
   const searchClients = useCallback(async (phoneQuery: string): Promise<AutocompleteOption[]> => {
@@ -687,6 +685,7 @@ const CreateBookingModal = observer(({
             value={selectedAdditionalServices}
             onChange={setSelectedAdditionalServices}
             clearable
+            multiline
           />
         </div>
 

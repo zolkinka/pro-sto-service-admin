@@ -39,4 +39,6 @@ export interface AppMultiSelectProps {
   baseDropdownProps?: Partial<AppBaseDropdownProps>;
   /** Класс для обертки */
   className?: string;
+  /** Многострочный режим - инпут расширяется для отображения всех тегов */
+  multiline?: boolean;
 }

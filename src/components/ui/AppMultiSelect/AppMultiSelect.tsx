@@ -44,6 +44,7 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
   option,
   baseDropdownProps = {},
   className,
+  multiline = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,33 +117,68 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
 
     return (
       <div className="app-multi-select__input-container">
-        <div className="app-multi-select__input-wrapper" onClick={handleInputClick}>
-          <AppInput
-            value={value.length > 0 ? `Выбрано: ${value.length}` : ''}
-            label={label}
-            placeholder={placeholder}
-            disabled={disabled}
-            error={error}
-            required={required}
-            readOnly
-            inputProps={{ style: { cursor: 'pointer' } }}
-          />
+        {/* Label для multiline режима - вынесен наружу */}
+        {multiline && value.length > 0 && label && (
+          <span className="app-multi-select__label">{label}</span>
+        )}
+        <div className={classNames('app-multi-select__input-wrapper', {
+          'app-multi-select__input-wrapper_multiline': multiline && value.length > 0,
+        })} onClick={handleInputClick}>
+          {/* В multiline режиме скрываем input когда есть теги */}
+          {!(multiline && value.length > 0) && (
+            <AppInput
+              value=""
+              label={label}
+              placeholder={value.length === 0 ? placeholder : ' '}
+              disabled={disabled}
+              error={error}
+              required={required}
+              readOnly
+              inputProps={{ style: { cursor: 'pointer' } }}
+            />
+          )}
           
           {/* Теги поверх input */}
           {value.length > 0 && (
-            <div className="app-multi-select__tags-container">
-              {value.map((selectedOption) => (
-                <div key={selectedOption.value} className="app-multi-select__tag-wrapper">
-                  <AppTag
-                    size="L"
-                    color="gray"
-                    closable
-                    onClose={() => handleTagRemove(selectedOption)}
-                  >
-                    {selectedOption.label}
-                  </AppTag>
-                </div>
-              ))}
+            <div className={classNames('app-multi-select__tags-container', {
+              'app-multi-select__tags-container_multiline': multiline,
+            })}>
+              {multiline ? (
+                // Многострочный режим - все теги
+                value.map((selectedOption) => (
+                  <div key={selectedOption.value} className="app-multi-select__tag-wrapper">
+                    <AppTag
+                      size="L"
+                      color="gray"
+                      closable
+                      onClose={() => handleTagRemove(selectedOption)}
+                    >
+                      {selectedOption.label}
+                    </AppTag>
+                  </div>
+                ))
+              ) : (
+                // Обычный режим - первый тег + счётчик
+                <>
+                  <div className="app-multi-select__tag-wrapper">
+                    <AppTag
+                      size="L"
+                      color="gray"
+                      closable
+                      onClose={() => handleTagRemove(value[0])}
+                    >
+                      {value[0].label}
+                    </AppTag>
+                  </div>
+                  {value.length > 1 && (
+                    <div className="app-multi-select__tag-wrapper">
+                      <AppTag size="L" color="gray">
+                        +{value.length - 1}
+                      </AppTag>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
           
@@ -268,6 +304,7 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
 
   const wrapperClassName = classNames('app-multi-select', {
     'app-multi-select_disabled': disabled,
+    'app-multi-select_multiline': multiline && value.length > 0,
   }, className);
 
   const mobileDrawerProps = isMobileMode && hasSearch 

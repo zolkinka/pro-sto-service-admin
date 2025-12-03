@@ -86,6 +86,15 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
     setSearchQuery('');
   }, []);
 
+  // Рендер label отдельно от toggle (для корректного позиционирования дропдауна)
+  const renderLabel = () => {
+    if (!label) return null;
+    
+    return (
+      <span className="app-single-select__label">{label}{required && <span className="app-single-select__required">*</span>}</span>
+    );
+  };
+
   // Рендер toggle (кастомный или дефолтный)
   const renderToggle = () => {
     if (toggle) return toggle;
@@ -99,11 +108,9 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
         <div className="app-single-select__input-wrapper" onClick={handleInputClick}>
           <AppInput
             value={value?.label ?? ''}
-            label={label}
             placeholder={placeholder}
             disabled={disabled}
             error={error}
-            required={required}
             readOnly
             inputProps={{ style: { cursor: 'pointer' } }}
           />

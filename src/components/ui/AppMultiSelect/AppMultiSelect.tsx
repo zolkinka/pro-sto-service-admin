@@ -107,6 +107,17 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
     setSearchQuery('');
   }, []);
 
+  // Рендер label отдельно от toggle (для корректного позиционирования дропдауна)
+  const renderLabel = () => {
+    if (!label) return null;
+    // В multiline режиме с выбранными значениями label рендерится в toggle
+    if (multiline && value.length > 0) return null;
+    
+    return (
+      <span className="app-multi-select__label">{label}{required && <span className="app-multi-select__required">*</span>}</span>
+    );
+  };
+
   // Рендер toggle (кастомный или дефолтный)
   const renderToggle = () => {
     if (toggle) return toggle;
@@ -128,11 +139,9 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
           {!(multiline && value.length > 0) && (
             <AppInput
               value=""
-              label={label}
               placeholder={value.length === 0 ? placeholder : ' '}
               disabled={disabled}
               error={error}
-              required={required}
               readOnly
               inputProps={{ style: { cursor: 'pointer' } }}
             />

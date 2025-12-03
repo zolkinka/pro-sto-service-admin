@@ -75,6 +75,11 @@
   margin-bottom: 0;
 }
 
+.app-multi-select__required {
+  color: var(--color-red-500, #EF4444);
+  margin-left: 2px;
+}
+
 .app-multi-select__clear-button {
   position: absolute;
   right: 40px;

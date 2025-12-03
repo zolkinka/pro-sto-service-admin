@@ -124,7 +124,7 @@
 
 .calendar-header__days {
   display: flex;
-  gap: 12px;
+  gap: 4px;
   flex: 1;
 }
 

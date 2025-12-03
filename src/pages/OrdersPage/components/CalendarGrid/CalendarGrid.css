@@ -61,8 +61,26 @@
 .calendar-grid__days-container {
   position: relative;
   flex: 1;
-  min-width: calc(120px * 7 + 12px * 6); /* 7 дней + 6 промежутков */
+  min-width: calc(120px * 7 + 4px * 6); /* 7 дней + 6 промежутков по 4px */
   isolation: isolate; /* Создаём новый контекст наложения */
+}
+
+/* Фоновые колонки для дней */
+.calendar-grid__day-backgrounds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.calendar-grid__day-background {
+  border-radius: 8px;
+}
+
+.calendar-grid__day-background--closed {
+  background-color: #F4F3F0;
 }
 
 .calendar-grid__horizontal-lines {

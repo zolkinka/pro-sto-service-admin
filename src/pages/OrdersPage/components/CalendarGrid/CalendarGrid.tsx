@@ -204,7 +204,33 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             />
           ) : (
             <>
-              {/* Горизонтальные и вертикальные линии скрыты - оставляем только карточки и слоты */}
+              {/* Фоновые колонки для выходных дней (дней без слотов) */}
+              <div 
+                className="calendar-grid__day-backgrounds"
+                style={{ height: `${bookingsHeight}px` }}
+              >
+                {Array.from({ length: 7 }).map((_, dayIndex) => {
+                  // Проверяем, есть ли хотя бы один слот в этот день
+                  const hasSlotsForDay = availableSlots[dayIndex] && 
+                    Object.keys(availableSlots[dayIndex]).length > 0;
+                  
+                  const left = dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
+                  
+                  return (
+                    <div
+                      key={dayIndex}
+                      className={`calendar-grid__day-background ${!hasSlotsForDay ? 'calendar-grid__day-background--closed' : ''}`}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: `${left}px`,
+                        width: `${DAY_COLUMN_WIDTH}px`,
+                        height: '100%',
+                      }}
+                    />
+                  );
+                })}
+              </div>
 
               {/* Кликабельные слоты для создания новых заказов */}
               {onSlotClick && (

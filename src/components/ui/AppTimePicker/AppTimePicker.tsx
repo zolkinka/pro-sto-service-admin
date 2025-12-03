@@ -42,12 +42,13 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
 
   // Генерация списка времени с шагом 15 минут или использование доступных слотов
   const timeOptions: string[] = useMemo(() => {
-    // Если переданы доступные слоты, используем их
-    if (availableSlots && availableSlots.length > 0) {
+    // Если передан массив доступных слотов (даже пустой), используем его
+    // Это позволяет показывать только доступное время
+    if (availableSlots !== undefined) {
       return availableSlots;
     }
 
-    // Иначе генерируем все времена с шагом 15 минут
+    // Иначе генерируем все времена с шагом 15 минут (fallback для режима без фильтрации)
     const times: string[] = [];
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
@@ -187,23 +188,29 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
     return (
       <div className="app-time-picker__dropdown" role="listbox">
         <div className="app-time-picker__options-container" ref={optionsContainerRef}>
-          {timeOptions.map((time) => {
-            const optionClassName = classNames('app-time-picker__option', {
-              'app-time-picker__option_selected': value === time,
-            });
+          {timeOptions.length > 0 ? (
+            timeOptions.map((time) => {
+              const optionClassName = classNames('app-time-picker__option', {
+                'app-time-picker__option_selected': value === time,
+              });
 
-            return (
-              <div
-                key={time}
-                className={optionClassName}
-                onClick={() => handleSelect(time)}
-                role="option"
-                aria-selected={value === time}
-              >
-                {time}
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={time}
+                  className={optionClassName}
+                  onClick={() => handleSelect(time)}
+                  role="option"
+                  aria-selected={value === time}
+                >
+                  {time}
+                </div>
+              );
+            })
+          ) : (
+            <div className="app-time-picker__no-options">
+              Нет доступного времени
+            </div>
+          )}
         </div>
       </div>
     );
@@ -211,6 +218,14 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
 
   // Рендер мобильного дровера
   const renderMobileDrawer = () => {
+    // Определяем текст для пустого состояния
+    const getEmptyMessage = () => {
+      if (timeOptions.length === 0) {
+        return 'Нет доступного времени';
+      }
+      return 'Ничего не найдено';
+    };
+
     return (
       <div className="app-time-picker__mobile-drawer">
         {hasSearch && (
@@ -245,7 +260,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
             })
           ) : (
             <div className="app-time-picker__mobile-no-options">
-              Ничего не найдено
+              {getEmptyMessage()}
             </div>
           )}
         </div>

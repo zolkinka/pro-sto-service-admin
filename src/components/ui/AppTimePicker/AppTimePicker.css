@@ -85,6 +85,14 @@
   font-weight: 500;
 }
 
+.app-time-picker__no-options {
+  padding: 16px 12px;
+  text-align: center;
+  font-family: 'Onest', sans-serif;
+  font-size: 14px;
+  color: #888684;
+}
+
 /* Mobile drawer styles */
 .app-time-picker__mobile-drawer {
   display: flex;

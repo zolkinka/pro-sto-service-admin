@@ -80,7 +80,8 @@
 }
 
 .calendar-grid__day-background--closed {
-  background-color: #F4F3F0;
+  /* Нерабочие дни остаются белыми */
+  background-color: transparent;
 }
 
 .calendar-grid__horizontal-lines {

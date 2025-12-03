@@ -146,6 +146,11 @@ export const MobileOrdersPage = observer(() => {
     const bookingDate = new Date(selectedDate);
     bookingDate.setHours(hours, 0, 0, 0);
     
+    // Проверяем, не является ли слот прошедшим
+    if (bookingDate < new Date()) {
+      return; // Не переходим на страницу создания для прошедших слотов
+    }
+    
     // Переходим на страницу создания бронирования с параметрами
     const dateParam = format(bookingDate, 'yyyy-MM-dd');
     const timeParam = timeSlot;
@@ -261,6 +266,12 @@ export const MobileOrdersPage = observer(() => {
               visibleSlots.map((timeSlot) => {
                 const bookings = bookingsBySlot.get(timeSlot) || [];
                 
+                // Проверяем, является ли слот прошедшим
+                const [hours] = timeSlot.split(':').map(Number);
+                const slotDateTime = new Date(selectedDate);
+                slotDateTime.setHours(hours, 0, 0, 0);
+                const isPast = slotDateTime < new Date();
+                
                 return (
                   <MobileBookingSlot
                     key={timeSlot}
@@ -268,6 +279,7 @@ export const MobileOrdersPage = observer(() => {
                     bookings={bookings}
                     onBookingClick={handleBookingClick}
                     onSlotClick={() => handleSlotClick(timeSlot)}
+                    isPast={isPast}
                   />
                 );
               })

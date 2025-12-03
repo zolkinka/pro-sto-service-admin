@@ -443,6 +443,15 @@ const CreateBookingModal = observer(({
       return;
     }
 
+    // Проверка что выбранная дата и время не в прошлом
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    const bookingDateTime = new Date(selectedDate);
+    bookingDateTime.setHours(hours, minutes, 0, 0);
+    if (bookingDateTime < new Date()) {
+      toastStore.showError('Нельзя создать запись на прошедшее время');
+      return;
+    }
+
     if (!selectedService) {
       toastStore.showError('Выберите услугу');
       return;

@@ -430,6 +430,15 @@ export const MobileCreateBooking = observer(() => {
       return;
     }
 
+    // Проверка что выбранная дата и время не в прошлом
+    const [checkHours, checkMinutes] = selectedTime.split(':').map(Number);
+    const bookingDateTime = new Date(selectedDate);
+    bookingDateTime.setHours(checkHours, checkMinutes, 0, 0);
+    if (bookingDateTime < new Date()) {
+      toastStore.showError('Нельзя создать запись на прошедшее время');
+      return;
+    }
+
     if (!selectedService) {
       toastStore.showError('Выберите услугу');
       return;

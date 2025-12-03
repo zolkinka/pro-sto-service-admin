@@ -8,6 +8,7 @@ interface MobileBookingSlotProps {
   bookings: AdminBookingResponseDto[];
   onBookingClick: (uuid: string) => void;
   onSlotClick?: () => void;
+  isPast?: boolean; // Слот в прошлом времени
 }
 
 export const MobileBookingSlot: React.FC<MobileBookingSlotProps> = ({
@@ -15,9 +16,10 @@ export const MobileBookingSlot: React.FC<MobileBookingSlotProps> = ({
   bookings,
   onBookingClick,
   onSlotClick,
+  isPast = false,
 }) => {
   const hasBookings = bookings.length > 0;
-  const isClickable = !hasBookings && onSlotClick;
+  const isClickable = !hasBookings && onSlotClick && !isPast;
   
   return (
     <div className="mobile-booking-slot">

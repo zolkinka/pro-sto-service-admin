@@ -253,6 +253,16 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           return null;
                         }
 
+                        // Проверяем, не является ли слот прошедшим
+                        const slotDateTime = new Date(slotDate);
+                        slotDateTime.setHours(hour, 0, 0, 0);
+                        const isPast = slotDateTime < new Date();
+                        
+                        // Не показываем слот для прошедшего времени
+                        if (isPast) {
+                          return null;
+                        }
+
                         return (
                           <div
                             key={`${hour}-${dayIndex}`}

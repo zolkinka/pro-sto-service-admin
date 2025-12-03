@@ -1,6 +1,6 @@
 ---
 description: 'Describe what this custom agent does and when to use it.'
-tools: ['runCommands', 'runTasks', 'atlassian/atlassian-mcp-server/fetch', 'atlassian/atlassian-mcp-server/search', 'chrome-mcp/*', 'clickup/*', 'figma-mcp/*', 'GitKraken/git_add_or_commit', 'edit', 'runNotebooks', 'search', 'new', 'extensions', 'todos', 'runSubagent', 'runTests', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo']
+tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'GitKraken/git_add_or_commit', 'chrome-mcp/*', 'clickup/*', 'figma-mcp/*', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runSubagent', 'runTests']
 ---
 Ты - Senior React Developer с большим опытом разработки
 Мы работаем над сервисом бронирования автоуслуг

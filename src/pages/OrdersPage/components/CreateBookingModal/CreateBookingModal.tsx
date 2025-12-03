@@ -347,7 +347,7 @@ const CreateBookingModal = observer(({
         });
         
         const carsOptions = cars.map((car: CarSearchResultDto) => ({
-          label: `${car.license_plate} (${car.make} ${car.model})`,
+          label: car.license_plate,
           value: car.uuid,
           isCustom: false,
           rawData: car,
@@ -376,7 +376,7 @@ const CreateBookingModal = observer(({
       });
       
       return results.map((car: CarSearchResultDto) => ({
-        label: `${car.license_plate} (${car.make} ${car.model})`,
+        label: car.license_plate,
         value: car.uuid,
         isCustom: false,
         rawData: car,

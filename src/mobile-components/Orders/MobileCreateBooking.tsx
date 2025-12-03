@@ -291,7 +291,7 @@ export const MobileCreateBooking = observer(() => {
         });
         
         const carsOptions: AutocompleteOption[] = cars.map((car: CarSearchResultDto) => ({
-          label: `${car.license_plate} (${car.make} ${car.model})`,
+          label: car.license_plate,
           value: car.uuid,
           isCustom: false,
         }));
@@ -318,7 +318,7 @@ export const MobileCreateBooking = observer(() => {
       });
       
       return results.map((car: CarSearchResultDto) => ({
-        label: `${car.license_plate} (${car.make} ${car.model})`,
+        label: car.license_plate,
         value: car.uuid,
         isCustom: false,
       } as AutocompleteOption));
@@ -342,7 +342,7 @@ export const MobileCreateBooking = observer(() => {
     // Ищем автомобиль в результатах поиска
     try {
       const cars = await adminSearchCars({
-        licensePlate: option.label.split(' ')[0], // Берём только номер из "A000AA (Toyota Camry)"
+        licensePlate: option.label,
         clientUuid: selectedClient?.uuid,
         limit: 1,
       });

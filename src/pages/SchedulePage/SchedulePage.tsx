@@ -8,7 +8,7 @@ import HolidayPickerModal from './HolidayPickerModal';
 import './SchedulePage.css';
 
 const SchedulePage: React.FC = observer(() => {
-  const { operatingHoursStore, authStore } = useStores();
+  const { operatingHoursStore, authStore, toastStore } = useStores();
   const [isEditing, setIsEditing] = useState(false);
   const [isHolidayModalOpen, setIsHolidayModalOpen] = useState(false);
   
@@ -43,6 +43,9 @@ const SchedulePage: React.FC = observer(() => {
       return;
     }
 
+    // Отключаем промежуточные уведомления для batch-операций
+    const silentOptions = { showSuccessToast: false, showErrorToast: false };
+
     try {
       // Форматируем выбранные даты
       const selectedFormattedDates = dates.map(date => format(date, 'yyyy-MM-dd'));
@@ -57,7 +60,7 @@ const SchedulePage: React.FC = observer(() => {
       // Удаляем снятые с выбора даты
       for (const dateToDelete of datesToDelete) {
         if (dateToDelete.uuid) {
-          await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, dateToDelete.uuid);
+          await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, dateToDelete.uuid, silentOptions);
         }
       }
       
@@ -76,11 +79,16 @@ const SchedulePage: React.FC = observer(() => {
             specific_date: formattedDate,
             is_closed: true,
             timezone: operatingHoursStore.timezone,
-          });
+          }, silentOptions);
         }
       }
+      
+      // Показываем общее уведомление об успехе
+      toastStore.showSuccess('Выходные дни обновлены');
     } catch (error) {
-      // Ошибка уже обработана в store и показана пользователю
+      // Показываем ошибку
+      const errorMessage = operatingHoursStore.error || 'Произошла ошибка при сохранении';
+      toastStore.showError(errorMessage);
       // Пробрасываем ошибку дальше, чтобы модалка не закрылась
       console.error('Failed to save holidays:', error);
       throw error;

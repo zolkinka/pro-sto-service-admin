@@ -29,6 +29,11 @@ const getErrorMessage = (error: unknown): string => {
   return 'Произошла ошибка';
 };
 
+interface OperationOptions {
+  showSuccessToast?: boolean;
+  showErrorToast?: boolean;
+}
+
 export class OperatingHoursStore {
   regularSchedule: OperatingHoursResponseDto[] = [];
   specialDates: OperatingHoursResponseDto[] = [];
@@ -71,7 +76,12 @@ export class OperatingHoursStore {
     }
   }
 
-  async updateRegularSchedule(serviceCenterUuid: string, data: UpdateRegularScheduleDto) {
+  async updateRegularSchedule(
+    serviceCenterUuid: string, 
+    data: UpdateRegularScheduleDto,
+    options: OperationOptions = {}
+  ) {
+    const { showSuccessToast = true, showErrorToast = true } = options;
     this.loading = true;
     this.error = null;
     
@@ -81,8 +91,10 @@ export class OperatingHoursStore {
         requestBody: data 
       });
       
-      // Показываем toast с успехом
-      this.rootStore?.toastStore.showSuccess('Расписание успешно обновлено');
+      // Показываем toast с успехом только если указано
+      if (showSuccessToast) {
+        this.rootStore?.toastStore.showSuccess('Расписание успешно обновлено');
+      }
       
       // Перезагружаем данные после обновления
       try {
@@ -103,14 +115,21 @@ export class OperatingHoursStore {
         this.loading = false;
       });
       
-      this.rootStore?.toastStore.showError(errorMessage);
+      if (showErrorToast) {
+        this.rootStore?.toastStore.showError(errorMessage);
+      }
       
       console.error('Error updating regular schedule:', error);
       throw error;
     }
   }
 
-  async createSpecialDate(serviceCenterUuid: string, data: CreateSpecialDateDto) {
+  async createSpecialDate(
+    serviceCenterUuid: string, 
+    data: CreateSpecialDateDto,
+    options: OperationOptions = {}
+  ) {
+    const { showSuccessToast = true, showErrorToast = true } = options;
     this.loading = true;
     this.error = null;
     
@@ -120,7 +139,9 @@ export class OperatingHoursStore {
         requestBody: data 
       });
       
-      this.rootStore?.toastStore.showSuccess('Выходной день добавлен');
+      if (showSuccessToast) {
+        this.rootStore?.toastStore.showSuccess('Выходной день добавлен');
+      }
       
       // Перезагружаем данные после добавления
       await this.loadOperatingHours(serviceCenterUuid);
@@ -136,14 +157,21 @@ export class OperatingHoursStore {
         this.loading = false;
       });
       
-      this.rootStore?.toastStore.showError(errorMessage);
+      if (showErrorToast) {
+        this.rootStore?.toastStore.showError(errorMessage);
+      }
       
       console.error('Error creating special date:', error);
       throw error;
     }
   }
 
-  async deleteSpecialDate(serviceCenterUuid: string, uuid: string) {
+  async deleteSpecialDate(
+    serviceCenterUuid: string, 
+    uuid: string,
+    options: OperationOptions = {}
+  ) {
+    const { showSuccessToast = true, showErrorToast = true } = options;
     this.loading = true;
     this.error = null;
     
@@ -153,7 +181,9 @@ export class OperatingHoursStore {
         uuid 
       });
       
-      this.rootStore?.toastStore.showSuccess('Выходной день удален');
+      if (showSuccessToast) {
+        this.rootStore?.toastStore.showSuccess('Выходной день удален');
+      }
       
       // Перезагружаем данные после удаления
       await this.loadOperatingHours(serviceCenterUuid);
@@ -169,7 +199,9 @@ export class OperatingHoursStore {
         this.loading = false;
       });
       
-      this.rootStore?.toastStore.showError(errorMessage);
+      if (showErrorToast) {
+        this.rootStore?.toastStore.showError(errorMessage);
+      }
       
       console.error('Error deleting special date:', error);
       throw error;

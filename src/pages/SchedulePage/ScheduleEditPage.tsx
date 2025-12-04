@@ -10,7 +10,7 @@ import { ROUTES } from '@/constants/routes';
 import type { OperatingHoursResponseDto } from '../../../services/api-client/types.gen';
 
 export const ScheduleEditPage: React.FC = observer(() => {
-  const { operatingHoursStore, authStore } = useStores();
+  const { operatingHoursStore, authStore, toastStore } = useStores();
   const navigate = useNavigate();
   const serviceCenterUuid = authStore.user?.service_center_uuid;
   const [isSpecialDateModalOpen, setIsSpecialDateModalOpen] = useState(false);
@@ -67,10 +67,14 @@ export const ScheduleEditPage: React.FC = observer(() => {
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
+    
+    // Отключаем промежуточные уведомления для batch-операций
+    const silentOptions = { showSuccessToast: false, showErrorToast: false };
+    
     try {
       // Сначала сохраняем обычное расписание, если есть изменения
       if (hasScheduleChanges && pendingScheduleData) {
-        await operatingHoursStore.updateRegularSchedule(serviceCenterUuid, pendingScheduleData);
+        await operatingHoursStore.updateRegularSchedule(serviceCenterUuid, pendingScheduleData, silentOptions);
         setHasScheduleChanges(false);
         setPendingScheduleData(null);
       }
@@ -84,7 +88,7 @@ export const ScheduleEditPage: React.FC = observer(() => {
       for (const serverDate of serverDates) {
         if (serverDate.specific_date && !localDatesMap.has(serverDate.specific_date)) {
           if (serverDate.uuid) {
-            await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, serverDate.uuid);
+            await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, serverDate.uuid, silentOptions);
           }
         }
       }
@@ -103,7 +107,7 @@ export const ScheduleEditPage: React.FC = observer(() => {
             open_time: localDate.open_time as string | undefined,
             close_time: localDate.close_time as string | undefined,
             timezone: operatingHoursStore.timezone,
-          });
+          }, silentOptions);
         } else {
           // Проверяем, нужно ли обновить существующую дату
           const needsUpdate = 
@@ -113,20 +117,25 @@ export const ScheduleEditPage: React.FC = observer(() => {
           
           if (needsUpdate && serverDate.uuid) {
             // Обновляем существующую дату
-            await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, serverDate.uuid);
+            await operatingHoursStore.deleteSpecialDate(serviceCenterUuid, serverDate.uuid, silentOptions);
             await operatingHoursStore.createSpecialDate(serviceCenterUuid, {
               specific_date: localDate.specific_date,
               is_closed: localDate.is_closed,
               open_time: localDate.open_time as string | undefined,
               close_time: localDate.close_time as string | undefined,
               timezone: operatingHoursStore.timezone,
-            });
+            }, silentOptions);
           }
         }
       }
       
+      // Показываем общее уведомление об успехе только после завершения всех операций
+      toastStore.showSuccess('Расписание успешно обновлено');
       navigate(ROUTES.SCHEDULE);
     } catch (error) {
+      // Показываем ошибку - сообщение уже содержится в operatingHoursStore.error
+      const errorMessage = operatingHoursStore.error || 'Произошла ошибка при сохранении';
+      toastStore.showError(errorMessage);
       console.error('Failed to save special dates:', error);
     } finally {
       setIsSaving(false);

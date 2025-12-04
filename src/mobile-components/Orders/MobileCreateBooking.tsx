@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
-import { AppInput, AppButton } from '@/components/ui';
+import { AppInput, AppButton, AppTextarea } from '@/components/ui';
 import { AppSingleSelect } from '@/components/ui/AppSingleSelect';
 import { AppMultiSelect } from '@/components/ui/AppMultiSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
@@ -638,11 +638,14 @@ export const MobileCreateBooking = observer(() => {
         </div>
 
         <div className="mobile-create-booking__field">
-          <AppInput
+          <AppTextarea
             label="Комментарий к заказу"
-            placeholder=" "
+            placeholder="Введите комментарий"
             value={comment}
             onChange={setComment}
+            minRows={2}
+            maxRows={10}
+            autoResize
           />
         </div>
       </div>

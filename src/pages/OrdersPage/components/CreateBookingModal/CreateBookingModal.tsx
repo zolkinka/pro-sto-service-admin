@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
-import { AppInput } from '@/components/ui';
+import { AppInput, AppTextarea } from '@/components/ui';
 import { AppSingleSelect } from '@/components/ui/AppSingleSelect';
 import { AppMultiSelect } from '@/components/ui/AppMultiSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
@@ -699,11 +699,14 @@ const CreateBookingModal = observer(({
         </div>
 
         <div className="create-booking-modal__field">
-          <AppInput
+          <AppTextarea
             label="Комментарий к заказу"
-            placeholder=""
+            placeholder="Введите комментарий"
             value={comment}
             onChange={(value) => setComment(value)}
+            minRows={2}
+            maxRows={10}
+            autoResize
           />
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { differenceInMinutes, format, isSameDay, addDays } from 'date-fns';
+import { format, isSameDay, addDays } from 'date-fns';
 import type { AdminBookingResponseDto } from '../../../../../services/api-client';
 import { serviceCenterGetSlots } from '../../../../../services/api-client';
 import BookingCard from '../BookingCard/BookingCard';
@@ -133,7 +133,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   // Рассчитываем позиции для каждого заказа
   const bookingsWithPositions: BookingWithPosition[] = bookings.map((booking) => {
     const startTime = new Date(booking.start_time);
-    const endTime = new Date(booking.end_time);
 
     // Определяем день недели (0-6)
     let dayIndex = -1;
@@ -156,10 +155,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     // Добавляем отступ сверху (CARD_PADDING) для визуального отделения от линии
     const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
 
-    // Рассчитываем высоту карточки
-    const durationMinutes = differenceInMinutes(endTime, startTime);
+    // Высота карточки бронирования фиксирована - 1 час (как и слоты)
     // Вычитаем отступы сверху и снизу (CARD_PADDING * 2)
-    const height = durationMinutes * PIXELS_PER_MINUTE - (CARD_PADDING * 2);
+    const height = PIXELS_PER_HOUR - (CARD_PADDING * 2);
 
     return {
       ...booking,

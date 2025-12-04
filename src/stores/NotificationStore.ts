@@ -25,7 +25,7 @@ export class NotificationStore {
   
   // Таймер для polling
   private pollingTimer: NodeJS.Timeout | null = null;
-  private readonly POLLING_INTERVAL = 45000; // 45 секунд
+  private readonly POLLING_INTERVAL = 30000; // 30 секунд
 
   constructor() {
     makeAutoObservable(this);

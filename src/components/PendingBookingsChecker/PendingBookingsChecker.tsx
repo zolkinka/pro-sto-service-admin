@@ -7,8 +7,8 @@ import ViewBookingModal from '@/pages/OrdersPage/components/ViewBookingModal/Vie
 import { MobileNewBookingModal } from '@/mobile-components/Orders/MobileNewBookingModal';
 import { notificationService } from '@/services/notificationService';
 
-// Интервал polling в миллисекундах (1 минута)
-const POLLING_INTERVAL_MS = 60 * 1000;
+// Интервал polling в миллисекундах (30 секунд)
+const POLLING_INTERVAL_MS = 30 * 1000;
 
 /**
  * Компонент для глобальной проверки новых заказов (pending_confirmation)

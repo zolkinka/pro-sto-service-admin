@@ -32,7 +32,13 @@ export const MobileOrderDetailsPage = observer(() => {
   }, [uuid, bookingsStore]);
 
   const handleBack = () => {
-    navigate(-1);
+    // Если есть данные о заказе, переходим на страницу заказов с датой этого заказа
+    if (booking?.start_time) {
+      const bookingDate = format(parseISO(booking.start_time), 'yyyy-MM-dd');
+      navigate(`/orders?date=${bookingDate}`);
+    } else {
+      navigate(-1);
+    }
   };
 
   const handleCancel = async () => {
@@ -45,8 +51,13 @@ export const MobileOrderDetailsPage = observer(() => {
       const success = await bookingsStore.updateBookingStatus(uuid, 'cancelled');
       
       if (success) {
-        // Возвращаемся на предыдущую страницу
-        navigate(-1);
+        // Возвращаемся на страницу заказов с датой этого заказа
+        if (booking?.start_time) {
+          const bookingDate = format(parseISO(booking.start_time), 'yyyy-MM-dd');
+          navigate(`/orders?date=${bookingDate}`);
+        } else {
+          navigate(-1);
+        }
         // Обновляем список заказов
         bookingsStore.fetchBookings();
       }

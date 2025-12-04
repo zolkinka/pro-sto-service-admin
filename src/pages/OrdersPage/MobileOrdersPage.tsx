@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { format, parseISO, isValid } from 'date-fns';
 import { useStores } from '@/hooks';
 import { MobileCalendarView } from '@/mobile-components/Orders/MobileCalendarView';
 import { MobileBookingSlot } from '@/mobile-components/Orders/MobileBookingSlot';
@@ -14,9 +14,47 @@ import './MobileOrdersPage.css';
 export const MobileOrdersPage = observer(() => {
   const { bookingsStore, authStore, servicesStore } = useStores();
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Получаем дату из URL параметра или используем текущую дату
+  const getInitialDate = (): Date => {
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      try {
+        const parsedDate = parseISO(dateParam);
+        if (isValid(parsedDate)) {
+          return parsedDate;
+        }
+      } catch {
+        // Если не удалось распарсить, используем текущую дату
+      }
+    }
+    return new Date();
+  };
+  
+  const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate);
   const [currentTime, setCurrentTime] = useState<string>('');
   const [uiCategory, setUiCategory] = useState<CategoryType>('car_wash');
+
+  // Синхронизируем selectedDate с URL параметром date при навигации
+  useEffect(() => {
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      try {
+        const parsedDate = parseISO(dateParam);
+        if (isValid(parsedDate)) {
+          // Сравниваем только даты (без времени)
+          const currentDateStr = format(selectedDate, 'yyyy-MM-dd');
+          if (dateParam !== currentDateStr) {
+            setSelectedDate(parsedDate);
+          }
+        }
+      } catch {
+        // Если не удалось распарсить, игнорируем
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
   
   // Состояния для модального окна pending заказов
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -128,6 +166,8 @@ export const MobileOrdersPage = observer(() => {
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
+    // Обновляем URL параметр для сохранения выбранной даты
+    setSearchParams({ date: format(date, 'yyyy-MM-dd') }, { replace: true });
   };
 
   const handleBookingClick = (uuid: string) => {

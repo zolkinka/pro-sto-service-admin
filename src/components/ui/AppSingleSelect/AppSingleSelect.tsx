@@ -28,10 +28,10 @@ import './AppSingleSelect.css';
  */
 export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
   value,
-  label,
+  label: _label,
   disabled = false,
   error,
-  required = false,
+  required: _required = false,
   placeholder = 'Выберите...',
   searchPlaceholder = 'Поиск...',
   clearable = false,
@@ -85,15 +85,6 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
     setIsOpen(false);
     setSearchQuery('');
   }, []);
-
-  // Рендер label отдельно от toggle (для корректного позиционирования дропдауна)
-  const renderLabel = () => {
-    if (!label) return null;
-    
-    return (
-      <span className="app-single-select__label">{label}{required && <span className="app-single-select__required">*</span>}</span>
-    );
-  };
 
   // Рендер toggle (кастомный или дефолтный)
   const renderToggle = () => {

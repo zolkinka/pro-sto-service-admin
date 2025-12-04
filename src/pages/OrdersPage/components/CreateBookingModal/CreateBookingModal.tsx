@@ -84,6 +84,10 @@ const CreateBookingModal = observer(({
 
   // Ref для отслеживания первой загрузки (чтобы не очищать initialTime)
   const isFirstLoad = useRef(true);
+  
+  // Ref для отслеживания места начала клика (для предотвращения закрытия при выделении текста)
+  const mouseDownOnOverlay = useRef(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Обновление даты и времени при открытии модального окна с новыми значениями
   useEffect(() => {
@@ -546,7 +550,7 @@ const CreateBookingModal = observer(({
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     // Reset form
     setPhone('');
     setLicensePlate('');
@@ -570,18 +574,61 @@ const CreateBookingModal = observer(({
     isFirstLoad.current = true;
     
     onClose();
-  };
+  }, [initialDate, initialTime, onClose]);
+
+  // Проверяем, была ли форма изменена
+  const isFormDirty = useCallback(() => {
+    // Проверяем, есть ли изменения в форме относительно начального состояния
+    const hasPhoneChange = phone !== '+7' && phone !== '';
+    const hasLicensePlate = licensePlate.trim() !== '';
+    const hasClientName = clientName.trim() !== '';
+    const hasComment = comment.trim() !== '';
+    const hasAdditionalServices = selectedAdditionalServices.length > 0;
+    
+    return hasPhoneChange || hasLicensePlate || hasClientName || hasComment || hasAdditionalServices;
+  }, [phone, licensePlate, clientName, comment, selectedAdditionalServices]);
+
+  // Обработчик закрытия с подтверждением
+  const handleCloseWithConfirmation = useCallback(() => {
+    if (isFormDirty()) {
+      if (window.confirm('Вы уверены, что хотите закрыть окно? Все несохранённые данные будут потеряны.')) {
+        handleClose();
+      }
+    } else {
+      handleClose();
+    }
+  }, [isFormDirty, handleClose]);
+
+  // Обработчики для корректного закрытия по клику на overlay
+  // (закрываем только если и mousedown и mouseup произошли на overlay)
+  const handleOverlayMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.target === overlayRef.current) {
+      mouseDownOnOverlay.current = true;
+    }
+  }, []);
+
+  const handleOverlayMouseUp = useCallback((e: React.MouseEvent) => {
+    if (e.target === overlayRef.current && mouseDownOnOverlay.current) {
+      handleCloseWithConfirmation();
+    }
+    mouseDownOnOverlay.current = false;
+  }, [handleCloseWithConfirmation]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="create-booking-modal__overlay" onClick={handleClose}>
+    <div 
+      ref={overlayRef}
+      className="create-booking-modal__overlay" 
+      onMouseDown={handleOverlayMouseDown}
+      onMouseUp={handleOverlayMouseUp}
+    >
       <div className="create-booking-modal" onClick={(e) => e.stopPropagation()}>
         <div className="create-booking-modal__header">
           <h2 className="create-booking-modal__title">Добавление записи</h2>
           <button 
             className="create-booking-modal__close" 
-            onClick={handleClose} 
+            onClick={handleCloseWithConfirmation} 
             aria-label="Закрыть"
             disabled={isSubmitting}
           >

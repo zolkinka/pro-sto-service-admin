@@ -230,6 +230,35 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 })}
               </div>
 
+              {/* Горизонтальные линии сетки (для каждого часа) */}
+              <div 
+                className="calendar-grid__horizontal-lines"
+                style={{ height: `${bookingsHeight}px` }}
+              >
+                {hours.map((hour, hourIndex) => (
+                  <div
+                    key={hour}
+                    className="calendar-grid__hour-line"
+                    style={{
+                      top: `${hourIndex * PIXELS_PER_HOUR}px`,
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Вертикальные линии сетки (между днями) */}
+              <div 
+                className="calendar-grid__vertical-lines"
+                style={{ height: `${bookingsHeight}px` }}
+              >
+                {Array.from({ length: 7 }).map((_, dayIndex) => (
+                  <div
+                    key={dayIndex}
+                    className="calendar-grid__day-line"
+                  />
+                ))}
+              </div>
+
               {/* Кликабельные слоты для создания новых заказов */}
               {onSlotClick && (
                 <div 

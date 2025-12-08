@@ -61,7 +61,6 @@
 .calendar-grid__days-container {
   position: relative;
   flex: 1;
-  min-width: calc(120px * 7 + 4px * 6); /* 7 дней + 6 промежутков по 4px */
   isolation: isolate; /* Создаём новый контекст наложения */
 }
 
@@ -98,7 +97,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background-color: #E4E3E0;
+  background-color: #F8F7F5;
   width: 100%;
 }
 
@@ -107,14 +106,27 @@
   top: 0;
   bottom: 0;
   left: 0;
+  right: 0;
   display: flex;
   gap: 4px;
   pointer-events: none;
   z-index: 1;
 }
 
+/* Левая граница сетки */
+.calendar-grid__vertical-lines::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: #F8F7F5;
+  z-index: 2;
+}
+
 .calendar-grid__day-line {
-  width: 120px;
+  flex: 1;
   height: 100%;
   position: relative;
 }
@@ -127,7 +139,7 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background-color: #E4E3E0;
+  background-color: #F8F7F5;
   transform: rotate(0deg);
 }
 
@@ -156,7 +168,6 @@
 
 .calendar-grid__clickable-slot {
   cursor: pointer;
-  transition: all 0.2s ease;
   border-radius: 8px;
   position: relative;
   /* Добавляем рамку для пустых слотов */

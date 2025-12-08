@@ -101,15 +101,16 @@
 .calendar-header__week-days {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 31px;
   font-family: var(--font-onest);
+  padding-right: 6px; /* Учитываем ширину скроллбара сетки */
 }
 
 .calendar-header__month {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 81px;
+  width: 58px;
   height: 56px;
   padding: 19px 12px;
   background: var(--color-gray-100);
@@ -133,14 +134,13 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  width: 120px;
+  flex: 1;
   height: 56px;
   padding: 8px;
   background: var(--color-gray-100);
   color: var(--color-gray-800);
   border-radius: 16px;
   transition: all 0.2s ease;
-  flex-shrink: 0;
   text-align: center;
 }
 

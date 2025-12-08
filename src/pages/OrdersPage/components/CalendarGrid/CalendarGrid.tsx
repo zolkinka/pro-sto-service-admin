@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useCallback } from 'react';
 import { format, isSameDay, addDays } from 'date-fns';
 import type { AdminBookingResponseDto } from '../../../../../services/api-client';
 import { serviceCenterGetSlots } from '../../../../../services/api-client';
@@ -56,6 +56,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   // Используем useRef для предотвращения дублирования запросов
   const isLoadingSlotsRef = React.useRef(false);
+  // Ref для контейнера дней, чтобы получить его ширину
+  const daysContainerRef = React.useRef<HTMLDivElement>(null);
+  // Состояние для ширины одной колонки дня
+  const [dayColumnWidth, setDayColumnWidth] = useState<number>(DAY_COLUMN_WIDTH);
 
   // Генерируем массив часов для отображения
   const hours: number[] = [];
@@ -130,6 +134,47 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     loadAvailableSlots();
   }, [loadAvailableSlots]);
 
+  // Рассчитываем ширину колонки дня на основе доступного пространства
+  useLayoutEffect(() => {
+    const updateDayColumnWidth = () => {
+      if (daysContainerRef.current) {
+        const containerWidth = daysContainerRef.current.offsetWidth;
+        // Вычисляем ширину одной колонки: (общая ширина - все gaps) / 7 дней
+        const totalGaps = DAY_COLUMN_GAP * 6; // 6 промежутков между 7 днями
+        const calculatedWidth = (containerWidth - totalGaps) / 7;
+        
+        // Обновляем только если значение действительно изменилось
+        setDayColumnWidth(prev => {
+          if (Math.abs(prev - calculatedWidth) > 0.01) {
+            return calculatedWidth;
+          }
+          return prev;
+        });
+      }
+    };
+
+    // Обновляем при монтировании с небольшой задержкой для корректного измерения
+    const timeoutId = setTimeout(updateDayColumnWidth, 0);
+
+    // Используем ResizeObserver для отслеживания изменений размера контейнера
+    const resizeObserver = new ResizeObserver(() => {
+      updateDayColumnWidth();
+    });
+
+    if (daysContainerRef.current) {
+      resizeObserver.observe(daysContainerRef.current);
+    }
+
+    // Обновляем при изменении размера окна (для надежности)
+    window.addEventListener('resize', updateDayColumnWidth);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateDayColumnWidth);
+    };
+  }, []);
+
   // Рассчитываем позиции для каждого заказа
   const bookingsWithPositions: BookingWithPosition[] = bookings.map((booking) => {
     const startTime = new Date(booking.start_time);
@@ -193,7 +238,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         </div>
 
         {/* Сетка с днями */}
-        <div className="calendar-grid__days-container">
+        <div className="calendar-grid__days-container" ref={daysContainerRef}>
           {isLoading || isLoadingSlots ? (
             /* Показываем скелетон на время загрузки заказов или слотов */
             <div 
@@ -212,7 +257,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   const hasSlotsForDay = availableSlots[dayIndex] && 
                     Object.keys(availableSlots[dayIndex]).length > 0;
                   
-                  const left = dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
+                  const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
                   
                   return (
                     <div
@@ -222,7 +267,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         position: 'absolute',
                         top: 0,
                         left: `${left}px`,
-                        width: `${DAY_COLUMN_WIDTH}px`,
+                        width: `${dayColumnWidth}px`,
                         height: '100%',
                       }}
                     />
@@ -270,7 +315,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       {Array.from({ length: 7 }).map((_, dayIndex) => {
                         const slotDate = addDays(weekStart, dayIndex);
                         const top = hourIndex * PIXELS_PER_HOUR;
-                        const left = dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
+                        const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
 
                         // Проверяем, доступен ли этот слот
                         const isAvailable = availableSlots[dayIndex]?.[hour] === true;
@@ -298,7 +343,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                               position: 'absolute',
                               top: `${top + SLOT_VERTICAL_PADDING / 2}px`,
                               left: `${left}px`,
-                              width: `${DAY_COLUMN_WIDTH}px`,
+                              width: `${dayColumnWidth}px`,
                               height: `${PIXELS_PER_HOUR - SLOT_VERTICAL_PADDING}px`,
                             }}
                             onClick={() => onSlotClick(slotDate, hour)}
@@ -316,7 +361,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 style={{ height: `${bookingsHeight}px` }}
               >
                 {bookingsWithPositions.map((booking) => {
-                  const left = booking.dayIndex * (DAY_COLUMN_WIDTH + DAY_COLUMN_GAP);
+                  const left = booking.dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
                   
                   return (
                     <div
@@ -326,7 +371,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         position: 'absolute',
                         top: `${booking.top}px`,
                         left: `${left}px`,
-                        width: `${DAY_COLUMN_WIDTH}px`,
+                        width: `${dayColumnWidth}px`,
                       }}
                     >
                       <BookingCard

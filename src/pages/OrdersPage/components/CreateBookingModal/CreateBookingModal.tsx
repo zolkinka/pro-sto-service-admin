@@ -679,9 +679,9 @@ const CreateBookingModal = observer(({
               const carData = (option as AutocompleteOption & { rawData?: CarSearchResultDto }).rawData;
               if (carData?.make && carData?.model) {
                 return (
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', pointerEvents: 'none' }}>
                     <div style={{ fontWeight: 500 }}>{option.label}</div>
-                    <div style={{ fontSize: '13px', color: '#666', lineHeight: 1 }}>{carData.make} {carData.model}</div>
+                    <div style={{ fontSize: '13px', color: '#666' }}>{carData.make} {carData.model}</div>
                   </div>
                 );
               }

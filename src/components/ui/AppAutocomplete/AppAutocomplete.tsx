@@ -430,8 +430,27 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     }
 
     // Desktop mode - обычный autocomplete input
+    const handleContainerClick = (e: React.MouseEvent) => {
+      if (disabled) return;
+      
+      // Если клик был на самом input, не обрабатываем
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT') return;
+      
+      // Находим input внутри контейнера и фокусируем его
+      const container = e.currentTarget;
+      const input = container.querySelector('input');
+      if (input) {
+        input.focus();
+      }
+    };
+
     return (
-      <div className="app-autocomplete__input-container">
+      <div 
+        className="app-autocomplete__input-container"
+        onClick={handleContainerClick}
+        style={{ cursor: disabled ? 'default' : 'pointer' }}
+      >
         <div className="app-autocomplete__input-wrapper">
           <AppInput
             ref={inputRef}

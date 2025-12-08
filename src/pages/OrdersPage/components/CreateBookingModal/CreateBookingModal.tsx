@@ -202,17 +202,20 @@ const CreateBookingModal = observer(({
 
   // Предзаполнение модели при выборе автомобиля из автокомплита
   useEffect(() => {
-    if (selectedCar && models.length > 0) {
-      const modelOption = models
-        .filter(m => m.id && m.name)
-        .map(m => ({ label: m.name!, value: m.id! }))
-        .find(m => m.label === selectedCar.model);
-      
-      if (modelOption) {
-        setSelectedModel(modelOption);
+    if (selectedCar && models.length > 0 && selectedMake) {
+      // Проверяем, что выбранная марка соответствует марке автомобиля
+      if (selectedMake.label === selectedCar.make) {
+        const modelOption = models
+          .filter(m => m.id && m.name && m.markId === selectedMake.value)
+          .map(m => ({ label: m.name!, value: m.id! }))
+          .find(m => m.label === selectedCar.model);
+        
+        if (modelOption) {
+          setSelectedModel(modelOption);
+        }
       }
     }
-  }, [selectedCar, models]);
+  }, [selectedCar, models, selectedMake]);
 
   // Load available slots when date or service changes
   useEffect(() => {

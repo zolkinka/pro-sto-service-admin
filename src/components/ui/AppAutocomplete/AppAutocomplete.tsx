@@ -72,20 +72,15 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<AppInputRef>(null);
   const mobileInputRef = useRef<AppInputRef>(null);
-  // Флаг для предотвращения повторного вызова onChange в handleBlur после выбора
+  // Флаг для предотвращения повторного вызова onChange в handleDropdownClose после выбора
   const justSelectedRef = useRef(false);
   // Флаг для предотвращения поиска после выбора опции
   const isSelectingRef = useRef(false);
+  // Флаг для предотвращения закрытия dropdown при клике на контейнер
+  const justOpenedRef = useRef(false);
 
   // Debounced input value для асинхронного поиска
   const debouncedInputValue = useDebounce(inputValue, searchDebounce);
-  
-  // Логируем debouncedInputValue когда он меняется
-  useEffect(() => {
-    if (onSearch && debouncedInputValue) {
-      console.log('⏱️ AppAutocomplete: debouncedInputValue changed:', { debouncedInputValue, minSearchLength });
-    }
-  }, [debouncedInputValue, onSearch, minSearchLength]);
 
   // Синхронизация внутреннего состояния с внешним value
   useEffect(() => {
@@ -96,11 +91,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
 
     // Используем displayLabel если он есть (для масок), иначе label
     const valueToDisplay = (value as SelectOption & { displayLabel?: string }).displayLabel || value.label;
-    console.log('🔄 AppAutocomplete: syncing value to inputValue', {
-      valueLabel: value.label,
-      displayLabel: (value as SelectOption & { displayLabel?: string }).displayLabel,
-      valueToDisplay,
-    });
     setInputValue(valueToDisplay);
   }, [value]);
 
@@ -135,7 +125,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     
     // Если сейчас происходит выбор опции, пропускаем поиск
     if (isSelectingRef.current) {
-      console.log('🚫 AppAutocomplete: skipping search during option selection');
       // НЕ сбрасываем флаг здесь - он будет сброшен в следующем цикле
       return;
     }
@@ -149,7 +138,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
       const normalizedDisplay = displayLabel.replace(/[^\d+]/g, '');
       
       if (normalizedDebounced === normalizedDisplay) {
-        console.log('🚫 AppAutocomplete: skipping search - inputValue matches selected value displayLabel');
         return;
       }
     }
@@ -178,19 +166,18 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
 
   // Обработчик изменения инпута
   const handleInputChange = useCallback((newValue: string) => {
-    console.log('⌨️ AppAutocomplete: handleInputChange called:', { newValue, mask });
     // Если используется маска, ПОЛНОСТЬЮ ИГНОРИРУЕМ это событие
     // т.к. всё будет обработано в handleMaskAccept
     if (mask) {
-      console.log('⌨️ AppAutocomplete: ignoring onChange because mask is used');
       return;
     }
     
     setInputValue(newValue);
     setHighlightedIndex(-1);
     
-    // Открываем dropdown при вводе
-    if (!isOpen && newValue.length > 0) {
+    // Открываем dropdown при вводе ТОЛЬКО если он закрыт
+    // Это предотвращает повторные setIsOpen(true) при уже открытом dropdown
+    if (newValue.length > 0 && !isOpen) {
       setIsOpen(true);
     }
 
@@ -203,12 +190,9 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   // Обработчик onAccept для маски
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMaskAccept = useCallback((maskedValue: string, maskRef: any) => {
-    console.log('🎭 AppAutocomplete: handleMaskAccept called:', { maskedValue, currentInputValue: inputValue, isSelecting: isSelectingRef.current });
-    
     // Если сейчас происходит выбор опции, пропускаем обновление inputValue
     // Это предотвращает открытие dropdown после программного обновления маски
     if (isSelectingRef.current) {
-      console.log('🚫 AppAutocomplete: skipping inputValue update during selection');
       // НЕ сбрасываем флаг здесь - он будет сброшен через setTimeout в handleSelect
       // Вызываем оригинальный onAccept если он передан
       onAccept?.(maskedValue, maskRef);
@@ -221,8 +205,9 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     }
     setHighlightedIndex(-1);
     
-    // Открываем dropdown при вводе
-    if (!isOpen && maskedValue.length > 0) {
+    // Открываем dropdown при вводе ТОЛЬКО если он закрыт
+    // Это предотвращает повторные setIsOpen(true) при уже открытом dropdown
+    if (maskedValue.length > 0 && !isOpen) {
       setIsOpen(true);
     }
     
@@ -237,11 +222,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     
     // Используем displayLabel если он есть (для масок), иначе label
     const valueToDisplay = (selectedOption as SelectOption & { displayLabel?: string }).displayLabel || selectedOption.label;
-    console.log('✅ AppAutocomplete: handleSelect', {
-      optionLabel: selectedOption.label,
-      displayLabel: (selectedOption as SelectOption & { displayLabel?: string }).displayLabel,
-      valueToDisplay,
-    });
     
     // Устанавливаем inputValue немедленно для отзывчивости UI
     setInputValue(valueToDisplay);
@@ -257,37 +237,51 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     // Сбрасываем isSelectingRef через 500ms после того как все useEffect отработают
     // (больше чем searchDebounce, чтобы гарантировать что debounced значение не вызовет поиск)
     setTimeout(() => {
-      console.log('🔓 AppAutocomplete: resetting isSelectingRef flag');
       isSelectingRef.current = false;
     }, 500);
     
     // Если используется маска, обновляем maskKey в AppInput
     // после того как React обновит value prop
     if (mask && inputRef.current) {
-      console.log('📍 AppAutocomplete: scheduling updateMaskKey call');
       setTimeout(() => {
-        console.log('🔄 AppAutocomplete: calling updateMaskKey');
         inputRef.current?.updateMaskKey();
       }, 50); // Задержка для обновления props
     }
   }, [onChange, mask]);
 
-  // Обработчик фокуса
-  const handleFocus = useCallback(() => {
-    if (!disabled) {
+  // Обработчик клика на контейнер - открываем dropdown
+  const handleContainerClick = useCallback(() => {
+    if (disabled) return;
+    
+    // Открываем dropdown если он закрыт
+    // Фокус на input будет установлен через проп focused={isOpen}
+    if (!isOpen) {
+      justOpenedRef.current = true;
       setIsOpen(true);
+      // Сбрасываем флаг после небольшой задержки
+      setTimeout(() => {
+        justOpenedRef.current = false;
+      }, 100);
     }
-  }, [disabled]);
-
-  // Обработчик потери фокуса
-  const handleBlur = useCallback(() => {
-    // Если только что выбрали опцию, не вызываем onChange снова
+  }, [disabled, isOpen]);
+  
+  // Обработчик закрытия dropdown от AppBaseDropdown (клик вне области)
+  const handleDropdownClose = useCallback(() => {
+    // Если только что открыли dropdown, игнорируем закрытие
+    if (justOpenedRef.current) {
+      return;
+    }
+    
+    setIsOpen(false);
+    setHighlightedIndex(-1);
+    
+    // Если только что выбрали опцию, не обрабатываем значение
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
     }
     
-    // Сохраняем текущее значение инпута
+    // Сохраняем значение инпута при закрытии
     if (inputValue !== '') {
       // Проверяем, есть ли точное совпадение в опциях
       const exactMatch = filteredOptions.find(
@@ -306,13 +300,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
       }
     }
   }, [inputValue, filteredOptions, onChange]);
-
-  // Обработчик закрытия dropdown
-  const handleDropdownClose = useCallback(() => {
-    setIsOpen(false);
-    setHighlightedIndex(-1);
-    handleBlur();
-  }, [handleBlur]);
 
   // Keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -340,9 +327,9 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
         if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
           handleSelect(filteredOptions[highlightedIndex]);
         } else {
-          // Если нет выделенной опции, закрываем и сохраняем текущее значение
+          // Если нет выделенной опции, просто закрываем
+          // Значение сохранится через handleDropdownClose
           setIsOpen(false);
-          handleBlur();
         }
         break;
       case 'Escape':
@@ -351,19 +338,15 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
         setHighlightedIndex(-1);
         break;
       case 'Tab':
-        // При Tab закрываем dropdown и сохраняем текущее значение
+        // При Tab просто закрываем dropdown
+        // Значение сохранится через handleDropdownClose
         setIsOpen(false);
-        handleBlur();
         break;
     }
-  }, [isOpen, highlightedIndex, filteredOptions, handleSelect, handleBlur]);
+  }, [isOpen, highlightedIndex, filteredOptions, handleSelect]);
 
   // Рендер dropdown содержимого
   const renderDropdown = () => {
-    // Не показываем dropdown если нет опций и нет загрузки
-    if (!isLoading && filteredOptions.length === 0) {
-      return null;
-    }
 
     return (
       <div className="app-autocomplete__dropdown" role="listbox">
@@ -430,21 +413,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     }
 
     // Desktop mode - обычный autocomplete input
-    const handleContainerClick = (e: React.MouseEvent) => {
-      if (disabled) return;
-      
-      // Если клик был на самом input, не обрабатываем
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT') return;
-      
-      // Находим input внутри контейнера и фокусируем его
-      const container = e.currentTarget;
-      const input = container.querySelector('input');
-      if (input) {
-        input.focus();
-      }
-    };
-
     return (
       <div 
         className="app-autocomplete__input-container"
@@ -461,7 +429,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
             error={error}
             required={required}
             onChange={handleInputChange}
-            onFocus={handleFocus}
+            focused={isOpen}
             autoComplete="off"
             inputProps={{
               onKeyDown: handleKeyDown,

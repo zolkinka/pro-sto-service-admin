@@ -34,6 +34,10 @@ export interface AppInputProps {
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   
+  // Управление фокусом
+  /** Декларативное управление фокусом. Если не передан, фокус управляется внутри компонента */
+  focused?: boolean;
+  
   // HTML атрибуты
   name?: string;
   id?: string;

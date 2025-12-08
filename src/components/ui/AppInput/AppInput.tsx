@@ -49,6 +49,9 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
   onBlur,
   onFocus,
   
+  // Управление фокусом
+  focused,
+  
   // HTML атрибуты
   name,
   id,
@@ -78,15 +81,30 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
   // Флаг для отслеживания программных обновлений (из props)
   const isProgrammaticUpdateRef = useRef(false);
   // Ссылка на IMask instance для принудительного обновления значения
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const maskInstanceRef = useRef<any>(null);
   
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Управление фокусом через проп focused
+  useEffect(() => {
+    // Если проп focused не передан, управление фокусом внутреннее
+    if (focused === undefined) return;
+    
+    const input = inputRef.current;
+    if (!input) return;
+    
+    if (focused && document.activeElement !== input) {
+      input.focus();
+    } else if (!focused && document.activeElement === input) {
+      input.blur();
+    }
+  }, [focused]);
   
   // Forwarding ref to internal input ref + добавляем метод updateMaskKey
   useImperativeHandle(ref, () => ({
     ...inputRef.current!,
     updateMaskKey: () => {
-      console.log('🔄 AppInput: updateMaskKey called', { value, maskInstance: !!maskInstanceRef.current });
       isProgrammaticUpdateRef.current = true;
       lastValueRef.current = value;
       
@@ -104,9 +122,7 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
           unmaskedValue = unmaskedValue.substring(1);
         }
         
-        console.log('🔄 AppInput: setting maskInstance.unmaskedValue =', unmaskedValue);
         maskInstanceRef.current.unmaskedValue = unmaskedValue;
-        console.log('🔄 AppInput: after setting, maskInstance.value =', maskInstanceRef.current.value);
       } else {
         // Иначе перерисовываем компонент через изменение key
         setMaskKey(prev => prev + 1);
@@ -117,7 +133,6 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
   // Отслеживаем изменения value из props для маски
   useEffect(() => {
     if (mask && value !== undefined && value !== lastValueRef.current) {
-      console.log('🔄 AppInput: value changed from props', { from: lastValueRef.current, to: value });
       isProgrammaticUpdateRef.current = true;
       lastValueRef.current = value;
     }
@@ -255,7 +270,6 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
               
               // Если это программное обновление (из props), не вызываем onChange
               if (isProgrammaticUpdateRef.current) {
-                console.log('🔄 AppInput: skipping onChange due to programmatic update');
                 // НЕ сбрасываем флаг сразу - отложим на следующий тик
                 // чтобы перехватить ВСЕ события от IMask
                 setTimeout(() => {
@@ -266,7 +280,6 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
               }
               
               const newValue = unmask ? maskRefInstance.unmaskedValue : value;
-              console.log('⌨️ AppInput: user typed, calling onChange', { value, newValue, unmask });
               if (!isControlled) {
                 setInternalValue(newValue);
               }

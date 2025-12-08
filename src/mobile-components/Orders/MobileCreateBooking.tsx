@@ -295,7 +295,8 @@ export const MobileCreateBooking = observer(() => {
           label: car.license_plate,
           value: car.uuid,
           isCustom: false,
-        }));
+          rawData: car,
+        } as AutocompleteOption & { rawData: CarSearchResultDto }));
         
         setClientCarsOptions(carsOptions);
       }
@@ -322,7 +323,8 @@ export const MobileCreateBooking = observer(() => {
         label: car.license_plate,
         value: car.uuid,
         isCustom: false,
-      } as AutocompleteOption));
+        rawData: car,
+      } as AutocompleteOption & { rawData: CarSearchResultDto }));
     } catch (error) {
       console.error('Failed to search cars:', error);
       toastStore.showError('Не удалось выполнить поиск автомобилей');
@@ -570,6 +572,18 @@ export const MobileCreateBooking = observer(() => {
             options={clientCarsOptions}
             minSearchLength={2}
             searchDebounce={300}
+            renderOption={(option) => {
+              const carData = (option as AutocompleteOption & { rawData?: CarSearchResultDto }).rawData;
+              if (carData?.make && carData?.model) {
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontWeight: 500 }}>{option.label}</div>
+                    <div style={{ fontSize: '13px', lineHeight: 1, color: '#666' }}>{carData.make} {carData.model}</div>
+                  </div>
+                );
+              }
+              return option.label;
+            }}
           />
         </div>
 

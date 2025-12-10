@@ -37,7 +37,7 @@
   /* позиционирование справа вверху, сразу под header */
   top: 0;
   right: 0;
-  width: 346px;
+  width: 450px;
   background: #FFFFFF;
   border: 1px solid #F4F3F0;
   border-radius: 20px;
@@ -252,44 +252,37 @@
   overflow: hidden;
 }
 
-.view-booking-modal__service-info {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  min-width: 0;
-}
-
 .view-booking-modal__service-name {
   font-weight: 400;
   color: #302F2D;
-  margin-right: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-shrink: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  flex: 1;
   min-width: 0;
+}
+
+.view-booking-modal__service-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .view-booking-modal__service-duration {
   font-weight: 400;
   color: #B2B1AE;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-/* Точка-разделитель перед длительностью (как в макете) */
-.view-booking-modal__service-duration::before {
-  content: '• ';
+.view-booking-modal__service-duration::after {
+  content: ' • ';
   color: #B2B1AE;
 }
 
 .view-booking-modal__service-price {
   font-weight: 400;
   color: #302F2D;
-  flex-shrink: 0;
   white-space: nowrap;
 }
 

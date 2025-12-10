@@ -256,13 +256,13 @@ const ViewBookingModal = observer(({
           <div className="view-booking-modal__service-list">
             {/* Основная услуга */}
             <div className="view-booking-modal__service-item">
+              <span className="view-booking-modal__service-name">{booking.service.name}</span>
               <div className="view-booking-modal__service-info">
-                <span className="view-booking-modal__service-name">{booking.service.name}</span>
                 <span className="view-booking-modal__service-duration">
                   {formatDuration(booking.service.duration_minutes)}
                 </span>
+                <span className="view-booking-modal__service-price">{booking.service.price}₽</span>
               </div>
-              <span className="view-booking-modal__service-price">{booking.service.price}₽</span>
             </div>
 
             {/* Дополнительные услуги */}
@@ -270,13 +270,13 @@ const ViewBookingModal = observer(({
               <>
                 {booking.additionalServices.map((service) => (
                   <div key={service.uuid} className="view-booking-modal__service-item">
+                    <span className="view-booking-modal__service-name">{service.name}</span>
                     <div className="view-booking-modal__service-info">
-                      <span className="view-booking-modal__service-name">{service.name}</span>
                       <span className="view-booking-modal__service-duration">
                         {formatDuration(service.duration_minutes)}
                       </span>
+                      <span className="view-booking-modal__service-price">{service.price}₽</span>
                     </div>
-                    <span className="view-booking-modal__service-price">{service.price}₽</span>
                   </div>
                 ))}
               </>

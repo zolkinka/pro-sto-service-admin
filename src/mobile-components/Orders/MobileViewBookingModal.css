@@ -191,34 +191,32 @@
   line-height: 1.2;
 }
 
-.mobile-view-booking-modal__service-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.mobile-view-booking-modal__service-name {
+  font-weight: 400;
+  color: #302F2D;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
   flex: 1;
   min-width: 0;
 }
 
-.mobile-view-booking-modal__service-name {
-  font-weight: 400;
-  color: #302F2D;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-shrink: 1;
+.mobile-view-booking-modal__service-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .mobile-view-booking-modal__service-duration {
   font-weight: 400;
   color: #B2B1AE;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .mobile-view-booking-modal__service-price {
   font-weight: 400;
   color: #302F2D;
-  flex-shrink: 0;
   white-space: nowrap;
 }
 

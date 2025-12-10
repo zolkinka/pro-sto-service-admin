@@ -178,13 +178,13 @@ export const MobileViewBookingModal = observer(({
               <div className="mobile-view-booking-modal__service-list">
                 {/* Main Service */}
                 <div className="mobile-view-booking-modal__service-item">
+                  <span className="mobile-view-booking-modal__service-name">{booking.service.name}</span>
                   <div className="mobile-view-booking-modal__service-info">
-                    <span className="mobile-view-booking-modal__service-name">{booking.service.name}</span>
                     <span className="mobile-view-booking-modal__service-duration">
                       {formatDuration(booking.service.duration_minutes)}
                     </span>
+                    <span className="mobile-view-booking-modal__service-price">{booking.service.price}₽</span>
                   </div>
-                  <span className="mobile-view-booking-modal__service-price">{booking.service.price}₽</span>
                 </div>
 
                 {/* Additional Services */}
@@ -192,13 +192,13 @@ export const MobileViewBookingModal = observer(({
                   <>
                     {booking.additionalServices.map((service) => (
                       <div key={service.uuid} className="mobile-view-booking-modal__service-item">
+                        <span className="mobile-view-booking-modal__service-name">{service.name}</span>
                         <div className="mobile-view-booking-modal__service-info">
-                          <span className="mobile-view-booking-modal__service-name">{service.name}</span>
                           <span className="mobile-view-booking-modal__service-duration">
                             {formatDuration(service.duration_minutes)}
                           </span>
+                          <span className="mobile-view-booking-modal__service-price">{service.price}₽</span>
                         </div>
-                        <span className="mobile-view-booking-modal__service-price">{service.price}₽</span>
                       </div>
                     ))}
                   </>

@@ -196,27 +196,27 @@ export const MobileOrderDetailsPage = observer(() => {
             <div className="mobile-order-details-page__service-list">
               {/* Main Service */}
               <div className="mobile-order-details-page__service-item">
+                <span className="mobile-order-details-page__service-name">{booking.service.name}</span>
                 <div className="mobile-order-details-page__service-info">
-                  <span className="mobile-order-details-page__service-name">{booking.service.name}</span>
                   <span className="mobile-order-details-page__service-duration">
                     {formatDuration(booking.service.duration_minutes)}
                   </span>
+                  <span className="mobile-order-details-page__service-price">{booking.service.price}₽</span>
                 </div>
-                <span className="mobile-order-details-page__service-price">{booking.service.price}₽</span>
               </div>
 
               {/* Additional Services */}
               {booking.additionalServices && booking.additionalServices.length > 0 && (
                 <>
                   {booking.additionalServices.map((service) => (
-                    <div key={service.uuid} className="mobile-order-details-page__service-item">
+                    <div className="mobile-order-details-page__service-item">
+                      <span className="mobile-order-details-page__service-name">{service.name}</span>
                       <div className="mobile-order-details-page__service-info">
-                        <span className="mobile-order-details-page__service-name">{service.name}</span>
                         <span className="mobile-order-details-page__service-duration">
                           {formatDuration(service.duration_minutes)}
                         </span>
+                        <span className="mobile-order-details-page__service-price">{service.price}₽</span>
                       </div>
-                      <span className="mobile-order-details-page__service-price">{service.price}₽</span>
                     </div>
                   ))}
                 </>

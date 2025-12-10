@@ -6,6 +6,7 @@ import { useStores } from '@/hooks';
 import { MobileCalendarView } from '@/mobile-components/Orders/MobileCalendarView';
 import { MobileBookingSlot } from '@/mobile-components/Orders/MobileBookingSlot';
 import { MobileNewBookingModal } from '@/mobile-components/Orders/MobileNewBookingModal';
+import { MobileViewBookingModal } from '@/mobile-components/Orders/MobileViewBookingModal';
 import MobileCategoryTabs from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { CategoryType } from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { AdminBookingResponseDto } from '../../../services/api-client';
@@ -63,6 +64,10 @@ export const MobileOrdersPage = observer(() => {
   const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
   const [hasShownPending, setHasShownPending] = useState(false);
 
+  // Состояние для модального окна просмотра деталей заказа
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedBookingUuid, setSelectedBookingUuid] = useState<string>('');
+
   // Обновление текущего времени каждую секунду
   useEffect(() => {
     const updateTime = () => {
@@ -107,7 +112,8 @@ export const MobileOrdersPage = observer(() => {
         servicesStore.fetchServices();
       }
     }
-  }, [selectedDate, authStore.user, bookingsStore, servicesStore, operatingHoursStore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, authStore.user?.service_center_uuid]);
 
   // Эффект для автоматического показа pending заказов в модальном окне
   useEffect(() => {
@@ -197,7 +203,33 @@ export const MobileOrdersPage = observer(() => {
   };
 
   const handleBookingClick = (uuid: string) => {
-    navigate(`/orders/${uuid}`);
+    setSelectedBookingUuid(uuid);
+    setIsViewModalOpen(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    // Обновляем список заказов после закрытия модалки
+    bookingsStore.fetchBookings();
+  };
+
+  const handleCancelBookingFromView = async () => {
+    if (!selectedBookingUuid) return;
+
+    const confirmed = window.confirm('Вы уверены, что хотите отменить эту запись?');
+    if (!confirmed) return;
+
+    try {
+      const success = await bookingsStore.updateBookingStatus(selectedBookingUuid, 'cancelled');
+      
+      if (success) {
+        setIsViewModalOpen(false);
+        // Обновляем список заказов
+        bookingsStore.fetchBookings();
+      }
+    } catch (error) {
+      console.error('Ошибка отмены заказа:', error);
+    }
   };
 
   const handleAddBooking = () => {
@@ -373,6 +405,16 @@ export const MobileOrdersPage = observer(() => {
           onCancel={handleCancelBooking}
           currentPendingIndex={currentPendingIndex}
           totalPendingCount={pendingBookings.length}
+        />
+      )}
+
+      {/* Modal for viewing booking details */}
+      {isViewModalOpen && selectedBookingUuid && (
+        <MobileViewBookingModal
+          isOpen={isViewModalOpen}
+          onClose={handleCloseViewModal}
+          bookingUuid={selectedBookingUuid}
+          onCancel={handleCancelBookingFromView}
         />
       )}
     </div>

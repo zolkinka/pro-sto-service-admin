@@ -72,7 +72,8 @@ const OrdersPage = observer(() => {
         servicesStore.fetchServices();
       }
     }
-  }, [currentDate, authStore.user, bookingsStore, servicesStore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDate, authStore.user?.service_center_uuid]);
 
   // Обработка query параметров для открытия бронирования
   useEffect(() => {
@@ -106,6 +107,7 @@ const OrdersPage = observer(() => {
   const handleCloseModal = () => {
     setSelectedBooking(null);
     bookingsStore.clearSelectedBooking();
+    // Не перезагружаем данные при закрытии - они уже актуальны
   };
 
   const handleUpdateBooking = () => {

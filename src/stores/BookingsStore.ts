@@ -194,6 +194,11 @@ export class BookingsStore {
         if (this.selectedBooking?.uuid === uuid) {
           this.selectedBooking.status = response.status as BookingStatus;
         }
+
+        // Если статус изменился с pending_confirmation на другой, удаляем из pendingBookings
+        if (status !== 'pending_confirmation') {
+          this.pendingBookings = this.pendingBookings.filter((b) => b.uuid !== uuid);
+        }
       });
 
       toastStore.showSuccess('Статус заказа успешно обновлен');

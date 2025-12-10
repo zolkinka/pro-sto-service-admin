@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -115,6 +115,9 @@ export const MobileCreateBooking = observer(() => {
   // Available time slots state
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  
+  // Сохраняем оригинальные значения марки/модели при автозаполнении (для визуальной индикации)
+  const originalCarDetails = useRef<{ make: string | null; model: string | null }>({ make: null, model: null });
 
   // Load makes on mount
   useEffect(() => {
@@ -148,6 +151,8 @@ export const MobileCreateBooking = observer(() => {
 
     if (selectedMake) {
       loadModels(selectedMake.value.toString());
+      // Сбрасываем модель при смене марки
+      setSelectedModel(null);
     } else {
       setModels([]);
       setSelectedModel(null);
@@ -355,6 +360,12 @@ export const MobileCreateBooking = observer(() => {
         setSelectedCar(carData);
         setLicensePlate(carData.license_plate);
         
+        // Сохраняем оригинальные значения для справки
+        originalCarDetails.current = {
+          make: carData.make,
+          model: carData.model,
+        };
+        
         const makeOption = makeOptions.find(m => m.label === carData.make);
         if (makeOption) {
           setSelectedMake(makeOption);
@@ -470,6 +481,8 @@ export const MobileCreateBooking = observer(() => {
       });
 
       // 2. Create/update car
+      // Если марка/модель были изменены после автозаполнения - создаем новый автомобиль
+      // (даже если номер уже есть в базе)
       const carResponse = await adminCreateOrUpdateCar({
         clientUuid: clientResponse.uuid,
         requestBody: {

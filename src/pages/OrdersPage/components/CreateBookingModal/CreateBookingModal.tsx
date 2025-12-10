@@ -88,6 +88,11 @@ const CreateBookingModal = observer(({
   // Ref для отслеживания места начала клика (для предотвращения закрытия при выделении текста)
   const mouseDownOnOverlay = useRef(false);
   const overlayRef = useRef<HTMLDivElement>(null);
+  
+  // Флаг для отслеживания, были ли изменены марка/модель после автозаполнения
+  const [carDetailsModified, setCarDetailsModified] = useState(false);
+  // Сохраняем оригинальные значения марки/модели при автозаполнении
+  const originalCarDetails = useRef<{ make: string | null; model: string | null }>({ make: null, model: null });
 
   // Обновление даты и времени при открытии модального окна с новыми значениями
   useEffect(() => {
@@ -194,6 +199,13 @@ const CreateBookingModal = observer(({
   useEffect(() => {
     if (selectedMake) {
       loadModels(selectedMake.value.toString());
+      // Сбрасываем модель при смене марки
+      setSelectedModel(null);
+      
+      // Проверяем, была ли изменена марка после автозаполнения
+      if (originalCarDetails.current.make && originalCarDetails.current.make !== selectedMake.label) {
+        setCarDetailsModified(true);
+      }
     } else {
       setModels([]);
       setSelectedModel(null);
@@ -216,6 +228,13 @@ const CreateBookingModal = observer(({
       }
     }
   }, [selectedCar, models, selectedMake]);
+  
+  // Отслеживание изменения модели после автозаполнения
+  useEffect(() => {
+    if (selectedModel && originalCarDetails.current.model && originalCarDetails.current.model !== selectedModel.label) {
+      setCarDetailsModified(true);
+    }
+  }, [selectedModel]);
 
   // Load available slots when date or service changes
   useEffect(() => {
@@ -412,6 +431,13 @@ const CreateBookingModal = observer(({
       setSelectedCar(carData);
       setLicensePlate(carData.license_plate);
       
+      // Сохраняем оригинальные значения для отслеживания изменений
+      originalCarDetails.current = {
+        make: carData.make,
+        model: carData.model,
+      };
+      setCarDetailsModified(false);
+      
       // Предзаполняем марку и модель, если они еще не выбраны или если они совпадают
       const makeOption = makeOptions.find(m => m.label === carData.make);
       if (makeOption) {
@@ -494,11 +520,12 @@ const CreateBookingModal = observer(({
 
       let carUuid: string;
       
-      // Если автомобиль был выбран из автокомплита - используем его UUID
-      if (selectedCar) {
+      // Если автомобиль был выбран из автокомплита И марка/модель НЕ были изменены - используем его UUID
+      // Иначе создаем новый автомобиль (даже если номер уже есть в базе)
+      if (selectedCar && !carDetailsModified) {
         carUuid = selectedCar.uuid;
       } else {
-        // Иначе создаем новый автомобиль
+        // Создаем новый автомобиль
         const carResponse = await adminCreateOrUpdateCar({
           clientUuid: clientUuid,
           requestBody: {
@@ -575,6 +602,10 @@ const CreateBookingModal = observer(({
     
     // Сбрасываем флаг первой загрузки
     isFirstLoad.current = true;
+    
+    // Сбрасываем флаги отслеживания изменений автомобиля
+    setCarDetailsModified(false);
+    originalCarDetails.current = { make: null, model: null };
     
     onClose();
   }, [initialDate, initialTime, onClose]);

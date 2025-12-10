@@ -51,10 +51,12 @@ export const MobileNotificationCard = observer(({ notification }: MobileNotifica
 
   const handleClick = () => {
     // Переход к связанной сущности
-    // Используем bookingUuid из data для навигации
-    const bookingUuid = notification.data?.bookingUuid;
+    // Используем booking_uuid из data для навигации
+    const bookingUuid = notification.data?.booking_uuid || notification.data?.bookingUuid;
     
-    if (bookingUuid) {
+    if (bookingUuid && typeof bookingUuid === 'string') {
+      // В mobile версии переходим на страницу детальной информации о заказе
+      // MobileOrderDetailsPage при возврате назад автоматически откроет orders с нужной датой
       navigate(`/orders/${bookingUuid}`);
     }
   };

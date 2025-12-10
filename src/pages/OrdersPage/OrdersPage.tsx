@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { startOfWeek, format } from 'date-fns';
+import { startOfWeek, format, parseISO } from 'date-fns';
+import { useSearchParams } from 'react-router-dom';
 import { useStores } from '@/hooks';
 import CalendarHeader from './components/CalendarHeader/CalendarHeader';
 import CalendarGrid from './components/CalendarGrid/CalendarGrid';
@@ -10,6 +11,7 @@ import './OrdersPage.css';
 
 const OrdersPage = observer(() => {
   const { bookingsStore, authStore, servicesStore } = useStores();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week'>('week');
@@ -71,6 +73,31 @@ const OrdersPage = observer(() => {
       }
     }
   }, [currentDate, authStore.user, bookingsStore, servicesStore]);
+
+  // Обработка query параметров для открытия бронирования
+  useEffect(() => {
+    const bookingParam = searchParams.get('booking');
+    const dateParam = searchParams.get('date');
+    
+    // Если есть параметр date, устанавливаем currentDate
+    if (dateParam) {
+      try {
+        const parsedDate = parseISO(dateParam);
+        if (!isNaN(parsedDate.getTime())) {
+          setCurrentDate(parsedDate);
+        }
+      } catch (error) {
+        console.error('Error parsing date from query param:', error);
+      }
+    }
+    
+    // Если есть параметр booking, открываем модалку
+    if (bookingParam && bookingParam !== selectedBooking) {
+      setSelectedBooking(bookingParam);
+      // Очищаем query параметры после открытия модалки
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, selectedBooking, setSearchParams]);
 
   const handleBookingClick = (bookingUuid: string) => {
     setSelectedBooking(bookingUuid);

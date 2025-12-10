@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { format, startOfWeek } from 'date-fns';
 import { useClickOutside } from '../../../hooks';
 import { useStores } from '../../../hooks/useStores';
 import AppButton from '../../ui/AppButton/AppButton';
@@ -9,7 +10,7 @@ import type { NotificationDropdownProps } from './NotificationDropdown.types';
 import './NotificationDropdown.css';
 
 const NotificationDropdown = observer(({ isOpen, onClose }: NotificationDropdownProps) => {
-  const { notificationStore } = useStores();
+  const { notificationStore, bookingsStore } = useStores();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -40,8 +41,31 @@ const NotificationDropdown = observer(({ isOpen, onClose }: NotificationDropdown
     if (notification?.data && typeof notification.data === 'object') {
       const bookingUuid = (notification.data as Record<string, unknown>).booking_uuid;
       if (bookingUuid && typeof bookingUuid === 'string') {
-        onClose();
-        navigate(`/orders?booking=${bookingUuid}`);
+        try {
+          // Загружаем детали бронирования чтобы узнать дату
+          await bookingsStore.fetchBookingDetails(bookingUuid);
+          const booking = bookingsStore.selectedBooking;
+          
+          if (booking) {
+            // Вычисляем начало недели для даты бронирования
+            const bookingDate = new Date(booking.start_time);
+            const weekStart = startOfWeek(bookingDate, { weekStartsOn: 1 });
+            const dateParam = format(weekStart, 'yyyy-MM-dd');
+            
+            // Переходим на страницу orders с параметрами date и booking
+            onClose();
+            navigate(`/orders?date=${dateParam}&booking=${bookingUuid}`);
+          } else {
+            // Если не удалось загрузить детали, просто переходим с booking параметром
+            onClose();
+            navigate(`/orders?booking=${bookingUuid}`);
+          }
+        } catch (error) {
+          console.error('Error loading booking details:', error);
+          // В случае ошибки просто переходим с booking параметром
+          onClose();
+          navigate(`/orders?booking=${bookingUuid}`);
+        }
       }
     }
   };

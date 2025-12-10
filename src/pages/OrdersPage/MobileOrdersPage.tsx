@@ -9,10 +9,11 @@ import { MobileNewBookingModal } from '@/mobile-components/Orders/MobileNewBooki
 import MobileCategoryTabs from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { CategoryType } from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { AdminBookingResponseDto } from '../../../services/api-client';
+import { getWorkingTimeSlots, getWorkingHoursForDate } from '@/utils/scheduleHelpers';
 import './MobileOrdersPage.css';
 
 export const MobileOrdersPage = observer(() => {
-  const { bookingsStore, authStore, servicesStore } = useStores();
+  const { bookingsStore, authStore, servicesStore, operatingHoursStore } = useStores();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -98,12 +99,15 @@ export const MobileOrdersPage = observer(() => {
       bookingsStore.fetchBookings();
       bookingsStore.fetchPendingBookings();
       
+      // Загружаем расписание работы
+      operatingHoursStore.loadOperatingHours(serviceCenterUuid);
+      
       // Загружаем сервисы если их еще нет
       if (servicesStore.services.length === 0) {
         servicesStore.fetchServices();
       }
     }
-  }, [selectedDate, authStore.user, bookingsStore, servicesStore]);
+  }, [selectedDate, authStore.user, bookingsStore, servicesStore, operatingHoursStore]);
 
   // Эффект для автоматического показа pending заказов в модальном окне
   useEffect(() => {
@@ -119,15 +123,37 @@ export const MobileOrdersPage = observer(() => {
     }
   }, [bookingsStore.pendingBookings, bookingsStore.isLoadingPending, hasShownPending]);
 
-  // Генерируем временные слоты с 08:00 до 22:00
+  // Генерируем временные слоты на основе расписания работы
   const timeSlots = useMemo(() => {
-    const slots: string[] = [];
-    for (let hour = 8; hour <= 21; hour++) {
-      const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-      slots.push(timeStr);
+    // Если расписание еще не загружено, возвращаем пустой массив
+    if (operatingHoursStore.regularSchedule.length === 0) {
+      return [];
     }
+    
+    // Получаем слоты для выбранной даты с учетом расписания работы
+    const slots = getWorkingTimeSlots(
+      selectedDate,
+      operatingHoursStore.regularSchedule,
+      operatingHoursStore.specialDates
+    );
+    
     return slots;
-  }, []);
+  }, [selectedDate, operatingHoursStore.regularSchedule, operatingHoursStore.specialDates]);
+
+  // Проверяем, является ли день выходным
+  const isClosedDay = useMemo(() => {
+    if (operatingHoursStore.regularSchedule.length === 0) {
+      return false;
+    }
+    
+    const workingHours = getWorkingHoursForDate(
+      selectedDate,
+      operatingHoursStore.regularSchedule,
+      operatingHoursStore.specialDates
+    );
+    
+    return workingHours === null;
+  }, [selectedDate, operatingHoursStore.regularSchedule, operatingHoursStore.specialDates]);
 
   // Создаём мап для быстрого поиска business_type по uuid сервиса
   const serviceBusinessTypeMap = useMemo(() => {
@@ -301,6 +327,15 @@ export const MobileOrdersPage = observer(() => {
             {bookingsStore.isLoading ? (
               <div className="mobile-orders-page__loading">
                 Загрузка...
+              </div>
+            ) : isClosedDay ? (
+              <div className="mobile-orders-page__closed-day">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="2" fill="none"/>
+                  <path d="M16 16L32 32M32 16L16 32" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                <h3>Выходной день</h3>
+                <p>В этот день сервис не работает</p>
               </div>
             ) : (
               visibleSlots.map((timeSlot) => {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { format } from 'date-fns';
+import React, { useState, useMemo } from 'react';
+import { format, parseISO, isAfter, isSameDay, startOfDay } from 'date-fns';
 import type { OperatingHoursResponseDto } from '../../../services/api-client/types.gen';
 import { formatTime } from '../../pages/SchedulePage/utils';
 import MobileConfirmDeleteModal from '../MobileConfirmDeleteModal/MobileConfirmDeleteModal';
@@ -36,7 +36,25 @@ const MobileSpecialDatesTable: React.FC<MobileSpecialDatesTableProps> = ({
     setDeleteConfirmation(null);
   };
 
-  if (specialDates.length === 0) {
+  // Фильтруем специальные даты: показываем только текущие и будущие даты
+  const filteredSpecialDates = useMemo(() => {
+    const today = startOfDay(new Date());
+    
+    return specialDates
+      .filter(d => d.specific_date)
+      .map(d => {
+        try {
+          const date = parseISO(d.specific_date!);
+          return { ...d, date };
+        } catch {
+          return null;
+        }
+      })
+      .filter(d => d !== null && (isSameDay(d!.date, today) || isAfter(d!.date, today)))
+      .sort((a, b) => a!.date.getTime() - b!.date.getTime()) as OperatingHoursResponseDto[];
+  }, [specialDates]);
+
+  if (filteredSpecialDates.length === 0) {
     return (
       <div className="mobile-special-dates-table mobile-special-dates-table_empty" data-testid={dataTestId}>
         <p className="mobile-special-dates-table__empty-message">
@@ -65,7 +83,7 @@ const MobileSpecialDatesTable: React.FC<MobileSpecialDatesTableProps> = ({
       </div>
 
       {/* Data rows */}
-      {specialDates.map((date) => {
+      {filteredSpecialDates.map((date) => {
         const formattedDate = date.specific_date 
           ? format(new Date(date.specific_date), 'dd.MM.yyyy')
           : '-';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppBaseDropdown from '../../ui/AppBaseDropdown/AppBaseDropdown';
-import { TariffsIcon, SupportIcon, SettingsIcon, UserIcon } from '../../ui/icons';
+import { TariffsIcon, SettingsIcon, UserIcon } from '../../ui/icons';
 import './AppHeaderMenu.css';
 
 interface MenuItem {
@@ -22,12 +22,13 @@ const AppHeaderMenu: React.FC = () => {
       icon: <TariffsIcon />,
       action: () => navigate('/tariffs'),
     },
-    {
-      id: 'support',
-      label: 'Поддержка',
-      icon: <SupportIcon />,
-      action: () => window.open('https://support.url', '_blank'),
-    },
+    // Временно скрыт пункт "Поддержка"
+    // {
+    //   id: 'support',
+    //   label: 'Поддержка',
+    //   icon: <SupportIcon />,
+    //   action: () => window.open('https://support.url', '_blank'),
+    // },
     {
       id: 'settings',
       label: 'Настройки',

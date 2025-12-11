@@ -4,7 +4,6 @@ import { Divider } from '../../components/ui/Divider';
 import { 
   UserIcon, 
   NotificationIcon, 
-  SupportIcon, 
   LogoutIcon 
 } from '../../components/ui/icons';
 import { useStores } from '../../hooks';
@@ -107,7 +106,8 @@ export const MobileMenu = observer(({ isOpen, onClose }: MobileMenuProps) => {
               <span>Уведомления</span>
             </button>
             
-            <button 
+            {/* Временно скрыт пункт "Поддержка" */}
+            {/* <button 
               className="mobile-menu__action" 
               onClick={() => {
                 // TODO: Добавить страницу поддержки
@@ -116,7 +116,7 @@ export const MobileMenu = observer(({ isOpen, onClose }: MobileMenuProps) => {
             >
               <SupportIcon />
               <span>Поддержка</span>
-            </button>
+            </button> */}
             
             <button 
               className="mobile-menu__action" 

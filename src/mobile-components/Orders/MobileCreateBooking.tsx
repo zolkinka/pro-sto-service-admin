@@ -118,6 +118,9 @@ export const MobileCreateBooking = observer(() => {
   
   // Сохраняем оригинальные значения марки/модели при автозаполнении (для визуальной индикации)
   const originalCarDetails = useRef<{ make: string | null; model: string | null }>({ make: null, model: null });
+  
+  // Флаг для однократного автовыбора услуги
+  const hasAutoSelectedService = useRef(false);
 
   // Load makes on mount
   useEffect(() => {
@@ -166,14 +169,15 @@ export const MobileCreateBooking = observer(() => {
     }
   }, [servicesStore]);
 
-  // Auto-select first main service when services are loaded
+  // Auto-select first main service when services are loaded (only once on mount)
   useEffect(() => {
-    if (servicesStore.mainServices.length > 0 && !selectedService) {
+    if (servicesStore.mainServices.length > 0 && !selectedService && !hasAutoSelectedService.current) {
       const firstService = servicesStore.mainServices[0];
       setSelectedService({
         label: firstService.name,
         value: firstService.uuid,
       });
+      hasAutoSelectedService.current = true;
     }
   }, [servicesStore.mainServices, selectedService]);
 

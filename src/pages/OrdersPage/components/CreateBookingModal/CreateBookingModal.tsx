@@ -93,6 +93,9 @@ const CreateBookingModal = observer(({
   const [carDetailsModified, setCarDetailsModified] = useState(false);
   // Сохраняем оригинальные значения марки/модели при автозаполнении
   const originalCarDetails = useRef<{ make: string | null; model: string | null }>({ make: null, model: null });
+  
+  // Флаг для однократного автовыбора услуги
+  const hasAutoSelectedService = useRef(false);
 
   // Обновление даты и времени при открытии модального окна с новыми значениями
   useEffect(() => {
@@ -177,14 +180,22 @@ const CreateBookingModal = observer(({
     }
   }, [isOpen, servicesStore]);
 
-  // Auto-select first main service when services are loaded
+  // Auto-select first main service when services are loaded (only once per modal open)
   useEffect(() => {
-    if (isOpen && servicesStore.mainServices.length > 0 && !selectedService) {
+    if (isOpen) {
+      // Сбрасываем флаг при открытии модального окна
+      hasAutoSelectedService.current = false;
+    }
+  }, [isOpen]);
+  
+  useEffect(() => {
+    if (isOpen && servicesStore.mainServices.length > 0 && !selectedService && !hasAutoSelectedService.current) {
       const firstService = servicesStore.mainServices[0];
       setSelectedService({
         label: firstService.name,
         value: firstService.uuid,
       });
+      hasAutoSelectedService.current = true;
     }
   }, [isOpen, servicesStore.mainServices, selectedService]);
 

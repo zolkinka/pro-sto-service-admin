@@ -188,6 +188,16 @@ export class BookingsStore {
         const bookingIndex = this.bookings.findIndex((b) => b.uuid === uuid);
         if (bookingIndex !== -1) {
           this.bookings[bookingIndex].status = response.status;
+        } else {
+          // Если заказа нет в основном списке (например, был pending),
+          // добавляем его туда из списка pendingBookings
+          const pendingBooking = this.pendingBookings.find((b) => b.uuid === uuid);
+          if (pendingBooking) {
+            this.bookings.push({
+              ...pendingBooking,
+              status: response.status,
+            });
+          }
         }
 
         // Если это выбранное бронирование, обновляем и его

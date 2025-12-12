@@ -9,11 +9,6 @@
   opacity: 0.6;
 }
 
-/* Корректировка позиции dropdown в multiline режиме */
-.app-multi-select_multiline .base-dropdown_content {
-  transform: translateY(-22px);
-}
-
 .app-multi-select__input-container {
   position: relative;
   cursor: pointer;
@@ -22,6 +17,7 @@
 .app-multi-select__input-wrapper {
   position: relative;
   width: 100%;
+  cursor: pointer;
 }
 
 /* Контейнер тегов */
@@ -72,7 +68,7 @@
   font-weight: 400;
   line-height: 22px;
   color: var(--color-gray-900);
-  margin-bottom: 0;
+  margin-bottom: 8px;
 }
 
 .app-multi-select__required {
@@ -177,6 +173,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
+  min-height: 44px;
   font-family: var(--font-onest);
   font-size: 14px;
   font-weight: 400;
@@ -185,6 +182,7 @@
   background: transparent;
   cursor: pointer;
   transition: background 0.15s ease;
+  box-sizing: border-box;
 }
 
 .app-multi-select__option:hover {
@@ -238,6 +236,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 0;
+  min-height: 50px;
   font-family: var(--font-onest);
   font-size: 16px;
   font-weight: 400;
@@ -247,6 +246,7 @@
   cursor: pointer;
   transition: background 0.15s ease;
   border-bottom: 1px solid var(--color-gray-100);
+  box-sizing: border-box;
 }
 
 .app-multi-select__mobile-option:last-child {

@@ -116,18 +116,14 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
     });
 
     return (
-      <div className="app-multi-select__input-container">
-        {/* Label для multiline режима - вынесен наружу */}
-        {multiline && value.length > 0 && label && (
-          <span className="app-multi-select__label">{label}</span>
-        )}
-        <div className={classNames('app-multi-select__input-wrapper', {
-          'app-multi-select__input-wrapper_multiline': multiline && value.length > 0,
-        })} onClick={handleInputClick}>
+      <div className={classNames('app-multi-select__input-wrapper', {
+        'app-multi-select__input-wrapper_multiline': multiline && value.length > 0,
+      })} onClick={handleInputClick}>
           {/* В multiline режиме скрываем input когда есть теги */}
           {!(multiline && value.length > 0) && (
             <AppInput
               value=""
+              label={!multiline ? label : undefined}
               placeholder={value.length === 0 ? placeholder : ' '}
               disabled={disabled}
               error={error}
@@ -195,7 +191,6 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
             <ChevronDownIcon color="#B2B1AE" size={20} />
           </div>
         </div>
-      </div>
     );
   };
 
@@ -302,7 +297,7 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
 
   const wrapperClassName = classNames('app-multi-select', {
     'app-multi-select_disabled': disabled,
-    'app-multi-select_multiline': multiline && value.length > 0,
+    'app-multi-select_multiline': multiline,
   }, className);
 
   const mobileDrawerProps = isMobileMode && hasSearch 
@@ -311,6 +306,10 @@ export const AppMultiSelect: React.FC<AppMultiSelectProps> = ({
 
   return (
     <div className={wrapperClassName}>
+      {/* Label для multiline режима - вынесен полностью наружу */}
+      {multiline && label && (
+        <span className="app-multi-select__label">{label}</span>
+      )}
       <AppBaseDropdown
         {...baseDropdownProps}
         {...mobileDrawerProps}

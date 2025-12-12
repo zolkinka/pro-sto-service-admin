@@ -28,7 +28,7 @@ import './AppSingleSelect.css';
  */
 export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
   value,
-  label: _label,
+  label,
   disabled = false,
   error,
   required: _required = false,
@@ -236,6 +236,9 @@ export const AppSingleSelect: React.FC<AppSingleSelectProps> = ({
 
   return (
     <div className={wrapperClassName}>
+      {label && (
+        <label className="app-single-select__label">{label}</label>
+      )}
       <AppBaseDropdown
         {...baseDropdownProps}
         {...mobileDrawerProps}

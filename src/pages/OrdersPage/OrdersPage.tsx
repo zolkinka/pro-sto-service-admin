@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { startOfWeek, format, parseISO } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
 import { useStores } from '@/hooks';
+import { getWorkingHoursRangeForWeek } from '@/utils/scheduleHelpers';
 import CalendarHeader from './components/CalendarHeader/CalendarHeader';
 import CalendarGrid from './components/CalendarGrid/CalendarGrid';
 import ViewBookingModal from './components/ViewBookingModal/ViewBookingModal';
@@ -10,7 +11,7 @@ import CreateBookingModal from './components/CreateBookingModal/CreateBookingMod
 import './OrdersPage.css';
 
 const OrdersPage = observer(() => {
-  const { bookingsStore, authStore, servicesStore } = useStores();
+  const { bookingsStore, authStore, servicesStore, operatingHoursStore } = useStores();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -21,32 +22,24 @@ const OrdersPage = observer(() => {
   const [createBookingDate, setCreateBookingDate] = useState<Date | null>(null);
   const [createBookingTime, setCreateBookingTime] = useState<string>('');
 
-  // Рабочие часы (динамически рассчитываются на основе заказов)
+  // Мемоизируем начало недели, чтобы избежать лишних ререндеров
+  const weekStart = useMemo(() => {
+    return startOfWeek(currentDate, { weekStartsOn: 1 });
+  }, [currentDate]);
+
+  // Рабочие часы на основе режима работы из operatingHoursStore
   const workingHours = useMemo(() => {
-    if (bookingsStore.bookings.length === 0) {
-      return { start: 9, end: 18 }; // дефолтные часы, если нет заказов
+    // Если расписание еще не загружено, используем дефолтные значения
+    if (operatingHoursStore.regularSchedule.length === 0) {
+      return { start: 9, end: 18 };
     }
 
-    let minHour = 9;
-    let maxHour = 18;
-
-    bookingsStore.bookings.forEach((booking) => {
-      const startTime = new Date(booking.start_time);
-      const endTime = new Date(booking.end_time);
-      
-      const startHour = startTime.getHours();
-      const endHour = endTime.getHours();
-      const endMinute = endTime.getMinutes();
-      
-      // Если есть минуты в конце, округляем час вверх
-      const effectiveEndHour = endMinute > 0 ? endHour + 1 : endHour;
-      
-      minHour = Math.min(minHour, startHour);
-      maxHour = Math.max(maxHour, effectiveEndHour);
-    });
-
-    return { start: minHour, end: maxHour };
-  }, [bookingsStore.bookings]);
+    return getWorkingHoursRangeForWeek(
+      weekStart,
+      operatingHoursStore.regularSchedule,
+      operatingHoursStore.specialDates
+    );
+  }, [weekStart, operatingHoursStore.regularSchedule, operatingHoursStore.specialDates]);
 
   useEffect(() => {
     // Загрузка заказов при монтировании и изменении даты
@@ -70,6 +63,11 @@ const OrdersPage = observer(() => {
       // Загружаем сервисы если их еще нет
       if (servicesStore.services.length === 0) {
         servicesStore.fetchServices();
+      }
+      
+      // Загружаем расписание работы если его еще нет
+      if (operatingHoursStore.regularSchedule.length === 0) {
+        operatingHoursStore.loadOperatingHours(serviceCenterUuid);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,11 +130,6 @@ const OrdersPage = observer(() => {
     setCreateBookingDate(null);
     setCreateBookingTime('');
   };
-
-  // Мемоизируем начало недели, чтобы избежать лишних ререндеров
-  const weekStart = useMemo(() => {
-    return startOfWeek(currentDate, { weekStartsOn: 1 });
-  }, [currentDate]);
   
   // Получаем первый доступный основной сервис для загрузки слотов
   const selectedService = servicesStore.mainServices[0];

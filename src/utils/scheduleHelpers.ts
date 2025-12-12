@@ -144,3 +144,39 @@ export const getWorkingTimeSlots = (
   
   return slots;
 };
+
+/**
+ * Получает диапазон рабочих часов для недели
+ * @returns объект с минимальным и максимальным часом работы { start: number, end: number }
+ */
+export const getWorkingHoursRangeForWeek = (
+  weekStart: Date,
+  regularSchedule: OperatingHoursResponseDto[],
+  specialDates: OperatingHoursResponseDto[]
+): { start: number; end: number } => {
+  let minHour = 24;
+  let maxHour = 0;
+  
+  // Проверяем все 7 дней недели
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(weekStart);
+    date.setDate(date.getDate() + i);
+    
+    const workingHours = getWorkingHoursForDate(date, regularSchedule, specialDates);
+    
+    if (workingHours) {
+      const [openHour] = workingHours.open.split(':').map(Number);
+      const [closeHour] = workingHours.close.split(':').map(Number);
+      
+      minHour = Math.min(minHour, openHour);
+      maxHour = Math.max(maxHour, closeHour);
+    }
+  }
+  
+  // Если не найдено ни одного рабочего дня, возвращаем дефолтные значения
+  if (minHour === 24 || maxHour === 0) {
+    return { start: 9, end: 18 };
+  }
+  
+  return { start: minHour, end: maxHour };
+};

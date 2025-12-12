@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ServiceDto } from '../../../services/api-client';
+import { formatPrice } from '../../utils/helpers';
 import './ServicesTable.css';
 
 interface ServiceTableRowProps {
@@ -53,22 +54,22 @@ const ServiceTableRow: React.FC<ServiceTableRowProps> = ({
 
       {/* Легковой */}
       <div className="services-table__cell" style={{ width: 110 }}>
-        {sedanPrice ? `${sedanPrice}₽` : '—'}
+        {sedanPrice ? `${formatPrice(sedanPrice)}₽` : '—'}
       </div>
 
       {/* Кроссовер */}
       <div className="services-table__cell" style={{ width: 110 }}>
-        {crossoverPrice ? `${crossoverPrice}₽` : '—'}
+        {crossoverPrice ? `${formatPrice(crossoverPrice)}₽` : '—'}
       </div>
 
       {/* Внедорожник */}
       <div className="services-table__cell" style={{ width: 110 }}>
-        {suvPrice ? `${suvPrice}₽` : '—'}
+        {suvPrice ? `${formatPrice(suvPrice)}₽` : '—'}
       </div>
 
       {/* Минивен */}
       <div className="services-table__cell" style={{ width: 110 }}>
-        {minivanPrice ? `${minivanPrice}₽` : '—'}
+        {minivanPrice ? `${formatPrice(minivanPrice)}₽` : '—'}
       </div>
 
       {/* Действия */}

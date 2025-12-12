@@ -5,6 +5,7 @@ import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useStores } from '@/hooks';
 import { AppTag } from '@/components/ui/AppTag';
+import { formatPrice } from '@/utils/helpers';
 import type { BookingStatus } from '@/stores/BookingsStore';
 import './MobileOrderDetailsPage.css';
 
@@ -201,7 +202,7 @@ export const MobileOrderDetailsPage = observer(() => {
                   <span className="mobile-order-details-page__service-duration">
                     {formatDuration(booking.service.duration_minutes)}
                   </span>
-                  <span className="mobile-order-details-page__service-price">{booking.service.price}₽</span>
+                  <span className="mobile-order-details-page__service-price">{formatPrice(booking.service.price)}₽</span>
                 </div>
               </div>
 
@@ -215,7 +216,7 @@ export const MobileOrderDetailsPage = observer(() => {
                         <span className="mobile-order-details-page__service-duration">
                           {formatDuration(service.duration_minutes)}
                         </span>
-                        <span className="mobile-order-details-page__service-price">{service.price}₽</span>
+                        <span className="mobile-order-details-page__service-price">{formatPrice(service.price)}₽</span>
                       </div>
                     </div>
                   ))}
@@ -228,7 +229,7 @@ export const MobileOrderDetailsPage = observer(() => {
             {/* Total */}
             <div className="mobile-order-details-page__total">
               <span className="mobile-order-details-page__total-label">Итого</span>
-              <span className="mobile-order-details-page__total-price">{totalPrice}₽</span>
+              <span className="mobile-order-details-page__total-price">{formatPrice(totalPrice)}₽</span>
             </div>
           </div>
         </div>

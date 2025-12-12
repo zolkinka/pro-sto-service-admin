@@ -33,6 +33,17 @@ export const formatCurrency = (
   }).format(amount);
 };
 
+// Format price number with locale (uses comma as decimal separator for ru-RU)
+export const formatPrice = (
+  amount: number,
+  locale = 'ru-RU'
+): string => {
+  return amount.toLocaleString(locale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+};
+
 // Generate random ID
 export const generateId = (): string => {
   return Math.random().toString(36).substr(2, 9);

@@ -4,6 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useStores } from '@/hooks';
 import { NotificationIcon } from '@/components/ui/icons';
+import { formatPrice } from '@/utils/helpers';
 import './MobileNewBookingModal.css';
 
 interface MobileNewBookingModalProps {
@@ -170,7 +171,7 @@ export const MobileNewBookingModal = observer(({
                     {formatDuration(booking.service.duration_minutes)}
                   </span>
                 </div>
-                <span className="mobile-new-booking-modal__service-price">{booking.service.price}₽</span>
+                <span className="mobile-new-booking-modal__service-price">{formatPrice(booking.service.price)}₽</span>
               </div>
 
               {/* Additional Services */}
@@ -184,7 +185,7 @@ export const MobileNewBookingModal = observer(({
                           {formatDuration(service.duration_minutes)}
                         </span>
                       </div>
-                      <span className="mobile-new-booking-modal__service-price">{service.price}₽</span>
+                      <span className="mobile-new-booking-modal__service-price">{formatPrice(service.price)}₽</span>
                     </div>
                   ))}
                 </>
@@ -196,7 +197,7 @@ export const MobileNewBookingModal = observer(({
             {/* Total */}
             <div className="mobile-new-booking-modal__total">
               <span className="mobile-new-booking-modal__total-label">Итого</span>
-              <span className="mobile-new-booking-modal__total-price">{totalPrice}₽</span>
+              <span className="mobile-new-booking-modal__total-price">{formatPrice(totalPrice)}₽</span>
             </div>
           </div>
 

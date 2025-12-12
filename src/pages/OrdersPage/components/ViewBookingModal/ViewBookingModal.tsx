@@ -5,6 +5,7 @@ import { ru } from 'date-fns/locale';
 import { useStores } from '@/hooks';
 import { AppTag } from '@/components/ui/AppTag';
 import { NotificationIcon } from '@/components/ui/icons';
+import { formatPrice } from '@/utils/helpers';
 import type { BookingStatus } from '@/stores/BookingsStore';
 import type { BookingCarDto } from '../../../../../services/api-client/types.gen';
 import './ViewBookingModal.css';
@@ -261,7 +262,7 @@ const ViewBookingModal = observer(({
                 <span className="view-booking-modal__service-duration">
                   {formatDuration(booking.service.duration_minutes)}
                 </span>
-                <span className="view-booking-modal__service-price">{booking.service.price}₽</span>
+                <span className="view-booking-modal__service-price">{formatPrice(booking.service.price)}₽</span>
               </div>
             </div>
 
@@ -275,7 +276,7 @@ const ViewBookingModal = observer(({
                       <span className="view-booking-modal__service-duration">
                         {formatDuration(service.duration_minutes)}
                       </span>
-                      <span className="view-booking-modal__service-price">{service.price}₽</span>
+                      <span className="view-booking-modal__service-price">{formatPrice(service.price)}₽</span>
                     </div>
                   </div>
                 ))}
@@ -288,7 +289,7 @@ const ViewBookingModal = observer(({
           {/* Итого */}
           <div className="view-booking-modal__total">
             <span className="view-booking-modal__total-label">Итого</span>
-            <span className="view-booking-modal__total-price">{totalPrice}₽</span>
+            <span className="view-booking-modal__total-price">{formatPrice(totalPrice)}₽</span>
           </div>
         </div>
 

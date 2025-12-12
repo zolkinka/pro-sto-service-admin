@@ -4,6 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useStores } from '@/hooks';
 import { AppTag } from '@/components/ui/AppTag';
+import { formatPrice } from '@/utils/helpers';
 import type { BookingStatus } from '@/stores/BookingsStore';
 import './MobileViewBookingModal.css';
 
@@ -183,7 +184,7 @@ export const MobileViewBookingModal = observer(({
                     <span className="mobile-view-booking-modal__service-duration">
                       {formatDuration(booking.service.duration_minutes)}
                     </span>
-                    <span className="mobile-view-booking-modal__service-price">{booking.service.price}₽</span>
+                    <span className="mobile-view-booking-modal__service-price">{formatPrice(booking.service.price)}₽</span>
                   </div>
                 </div>
 
@@ -197,7 +198,7 @@ export const MobileViewBookingModal = observer(({
                           <span className="mobile-view-booking-modal__service-duration">
                             {formatDuration(service.duration_minutes)}
                           </span>
-                          <span className="mobile-view-booking-modal__service-price">{service.price}₽</span>
+                          <span className="mobile-view-booking-modal__service-price">{formatPrice(service.price)}₽</span>
                         </div>
                       </div>
                     ))}
@@ -210,7 +211,7 @@ export const MobileViewBookingModal = observer(({
               {/* Total */}
               <div className="mobile-view-booking-modal__total">
                 <span className="mobile-view-booking-modal__total-label">Итого</span>
-                <span className="mobile-view-booking-modal__total-price">{totalPrice}₽</span>
+                <span className="mobile-view-booking-modal__total-price">{formatPrice(totalPrice)}₽</span>
               </div>
             </div>
           </div>

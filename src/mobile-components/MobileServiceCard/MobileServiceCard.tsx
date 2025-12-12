@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ServiceDto } from '../../../services/api-client';
 import { EditIcon, TrashIcon } from '../../components/ui/icons';
+import { formatPrice } from '@/utils/helpers';
 import './MobileServiceCard.css';
 
 export interface MobileServiceCardProps {
@@ -69,7 +70,7 @@ const MobileServiceCard: React.FC<MobileServiceCardProps> = ({
               <span className="mobile-service-card__price-label">
                 {CAR_CLASS_LABELS[carClass]}
               </span>
-              <span className="mobile-service-card__price-value">{price}₽</span>
+              <span className="mobile-service-card__price-value">{formatPrice(price)}₽</span>
             </div>
           );
         })}

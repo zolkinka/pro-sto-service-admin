@@ -23,13 +23,7 @@ export const MobileBookingSlot: React.FC<MobileBookingSlotProps> = ({
   const hasBookings = bookings.length > 0;
   const isClickable = !hasBookings && onSlotClick && !isPast;
   
-  // Обработчик для кнопки "+" с предотвращением всплытия
-  const handleAddMoreClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onSlotClick) {
-      onSlotClick();
-    }
-  };
+  const isMultiple = bookings.length > 1;
   
   return (
     <div className="mobile-booking-slot">
@@ -45,21 +39,11 @@ export const MobileBookingSlot: React.FC<MobileBookingSlotProps> = ({
                 key={booking.uuid}
                 booking={booking}
                 onClick={onBookingClick}
+                canAddMore={canAddMore}
+                onAddMore={onSlotClick}
+                isMultiple={isMultiple}
               />
             ))}
-            {/* Кнопка "+" для добавления дополнительной записи */}
-            {canAddMore && onSlotClick && (
-              <button
-                className="mobile-booking-slot__add-button"
-                onClick={handleAddMoreClick}
-                aria-label="Добавить еще одну запись"
-                type="button"
-              >
-                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 4V16M4 10H16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            )}
           </div>
         ) : (
           <div 

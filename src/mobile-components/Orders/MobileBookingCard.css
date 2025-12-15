@@ -1,4 +1,5 @@
 .mobile-booking-card {
+  position: relative;
   border-radius: 16px;
   padding: 12px;
   cursor: pointer;
@@ -8,12 +9,20 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 100%;
-  max-width: 100%;
+  width: 66.666vw; /* 2/3 ширины экрана */
+  min-width: 66.666vw;
+  flex-shrink: 0;
   overflow: hidden;
+  scroll-snap-align: start;
   
   /* iOS specific */
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Уменьшенная ширина для множественных бронирований (на 30% меньше) */
+.mobile-booking-card_multiple {
+  width: 46.666vw; /* 70% от 66.666vw */
+  min-width: 46.666vw;
 }
 
 .mobile-booking-card:active {
@@ -87,4 +96,39 @@
   font-weight: 400;
   line-height: 1.2;
   color: #53514F;
+}
+
+/* Кнопка "+" для добавления дополнительной записи */
+.mobile-booking-card__add-button {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FEFDFA;
+  border: none;
+  border-radius: 16px;
+  color: #DFDFDF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  z-index: 1;
+  
+  /* iOS specific */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-booking-card__add-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+.mobile-booking-card__add-button:active {
+  background-color: #EFEEEB;
+  color: #888684;
+  transform: scale(0.95);
 }

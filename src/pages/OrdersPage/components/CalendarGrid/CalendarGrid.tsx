@@ -444,6 +444,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           return null;
                         }
 
+                        // Проверяем, есть ли уже бронирование в этом слоте
+                        const hasBooking = weekBookingsByDayAndHour[dayIndex]?.[hour]?.length > 0;
+                        
+                        // Не показываем плейсхолдер, если уже есть бронирование
+                        if (hasBooking) {
+                          return null;
+                        }
+
                         return (
                           <div
                             key={`${hour}-${dayIndex}`}

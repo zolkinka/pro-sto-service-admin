@@ -310,6 +310,24 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     });
   }
 
+  // В режиме 'week' группируем бронирования по дню и часу
+  // Структура: weekBookingsByDayAndHour[dayIndex][hour] = BookingWithPosition[]
+  const weekBookingsByDayAndHour: { [dayIndex: number]: { [hour: number]: BookingWithPosition[] } } = {};
+  if (viewMode === 'week') {
+    bookingsWithPositions.forEach((booking) => {
+      const startTime = new Date(booking.start_time);
+      const hour = startTime.getHours();
+      
+      if (!weekBookingsByDayAndHour[booking.dayIndex]) {
+        weekBookingsByDayAndHour[booking.dayIndex] = {};
+      }
+      if (!weekBookingsByDayAndHour[booking.dayIndex][hour]) {
+        weekBookingsByDayAndHour[booking.dayIndex][hour] = [];
+      }
+      weekBookingsByDayAndHour[booking.dayIndex][hour].push(booking);
+    });
+  }
+
   return (
     <div className={`calendar-grid ${isLoading ? 'calendar-grid--loading' : ''}`}>
       <div className="calendar-grid__content">
@@ -451,39 +469,77 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 className="calendar-grid__bookings"
                 style={{ height: `${bookingsHeight}px` }}
               >
-                {bookingsWithPositions.map((booking) => {
-                  let left: number;
-                  let width: number;
-                  
-                  if (viewMode === 'day') {
-                    // В режиме 'day' карточки располагаются горизонтально с фиксированной шириной
-                    left = booking.dayIndex * (DAY_MODE_CARD_WIDTH + DAY_MODE_CARD_GAP);
-                    width = DAY_MODE_CARD_WIDTH;
-                  } else {
-                    // В режиме 'week' карточки занимают всю ширину колонки дня
-                    left = booking.dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
-                    width = dayColumnWidth;
-                  }
-                  
-                  return (
-                    <div
-                      key={booking.uuid}
-                      className="calendar-grid__booking-wrapper"
-                      style={{
-                        position: 'absolute',
-                        top: `${booking.top}px`,
-                        left: `${left}px`,
-                        width: `${width}px`,
-                      }}
-                    >
-                      <BookingCard
-                        booking={booking}
-                        onClick={() => onBookingClick(booking.uuid)}
-                        style={{ height: `${booking.height}px` }}
-                      />
-                    </div>
-                  );
-                })}
+                {viewMode === 'day' ? (
+                  // В режиме 'day' показываем все карточки горизонтально
+                  bookingsWithPositions.map((booking) => {
+                    const left = booking.dayIndex * (DAY_MODE_CARD_WIDTH + DAY_MODE_CARD_GAP);
+                    const width = DAY_MODE_CARD_WIDTH;
+                    
+                    return (
+                      <div
+                        key={booking.uuid}
+                        className="calendar-grid__booking-wrapper"
+                        style={{
+                          position: 'absolute',
+                          top: `${booking.top}px`,
+                          left: `${left}px`,
+                          width: `${width}px`,
+                        }}
+                      >
+                        <BookingCard
+                          booking={booking}
+                          onClick={() => onBookingClick(booking.uuid)}
+                          style={{ height: `${booking.height}px` }}
+                        />
+                      </div>
+                    );
+                  })
+                ) : (
+                  // В режиме 'week' показываем только первую карточку для каждого слота
+                  // с кнопкой плюса или счётчиком "ещё N заказов"
+                  Object.entries(weekBookingsByDayAndHour).flatMap(([dayIndexStr, hourBookings]) => {
+                    const dayIndex = parseInt(dayIndexStr, 10);
+                    
+                    return Object.entries(hourBookings).map(([hourStr, slotBookings]) => {
+                      const hour = parseInt(hourStr, 10);
+                      const firstBooking = slotBookings[0];
+                      const moreCount = slotBookings.length - 1;
+                      
+                      const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
+                      const width = dayColumnWidth;
+                      
+                      // Проверяем, доступен ли слот для добавления нового заказа
+                      const isSlotAvailable = availableSlots[dayIndex]?.[hour] === true;
+                      const slotDate = addDays(weekStart, dayIndex);
+                      const slotDateTime = new Date(slotDate);
+                      slotDateTime.setHours(hour, 0, 0, 0);
+                      const isPast = slotDateTime < new Date();
+                      const canAddMore = isSlotAvailable && !isPast && onSlotClick;
+                      
+                      return (
+                        <div
+                          key={`${dayIndex}-${hour}`}
+                          className="calendar-grid__booking-wrapper"
+                          style={{
+                            position: 'absolute',
+                            top: `${firstBooking.top}px`,
+                            left: `${left}px`,
+                            width: `${width}px`,
+                          }}
+                        >
+                          <BookingCard
+                            booking={firstBooking}
+                            onClick={() => onBookingClick(firstBooking.uuid)}
+                            style={{ height: `${firstBooking.height}px` }}
+                            showPlusButton={canAddMore && moreCount === 0}
+                            onPlusClick={canAddMore ? () => onSlotClick!(slotDate, hour) : undefined}
+                            moreCount={moreCount > 0 ? moreCount : undefined}
+                          />
+                        </div>
+                      );
+                    });
+                  })
+                )}
 
                 {/* Плейсхолдеры для добавления новых бронирований в режиме 'day' */}
                 {viewMode === 'day' && onSlotClick && currentDate && hours.map((hour, hourIndex) => {

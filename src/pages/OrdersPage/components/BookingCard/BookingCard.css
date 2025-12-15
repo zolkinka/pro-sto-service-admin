@@ -21,6 +21,12 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Отключаем hover-эффект карточки при наведении на кнопку плюса */
+.booking-card:has(.booking-card__plus-button:hover) {
+  transform: none;
+  box-shadow: none;
+}
+
 .booking-card:focus {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
@@ -93,4 +99,56 @@
 
 .booking-card_status_cancelled .booking-card__status {
   color: var(--color-gray-600);
+}
+
+/* Plus button */
+.booking-card__plus-button {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FEFDFA;
+  border: 1px solid #F4F3F0;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #DFDFDF;
+  padding: 0;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.booking-card__plus-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.booking-card__plus-button:hover {
+  background-color: #EFEEEB;
+  border-color: #DFDFDF;
+  color: #888684;
+  transform: scale(1.1);
+}
+
+.booking-card__plus-button:active {
+  transform: scale(0.95);
+  background-color: #E4E3E0;
+}
+
+/* More count badge */
+.booking-card__more-count {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  padding: 4px 8px;
+  background-color: #FEFDFA;
+  border: 1px solid #F4F3F0;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: var(--font-weight-normal);
+  color: #888684;
+  white-space: nowrap;
 }

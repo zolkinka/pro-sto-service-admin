@@ -287,6 +287,8 @@ const OrdersPage = observer(() => {
             serviceUuid={selectedService?.uuid}
             viewMode={viewMode}
             currentDate={currentDate}
+            onViewModeChange={setViewMode}
+            onSelectedDateChange={setCurrentDate}
           />
         </div>
       </div>

@@ -16,6 +16,8 @@ export interface CalendarGridProps {
   serviceUuid?: string;
   viewMode?: 'day' | 'week';
   currentDate?: Date; // для режима 'day' - текущая выбранная дата
+  onViewModeChange?: (mode: 'day' | 'week') => void;
+  onSelectedDateChange?: (date: Date) => void;
 }
 
 // Расстояние между часами в пикселях: gap + высота строки времени (13px)
@@ -57,6 +59,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   serviceUuid,
   viewMode = 'week',
   currentDate,
+  onViewModeChange,
+  onSelectedDateChange,
 }) => {
   // Состояние для хранения доступных слотов
   const [availableSlots, setAvailableSlots] = useState<AvailableSlots>({});
@@ -548,7 +552,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       return (
                         <div
                           key={`${dayIndex}-${hour}`}
-                          className="calendar-grid__booking-wrapper"
+                          className={`calendar-grid__booking-wrapper ${moreCount > 0 ? 'calendar-grid__booking-wrapper--multi' : ''}`}
                           style={{
                             position: 'absolute',
                             top: `${firstBooking.top}px`,
@@ -566,9 +570,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           
                           {/* Надпись о дополнительных заказах */}
                           {moreCount > 0 && (
-                            <div className="calendar-grid__more-count">
+                            <button 
+                              className="calendar-grid__more-count"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onViewModeChange?.('day');
+                                onSelectedDateChange?.(slotDate);
+                              }}
+                              type="button"
+                            >
                               Еще {moreCount} {getOrderWord(moreCount)}
-                            </div>
+                            </button>
                           )}
                           
                           {/* Кнопка плюса */}

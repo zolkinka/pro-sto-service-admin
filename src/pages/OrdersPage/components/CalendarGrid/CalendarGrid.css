@@ -247,6 +247,12 @@
 .calendar-grid__booking-wrapper {
   pointer-events: auto; /* Карточки ловят клики и блокируют слоты под собой */
   position: relative;
+  border-radius: 16px;
+}
+
+/* Рамка для блока с мультибронированием */
+.calendar-grid__booking-wrapper--multi {
+  border: 1px solid #F4F3F0;
 }
 
 .calendar-grid__booking-wrapper > * {
@@ -257,13 +263,21 @@
 .calendar-grid__more-count {
   position: absolute;
   left: 8px;
-  bottom: 0;
+  bottom: 4px;
   font-family: var(--font-onest);
   font-size: 10px;
   font-weight: 400;
   line-height: 1.4;
   color: #888684;
-  pointer-events: none;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  border: none;
+  transition: color var(--transition-fast);
+}
+
+.calendar-grid__more-count:hover {
+  color: #53514F;
 }
 
 /* Кнопка плюса */
@@ -277,12 +291,18 @@
   align-items: center;
   justify-content: center;
   background-color: #FEFDFA;
-  border: 1px solid #F4F3F0;
-  border-radius: 9px;
+  border: none;
+  border-radius: 16px;
   color: #DFDFDF;
   cursor: pointer;
   transition: all var(--transition-fast);
   padding: 0;
+}
+
+/* Компактная кнопка плюса для мультиброни */
+.calendar-grid__booking-wrapper--multi .calendar-grid__plus-button {
+  width: 28px;
+  height: 28px;
 }
 
 .calendar-grid__plus-button svg {
@@ -293,7 +313,6 @@
 
 .calendar-grid__plus-button:hover {
   background-color: #EFEEEB;
-  border-color: #DFDFDF;
   color: #888684;
 }
 

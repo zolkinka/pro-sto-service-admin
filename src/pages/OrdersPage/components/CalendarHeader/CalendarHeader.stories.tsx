@@ -18,6 +18,7 @@ type Story = StoryObj<typeof CalendarHeader>;
 const CalendarHeaderWithState = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week'>('week');
+  const [serviceCategory, setServiceCategory] = useState<'car_wash' | 'tire_service'>('car_wash');
 
   return (
     <div style={{ width: '100%', maxWidth: '1200px' }}>
@@ -26,6 +27,9 @@ const CalendarHeaderWithState = () => {
         onDateChange={setCurrentDate}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        serviceCategory={serviceCategory}
+        onServiceCategoryChange={setServiceCategory}
+        onAddBooking={() => console.log('Add booking')}
       />
     </div>
   );
@@ -41,6 +45,9 @@ export const WeekView: Story = {
     viewMode: 'week',
     onDateChange: (date) => console.log('Date changed:', date),
     onViewModeChange: (mode) => console.log('View mode changed:', mode),
+    serviceCategory: 'car_wash',
+    onServiceCategoryChange: (category) => console.log('Service category changed:', category),
+    onAddBooking: () => console.log('Add booking'),
   },
 };
 
@@ -50,5 +57,8 @@ export const DayView: Story = {
     viewMode: 'day',
     onDateChange: (date) => console.log('Date changed:', date),
     onViewModeChange: (mode) => console.log('View mode changed:', mode),
+    serviceCategory: 'car_wash',
+    onServiceCategoryChange: (category) => console.log('Service category changed:', category),
+    onAddBooking: () => console.log('Add booking'),
   },
 };

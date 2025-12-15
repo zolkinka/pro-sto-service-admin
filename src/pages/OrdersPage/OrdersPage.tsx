@@ -120,6 +120,13 @@ const OrdersPage = observer(() => {
     setIsCreateModalOpen(true);
   };
 
+  const handleAddBookingClick = () => {
+    // Открываем модалку создания записи от выбранной даты (время пользователь выберет в форме)
+    setCreateBookingDate(currentDate);
+    setCreateBookingTime('');
+    setIsCreateModalOpen(true);
+  };
+
   const handleCreateBookingSuccess = () => {
     // Перезагружаем список заказов после успешного создания
     bookingsStore.fetchBookings();
@@ -135,6 +142,17 @@ const OrdersPage = observer(() => {
   const selectedService = servicesStore.mainServices[0];
   const serviceCenterUuid = authStore.user?.service_center_uuid;
 
+  // Фильтруем бронирования по активной категории, используя список услуг текущей категории.
+  // (По аналогии с mobile: bookings API не отдаёт business_type в сущности заказа.)
+  const visibleServiceUuids = useMemo(() => {
+    return new Set(servicesStore.services.map((s) => s.uuid));
+  }, [servicesStore.services]);
+
+  const visibleBookings = useMemo(() => {
+    if (visibleServiceUuids.size === 0) return [];
+    return bookingsStore.bookings.filter((booking) => visibleServiceUuids.has(booking.service.uuid));
+  }, [bookingsStore.bookings, visibleServiceUuids]);
+
   return (
     <div className="orders-page">
       <div className="orders-page__container">
@@ -143,6 +161,9 @@ const OrdersPage = observer(() => {
           onDateChange={setCurrentDate}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          serviceCategory={servicesStore.activeCategory}
+          onServiceCategoryChange={(category) => servicesStore.setActiveCategory(category)}
+          onAddBooking={handleAddBookingClick}
         />
 
         {selectedBooking && (
@@ -157,7 +178,7 @@ const OrdersPage = observer(() => {
 
         <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden' }}>
           <CalendarGrid
-            bookings={bookingsStore.bookings}
+            bookings={visibleBookings}
             weekStart={weekStart}
             onBookingClick={handleBookingClick}
             onSlotClick={handleSlotClick}

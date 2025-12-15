@@ -7,6 +7,90 @@
   font-family: var(--font-onest);
 }
 
+.calendar-header__left {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.calendar-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Add booking */
+.calendar-header__add {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-onest);
+}
+
+.calendar-header__add:active {
+  opacity: 0.8;
+}
+
+.calendar-header__add-text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-gray-900);
+  white-space: nowrap;
+}
+
+.calendar-header__add-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--color-gray-900);
+  color: var(--color-gray-25);
+  flex-shrink: 0;
+}
+
+/* Service category tabs (car wash / tire service) */
+.calendar-header__service-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--color-gray-100);
+  padding: 8px;
+  border-radius: 16px;
+}
+
+.calendar-header__service-tab {
+  padding: 12px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-800);
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.calendar-header__service-tab:hover:not(:disabled) {
+  background: rgba(48, 47, 45, 0.1);
+}
+
+.calendar-header__service-tab_active {
+  background: var(--color-gray-25);
+  color: var(--color-gray-900);
+  font-weight: 500;
+  box-shadow: 0px 1px 2px 0px rgba(30, 27, 21, 0.05);
+}
+
 /* Tabs */
 .calendar-header__tabs {
   display: flex;
@@ -53,6 +137,7 @@
   display: flex;
   align-items: center;
   gap: 13px;
+  color: var(--color-gray-800);
 }
 
 .calendar-header__time-text {
@@ -67,7 +152,15 @@
 .calendar-header__navigation {
   display: flex;
   gap: 15px;
-  margin-left: auto;
+  align-items: center;
+}
+
+.calendar-header__week-range {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-gray-800);
+  white-space: nowrap;
 }
 
 .calendar-header__nav-button {
@@ -82,14 +175,15 @@
   border-radius: 20px;
   cursor: pointer;
   transition: background 0.2s ease;
+  color: var(--color-gray-900);
 }
 
 .calendar-header__nav-button:hover {
-  background: #E8E7E4;
+  background: var(--color-gray-300);
 }
 
 .calendar-header__nav-button:active {
-  background: #DCDBD8;
+  background: var(--color-gray-300);
 }
 
 .calendar-header__nav-button svg {
@@ -106,7 +200,7 @@
   padding-right: 6px; /* Учитываем ширину скроллбара сетки */
 }
 
-.calendar-header__month {
+.calendar-header__time-label {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -145,7 +239,7 @@
 }
 
 .calendar-header__day_current {
-  background: #EFEEEB;
+  background: var(--color-gray-300);
   color: var(--color-gray-900);
 }
 
@@ -168,6 +262,16 @@
     gap: 12px;
   }
 
+  .calendar-header__left {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .calendar-header__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .calendar-header__navigation {
     margin-left: 0;
   }
@@ -178,7 +282,7 @@
     gap: 12px;
   }
 
-  .calendar-header__month {
+  .calendar-header__time-label {
     min-width: auto;
   }
 
@@ -198,6 +302,10 @@
   }
 
   .calendar-header__tabs {
+    width: 100%;
+  }
+
+  .calendar-header__service-tabs {
     width: 100%;
   }
 

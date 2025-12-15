@@ -18,18 +18,19 @@ export interface CalendarGridProps {
   currentDate?: Date; // для режима 'day' - текущая выбранная дата
 }
 
-// Расстояние между часами в пикселях: gap (50px) + высота строки времени (13px)
+// Расстояние между часами в пикселях: gap + высота строки времени (13px)
 const TIME_ROW_HEIGHT = 13;
-const TIME_ROW_GAP = 50;
-const PIXELS_PER_HOUR = TIME_ROW_HEIGHT + TIME_ROW_GAP; // 13 + 50 = 63px
+const TIME_ROW_GAP = 67; // увеличен для комфортного размещения карточек высотой 70px
+const PIXELS_PER_HOUR = TIME_ROW_HEIGHT + TIME_ROW_GAP; // 13 + 67 = 80px
 // Пикселей на минуту
-const PIXELS_PER_MINUTE = PIXELS_PER_HOUR / 60; // 63 / 60 = 1.05
+const PIXELS_PER_MINUTE = PIXELS_PER_HOUR / 60; // 80 / 60 = 1.333
 const DAY_COLUMN_WIDTH = 120; // ширина колонки для одного дня
 const DAY_COLUMN_GAP = 4; // отступ между колонками дней (уменьшен для большей плотности)
 const CARD_PADDING = 4; // отступ карточки от линий сетки в пикселях
 const SLOT_VERTICAL_PADDING = 4; // вертикальный отступ между слотами (2px сверху + 2px снизу = 4px)
 const DAY_MODE_CARD_WIDTH = 120; // фиксированная ширина карточки в режиме 'day'
 const DAY_MODE_CARD_GAP = 8; // отступ между карточками в режиме 'day'
+const BOOKING_CARD_HEIGHT = 70; // фиксированная высота карточки бронирования
 
 interface BookingWithPosition extends AdminBookingResponseDto {
   top: number;
@@ -247,9 +248,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     // Добавляем отступ сверху (CARD_PADDING) для визуального отделения от линии
     const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
 
-    // Высота карточки бронирования фиксирована - 1 час (как и слоты)
-    // Вычитаем отступы сверху и снизу (CARD_PADDING * 2)
-    const height = PIXELS_PER_HOUR - (CARD_PADDING * 2);
+    // Высота карточки бронирования фиксирована - 70px согласно макету Figma
+    const height = BOOKING_CARD_HEIGHT;
 
     return {
       ...booking,

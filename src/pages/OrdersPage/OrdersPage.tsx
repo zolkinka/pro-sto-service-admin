@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { startOfWeek, format, parseISO } from 'date-fns';
+import { startOfWeek, format, parse } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
 import { useStores } from '@/hooks';
 import { getWorkingHoursRangeForWeek } from '@/utils/scheduleHelpers';
@@ -10,12 +10,44 @@ import ViewBookingModal from './components/ViewBookingModal/ViewBookingModal';
 import CreateBookingModal from './components/CreateBookingModal/CreateBookingModal';
 import './OrdersPage.css';
 
+// Хелпер для парсинга даты из URL формата dd-MM-yyyy
+const parseDateFromUrl = (dateStr: string): Date | null => {
+  try {
+    const parsed = parse(dateStr, 'dd-MM-yyyy', new Date());
+    if (!isNaN(parsed.getTime())) return parsed;
+  } catch (e) {
+    console.error('Invalid date param:', e);
+  }
+  return null;
+};
+
 const OrdersPage = observer(() => {
   const { bookingsStore, authStore, servicesStore, operatingHoursStore } = useStores();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [viewMode, setViewMode] = useState<'day' | 'week'>('week');
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Инициализируем состояние из URL параметров
+  const [currentDate, setCurrentDate] = useState<Date>(() => {
+    const dayParam = searchParams.get('day');
+    const weekParam = searchParams.get('week');
+    
+    if (dayParam) {
+      const parsed = parseDateFromUrl(dayParam);
+      if (parsed) return parsed;
+    }
+    
+    if (weekParam) {
+      const parsed = parseDateFromUrl(weekParam);
+      if (parsed) return parsed;
+    }
+    
+    return new Date();
+  });
+  
+  const [viewMode, setViewMode] = useState<'day' | 'week'>(() => {
+    return searchParams.has('day') ? 'day' : 'week';
+  });
   
   // State for create booking modal
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -41,21 +73,98 @@ const OrdersPage = observer(() => {
     );
   }, [weekStart, operatingHoursStore.regularSchedule, operatingHoursStore.specialDates]);
 
+  // Инициализация из URL при первом рендере
   useEffect(() => {
-    // Загрузка заказов при монтировании и изменении даты
+    if (isInitialized) return;
+    
+    const dayParam = searchParams.get('day');
+    const weekParam = searchParams.get('week');
+    
+    if (dayParam) {
+      const parsed = parseDateFromUrl(dayParam);
+      if (parsed) {
+        setCurrentDate(parsed);
+        setViewMode('day');
+        setIsInitialized(true);
+        return;
+      }
+    }
+    
+    if (weekParam) {
+      const parsed = parseDateFromUrl(weekParam);
+      if (parsed) {
+        setCurrentDate(parsed);
+        setViewMode('week');
+        setIsInitialized(true);
+        return;
+      }
+    }
+    
+    // Если нет параметров, устанавливаем дефолтные
+    if (!dayParam && !weekParam) {
+      const params = new URLSearchParams();
+      params.set('week', format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'dd-MM-yyyy'));
+      setSearchParams(params, { replace: true });
+    }
+    
+    setIsInitialized(true);
+  }, [searchParams, setSearchParams, isInitialized]);
+
+  // Синхронизируем URL с состоянием календаря при изменении даты/режима
+  useEffect(() => {
+    // Не обновляем URL до инициализации
+    if (!isInitialized) return;
+    
+    const dayParam = searchParams.get('day');
+    const weekParam = searchParams.get('week');
+    const params = new URLSearchParams();
+    
+    if (viewMode === 'day') {
+      const expectedDay = format(currentDate, 'dd-MM-yyyy');
+      if (dayParam !== expectedDay) {
+        params.set('day', expectedDay);
+        setSearchParams(params, { replace: true });
+      }
+    } else {
+      const expectedWeek = format(weekStart, 'dd-MM-yyyy');
+      if (weekParam !== expectedWeek) {
+        params.set('week', expectedWeek);
+        setSearchParams(params, { replace: true });
+      }
+    }
+  }, [currentDate, viewMode, weekStart, searchParams, setSearchParams, isInitialized]);
+
+  useEffect(() => {
+    // Не загружаем данные до инициализации из URL
+    if (!isInitialized) return;
+    
+    // Загрузка заказов при монтировании и изменении даты или режима
     const serviceCenterUuid = authStore.user?.service_center_uuid;
     
     if (serviceCenterUuid) {
       // Устанавливаем UUID сервисного центра в store
       bookingsStore.setServiceCenterUuid(serviceCenterUuid);
       
-      // Устанавливаем диапазон дат для недели
-      const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-      weekEnd.setHours(23, 59, 59, 999);
+      // Устанавливаем диапазон дат в зависимости от режима
+      let dateStart: Date;
+      let dateEnd: Date;
       
-      bookingsStore.setDateRange(weekStart, weekEnd);
+      if (viewMode === 'day') {
+        // В режиме 'day' загружаем только выбранный день
+        dateStart = new Date(currentDate);
+        dateStart.setHours(0, 0, 0, 0);
+        dateEnd = new Date(currentDate);
+        dateEnd.setHours(23, 59, 59, 999);
+      } else {
+        // В режиме 'week' загружаем всю неделю
+        const weekStartDate = startOfWeek(currentDate, { weekStartsOn: 1 });
+        dateStart = weekStartDate;
+        dateEnd = new Date(weekStartDate);
+        dateEnd.setDate(dateEnd.getDate() + 6);
+        dateEnd.setHours(23, 59, 59, 999);
+      }
+      
+      bookingsStore.setDateRange(dateStart, dateEnd);
       
       // Загружаем данные
       bookingsStore.fetchBookings();
@@ -71,30 +180,20 @@ const OrdersPage = observer(() => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate, authStore.user?.service_center_uuid]);
+  }, [currentDate, viewMode, authStore.user?.service_center_uuid, isInitialized]);
 
   // Обработка query параметров для открытия бронирования
   useEffect(() => {
     const bookingParam = searchParams.get('booking');
-    const dateParam = searchParams.get('date');
-    
-    // Если есть параметр date, устанавливаем currentDate
-    if (dateParam) {
-      try {
-        const parsedDate = parseISO(dateParam);
-        if (!isNaN(parsedDate.getTime())) {
-          setCurrentDate(parsedDate);
-        }
-      } catch (error) {
-        console.error('Error parsing date from query param:', error);
-      }
-    }
     
     // Если есть параметр booking, открываем модалку
     if (bookingParam && bookingParam !== selectedBooking) {
       setSelectedBooking(bookingParam);
-      // Очищаем query параметры после открытия модалки
-      setSearchParams({}, { replace: true });
+      
+      // Сохраняем текущие параметры календаря при открытии модалки
+      const params = new URLSearchParams(searchParams);
+      params.delete('booking');
+      setSearchParams(params, { replace: true });
     }
   }, [searchParams, selectedBooking, setSearchParams]);
 
@@ -186,6 +285,8 @@ const OrdersPage = observer(() => {
             isLoading={bookingsStore.isLoading}
             serviceCenterUuid={serviceCenterUuid}
             serviceUuid={selectedService?.uuid}
+            viewMode={viewMode}
+            currentDate={currentDate}
           />
         </div>
       </div>

@@ -165,7 +165,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             <button
               className={`calendar-header__tab ${viewMode === 'day' ? 'calendar-header__tab_active' : ''}`}
               onClick={() => onViewModeChange('day')}
-              disabled={true}
               type="button"
             >
               День
@@ -179,22 +178,22 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             </button>
           </div>
 
-          <div className="calendar-header__navigation" aria-label="Переключение недели">
+          <div className="calendar-header__navigation" aria-label={viewMode === 'day' ? 'Переключение дня' : 'Переключение недели'}>
             <button
               className="calendar-header__nav-button"
               onClick={handlePrevious}
-              aria-label="Предыдущая неделя"
+              aria-label={viewMode === 'day' ? 'Предыдущий день' : 'Предыдущая неделя'}
               type="button"
             >
               <ChevronLeftIcon />
             </button>
-            <span className="calendar-header__week-range" aria-label="Текущая неделя">
-              {weekRangeLabel}
+            <span className="calendar-header__week-range" aria-label={viewMode === 'day' ? 'Текущий день' : 'Текущая неделя'}>
+              {viewMode === 'day' ? format(currentDate, 'd MMMM', { locale: ru }) : weekRangeLabel}
             </span>
             <button
               className="calendar-header__nav-button"
               onClick={handleNext}
-              aria-label="Следующая неделя"
+              aria-label={viewMode === 'day' ? 'Следующий день' : 'Следующая неделя'}
               type="button"
             >
               <ChevronRightIcon />
@@ -203,27 +202,37 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         </div>
       </div>
 
-      {/* Week Days Row - интегрированная часть заголовка */}
-      <div className="calendar-header__week-days">
-        <div className="calendar-header__time-label">Время</div>
-        <div className="calendar-header__days">
-          {weekDays.map((day, index) => {
-            const isCurrentDay = isSameDay(day, currentDate);
-            const dayOfWeek = format(day, 'EEEEEE', { locale: ru });
-            const dayNumber = format(day, 'd');
+      {/* Week Days Row - интегрированная часть заголовка (только для режима 'неделя') */}
+      {viewMode === 'week' && (
+        <div className="calendar-header__week-days">
+          <div className="calendar-header__time-label">Время</div>
+          <div className="calendar-header__days">
+            {weekDays.map((day, index) => {
+              const isCurrentDay = isSameDay(day, currentDate);
+              const dayOfWeek = format(day, 'EEEEEE', { locale: ru });
+              const dayNumber = format(day, 'd');
 
-            return (
-              <div
-                key={index}
-                className={`calendar-header__day ${isCurrentDay ? 'calendar-header__day_current' : ''}`}
-              >
-                <span className="calendar-header__day-name">{dayOfWeek}</span>
-                <span className="calendar-header__day-number">{dayNumber}</span>
-              </div>
-            );
-          })}
+              const handleDayClick = () => {
+                onDateChange(day);
+                onViewModeChange('day');
+              };
+
+              return (
+                <button
+                  key={index}
+                  className={`calendar-header__day ${isCurrentDay ? 'calendar-header__day_current' : ''}`}
+                  onClick={handleDayClick}
+                  type="button"
+                  aria-label={`Перейти к ${format(day, 'd MMMM', { locale: ru })}`}
+                >
+                  <span className="calendar-header__day-name">{dayOfWeek}</span>
+                  <span className="calendar-header__day-number">{dayNumber}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

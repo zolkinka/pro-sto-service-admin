@@ -14,6 +14,8 @@ export interface CalendarGridProps {
   isLoading?: boolean;
   serviceCenterUuid?: string;
   serviceUuid?: string;
+  viewMode?: 'day' | 'week';
+  currentDate?: Date; // для режима 'day' - текущая выбранная дата
 }
 
 // Расстояние между часами в пикселях: gap (50px) + высота строки времени (13px)
@@ -26,6 +28,8 @@ const DAY_COLUMN_WIDTH = 120; // ширина колонки для одного
 const DAY_COLUMN_GAP = 4; // отступ между колонками дней (уменьшен для большей плотности)
 const CARD_PADDING = 4; // отступ карточки от линий сетки в пикселях
 const SLOT_VERTICAL_PADDING = 4; // вертикальный отступ между слотами (2px сверху + 2px снизу = 4px)
+const DAY_MODE_CARD_WIDTH = 120; // фиксированная ширина карточки в режиме 'day'
+const DAY_MODE_CARD_GAP = 8; // отступ между карточками в режиме 'day'
 
 interface BookingWithPosition extends AdminBookingResponseDto {
   top: number;
@@ -49,6 +53,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   isLoading = false,
   serviceCenterUuid,
   serviceUuid,
+  viewMode = 'week',
+  currentDate,
 }) => {
   // Состояние для хранения доступных слотов
   const [availableSlots, setAvailableSlots] = useState<AvailableSlots>({});
@@ -67,7 +73,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     hours.push(hour);
   }
 
-  // Функция для загрузки слотов для всей недели
+  // Функция для загрузки слотов для всей недели или одного дня
   const loadAvailableSlots = useCallback(async () => {
     // Предотвращаем повторную загрузку, если уже идет загрузка
     if (isLoadingSlotsRef.current) {
@@ -85,12 +91,22 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     const slots: AvailableSlots = {};
 
     try {
-      // Вычисляем начало и конец недели
-      const weekEnd = addDays(weekStart, 6);
-      const dateFrom = format(weekStart, 'yyyy-MM-dd');
-      const dateTo = format(weekEnd, 'yyyy-MM-dd');
+      // Вычисляем начало и конец периода в зависимости от режима
+      let dateFrom: string;
+      let dateTo: string;
+      
+      if (viewMode === 'day' && currentDate) {
+        // В режиме 'day' загружаем только выбранный день
+        dateFrom = format(currentDate, 'yyyy-MM-dd');
+        dateTo = format(currentDate, 'yyyy-MM-dd');
+      } else {
+        // В режиме 'week' загружаем всю неделю
+        const weekEnd = addDays(weekStart, 6);
+        dateFrom = format(weekStart, 'yyyy-MM-dd');
+        dateTo = format(weekEnd, 'yyyy-MM-dd');
+      }
 
-      // Делаем один запрос на всю неделю
+      // Делаем один запрос на период (день или неделю)
       const response = await serviceCenterGetSlots({
         uuid: serviceCenterUuid,
         serviceUuid: serviceUuid,
@@ -98,17 +114,25 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         dateTo: dateTo,
       });
 
-      // Парсим слоты и группируем их по дням недели
+      // Парсим слоты и группируем их по дням
       response.forEach((timeSlot: string) => {
         const slotDate = new Date(timeSlot);
         const hour = slotDate.getHours();
         
-        // Определяем индекс дня недели (0-6)
         let dayIndex = -1;
-        for (let i = 0; i < 7; i++) {
-          if (isSameDay(slotDate, addDays(weekStart, i))) {
-            dayIndex = i;
-            break;
+        
+        if (viewMode === 'day' && currentDate) {
+          // В режиме 'day' проверяем только выбранный день
+          if (isSameDay(slotDate, currentDate)) {
+            dayIndex = 0; // единственная колонка
+          }
+        } else {
+          // В режиме 'week' определяем индекс дня недели (0-6)
+          for (let i = 0; i < 7; i++) {
+            if (isSameDay(slotDate, addDays(weekStart, i))) {
+              dayIndex = i;
+              break;
+            }
           }
         }
 
@@ -127,21 +151,24 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       isLoadingSlotsRef.current = false;
       setIsLoadingSlots(false);
     }
-  }, [weekStart, serviceCenterUuid, serviceUuid]);
+  }, [weekStart, serviceCenterUuid, serviceUuid, viewMode, currentDate]);
 
   // Загружаем слоты при изменении недели или сервиса
   useEffect(() => {
     loadAvailableSlots();
   }, [loadAvailableSlots]);
 
+  // Определяем количество дней для отображения в зависимости от режима
+  const daysToShow = viewMode === 'day' ? 1 : 7;
+  
   // Рассчитываем ширину колонки дня на основе доступного пространства
   useLayoutEffect(() => {
     const updateDayColumnWidth = () => {
       if (daysContainerRef.current) {
         const containerWidth = daysContainerRef.current.offsetWidth;
-        // Вычисляем ширину одной колонки: (общая ширина - все gaps) / 7 дней
-        const totalGaps = DAY_COLUMN_GAP * 6; // 6 промежутков между 7 днями
-        const calculatedWidth = (containerWidth - totalGaps) / 7;
+        // Вычисляем ширину одной колонки: (общая ширина - все gaps) / количество дней
+        const totalGaps = DAY_COLUMN_GAP * (daysToShow - 1); // промежутки между днями
+        const calculatedWidth = (containerWidth - totalGaps) / daysToShow;
         
         // Обновляем только если значение действительно изменилось
         setDayColumnWidth(prev => {
@@ -173,13 +200,33 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateDayColumnWidth);
     };
-  }, []);
+  }, [daysToShow]);
 
   // Рассчитываем позиции для каждого заказа
   const bookingsWithPositions: BookingWithPosition[] = bookings.map((booking) => {
     const startTime = new Date(booking.start_time);
 
-    // Определяем день недели (0-6)
+    // В режиме 'day' показываем только заказы для выбранного дня
+    if (viewMode === 'day' && currentDate) {
+      if (!isSameDay(startTime, currentDate)) {
+        return null;
+      }
+      // В режиме дня dayIndex будет использоваться как порядковый номер карточки в строке
+      const startHour = startTime.getHours();
+      const startMinute = startTime.getMinutes();
+      const minutesFromStart = (startHour - workingHours.start) * 60 + startMinute;
+      const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
+      const height = PIXELS_PER_HOUR - (CARD_PADDING * 2);
+
+      return {
+        ...booking,
+        top,
+        height,
+        dayIndex: 0, // временно, будет перезаписан при группировке
+      };
+    }
+
+    // В режиме 'week' определяем день недели (0-6)
     let dayIndex = -1;
     for (let i = 0; i < 7; i++) {
       if (isSameDay(startTime, addDays(weekStart, i))) {
@@ -212,16 +259,56 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     };
   }).filter((b): b is BookingWithPosition => b !== null);
 
-  // Группируем заказы по дням для подсчета перекрытий
-  const bookingsByDay: BookingWithPosition[][] = Array.from({ length: 7 }, () => []);
-  bookingsWithPositions.forEach((booking) => {
-    bookingsByDay[booking.dayIndex].push(booking);
-  });
+  // Группируем заказы
+  // В режиме 'day' группируем по часам (для горизонтального отображения)
+  // В режиме 'week' группируем по дням
+  const bookingsByDay: BookingWithPosition[][] = Array.from({ length: daysToShow }, () => []);
+  
+  if (viewMode === 'day') {
+    // Группируем по часам и назначаем dayIndex как порядковый номер в строке
+    const bookingsByHour: { [hour: number]: BookingWithPosition[] } = {};
+    
+    bookingsWithPositions.forEach((booking) => {
+      const startTime = new Date(booking.start_time);
+      const hour = startTime.getHours();
+      
+      if (!bookingsByHour[hour]) {
+        bookingsByHour[hour] = [];
+      }
+      bookingsByHour[hour].push(booking);
+    });
+    
+    // Назначаем каждой карточке горизонтальную позицию
+    Object.values(bookingsByHour).forEach((hourBookings) => {
+      hourBookings.forEach((booking, index) => {
+        booking.dayIndex = index; // используем dayIndex как индекс в горизонтальном ряду
+      });
+    });
+  } else {
+    // В режиме week группируем по дням как раньше
+    bookingsWithPositions.forEach((booking) => {
+      bookingsByDay[booking.dayIndex].push(booking);
+    });
+  }
 
   // Вычисляем высоту контейнера с бронированиями
   // Добавляем дополнительный час после последнего времени для отображения завершающих заказов
   const totalHours = hours.length;
   const bookingsHeight = totalHours * PIXELS_PER_HOUR;
+
+  // В режиме 'day' группируем бронирования по часам для добавления плейсхолдеров
+  const bookingsByHour: { [hour: number]: BookingWithPosition[] } = {};
+  if (viewMode === 'day') {
+    bookingsWithPositions.forEach((booking) => {
+      const startTime = new Date(booking.start_time);
+      const hour = startTime.getHours();
+      
+      if (!bookingsByHour[hour]) {
+        bookingsByHour[hour] = [];
+      }
+      bookingsByHour[hour].push(booking);
+    });
+  }
 
   return (
     <div className={`calendar-grid ${isLoading ? 'calendar-grid--loading' : ''}`}>
@@ -247,33 +334,35 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             />
           ) : (
             <>
-              {/* Фоновые колонки для выходных дней (дней без слотов) */}
-              <div 
-                className="calendar-grid__day-backgrounds"
-                style={{ height: `${bookingsHeight}px` }}
-              >
-                {Array.from({ length: 7 }).map((_, dayIndex) => {
-                  // Проверяем, есть ли хотя бы один слот в этот день
-                  const hasSlotsForDay = availableSlots[dayIndex] && 
-                    Object.keys(availableSlots[dayIndex]).length > 0;
-                  
-                  const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
-                  
-                  return (
-                    <div
-                      key={dayIndex}
-                      className={`calendar-grid__day-background ${!hasSlotsForDay ? 'calendar-grid__day-background--closed' : ''}`}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: `${left}px`,
-                        width: `${dayColumnWidth}px`,
-                        height: '100%',
-                      }}
-                    />
-                  );
-                })}
-              </div>
+              {/* Фоновые колонки для выходных дней (дней без слотов) - только в режиме week */}
+              {viewMode === 'week' && (
+                <div 
+                  className="calendar-grid__day-backgrounds"
+                  style={{ height: `${bookingsHeight}px` }}
+                >
+                  {Array.from({ length: daysToShow }).map((_, dayIndex) => {
+                    // Проверяем, есть ли хотя бы один слот в этот день
+                    const hasSlotsForDay = availableSlots[dayIndex] && 
+                      Object.keys(availableSlots[dayIndex]).length > 0;
+                    
+                    const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
+                    
+                    return (
+                      <div
+                        key={dayIndex}
+                        className={`calendar-grid__day-background ${!hasSlotsForDay ? 'calendar-grid__day-background--closed' : ''}`}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: `${left}px`,
+                          width: `${dayColumnWidth}px`,
+                          height: '100%',
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Горизонтальные линии сетки (для каждого часа) */}
               <div 
@@ -291,28 +380,30 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 ))}
               </div>
 
-              {/* Вертикальные линии сетки (между днями) */}
-              <div 
-                className="calendar-grid__vertical-lines"
-                style={{ height: `${bookingsHeight}px` }}
-              >
-                {Array.from({ length: 7 }).map((_, dayIndex) => (
-                  <div
-                    key={dayIndex}
-                    className="calendar-grid__day-line"
-                  />
-                ))}
-              </div>
+              {/* Вертикальные линии сетки (между днями) - только в режиме week */}
+              {viewMode === 'week' && (
+                <div 
+                  className="calendar-grid__vertical-lines"
+                  style={{ height: `${bookingsHeight}px` }}
+                >
+                  {Array.from({ length: daysToShow }).map((_, dayIndex) => (
+                    <div
+                      key={dayIndex}
+                      className="calendar-grid__day-line"
+                    />
+                  ))}
+                </div>
+              )}
 
-              {/* Кликабельные слоты для создания новых заказов */}
-              {onSlotClick && (
+              {/* Кликабельные слоты для создания новых заказов - только в режиме week */}
+              {onSlotClick && viewMode === 'week' && (
                 <div 
                   className="calendar-grid__clickable-slots"
                   style={{ height: `${bookingsHeight}px` }}
                 >
                   {hours.map((hour, hourIndex) => (
                     <React.Fragment key={hour}>
-                      {Array.from({ length: 7 }).map((_, dayIndex) => {
+                      {Array.from({ length: daysToShow }).map((_, dayIndex) => {
                         const slotDate = addDays(weekStart, dayIndex);
                         const top = hourIndex * PIXELS_PER_HOUR;
                         const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
@@ -361,7 +452,18 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 style={{ height: `${bookingsHeight}px` }}
               >
                 {bookingsWithPositions.map((booking) => {
-                  const left = booking.dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
+                  let left: number;
+                  let width: number;
+                  
+                  if (viewMode === 'day') {
+                    // В режиме 'day' карточки располагаются горизонтально с фиксированной шириной
+                    left = booking.dayIndex * (DAY_MODE_CARD_WIDTH + DAY_MODE_CARD_GAP);
+                    width = DAY_MODE_CARD_WIDTH;
+                  } else {
+                    // В режиме 'week' карточки занимают всю ширину колонки дня
+                    left = booking.dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
+                    width = dayColumnWidth;
+                  }
                   
                   return (
                     <div
@@ -371,7 +473,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         position: 'absolute',
                         top: `${booking.top}px`,
                         left: `${left}px`,
-                        width: `${dayColumnWidth}px`,
+                        width: `${width}px`,
                       }}
                     >
                       <BookingCard
@@ -379,6 +481,56 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         onClick={() => onBookingClick(booking.uuid)}
                         style={{ height: `${booking.height}px` }}
                       />
+                    </div>
+                  );
+                })}
+
+                {/* Плейсхолдеры для добавления новых бронирований в режиме 'day' */}
+                {viewMode === 'day' && onSlotClick && currentDate && hours.map((hour, hourIndex) => {
+                  // Проверяем, доступен ли этот слот (работает ли сервис в этот час)
+                  const isAvailable = availableSlots[0]?.[hour] === true;
+                  
+                  // Не показываем плейсхолдер для недоступных слотов
+                  if (!isAvailable) {
+                    return null;
+                  }
+
+                  // Проверяем, не является ли слот прошедшим
+                  const slotDateTime = new Date(currentDate);
+                  slotDateTime.setHours(hour, 0, 0, 0);
+                  const isPast = slotDateTime < new Date();
+                  
+                  // Не показываем плейсхолдер для прошедшего времени
+                  if (isPast) {
+                    return null;
+                  }
+                  
+                  // Считаем количество бронирований на этот час
+                  const hourBookingsCount = bookingsByHour[hour]?.length || 0;
+                  
+                  // Позиция плейсхолдера после всех бронирований
+                  const left = hourBookingsCount * (DAY_MODE_CARD_WIDTH + DAY_MODE_CARD_GAP);
+                  const top = hourIndex * PIXELS_PER_HOUR + CARD_PADDING;
+                  const height = PIXELS_PER_HOUR - (CARD_PADDING * 2);
+                  
+                  return (
+                    <div
+                      key={`placeholder-${hour}`}
+                      className="calendar-grid__placeholder-wrapper"
+                      style={{
+                        position: 'absolute',
+                        top: `${top}px`,
+                        left: `${left}px`,
+                        width: `${DAY_MODE_CARD_WIDTH}px`,
+                        height: `${height}px`,
+                      }}
+                      onClick={() => onSlotClick(currentDate, hour)}
+                    >
+                      <div className="calendar-grid__placeholder">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                     </div>
                   );
                 })}

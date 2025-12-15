@@ -236,11 +236,22 @@
   border-radius: 16px;
   transition: all 0.2s ease;
   text-align: center;
+  border: none;
+  font-family: var(--font-onest);
+  cursor: pointer;
+}
+
+.calendar-header__day:hover {
+  background: var(--color-gray-200);
 }
 
 .calendar-header__day_current {
   background: var(--color-gray-300);
   color: var(--color-gray-900);
+}
+
+.calendar-header__day_current:hover {
+  background: var(--color-gray-300);
 }
 
 .calendar-header__day-name {

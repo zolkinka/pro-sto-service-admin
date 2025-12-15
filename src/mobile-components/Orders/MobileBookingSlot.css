@@ -30,6 +30,14 @@
   overflow: hidden;
 }
 
+.mobile-booking-slot__bookings {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .mobile-booking-slot__empty {
   width: 100%;
   height: 70px;
@@ -37,6 +45,11 @@
   border: 1px solid #F4F3F0;
   border-radius: 16px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #DFDFDF;
+  transition: all 0.2s ease;
 }
 
 .mobile-booking-slot__empty_clickable {
@@ -49,4 +62,44 @@
 .mobile-booking-slot__empty_clickable:active {
   background: #F9F8F5;
   opacity: 0.8;
+}
+
+.mobile-booking-slot__empty-icon {
+  width: 34px;
+  height: 34px;
+  stroke-width: 1.5;
+}
+
+/* Кнопка "+" для добавления дополнительной записи в слоте с бронированиями */
+.mobile-booking-slot__add-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FEFDFA;
+  border: none;
+  border-radius: 16px;
+  color: #DFDFDF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  
+  /* iOS specific */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-booking-slot__add-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+.mobile-booking-slot__add-button:active {
+  background-color: #EFEEEB;
+  color: #888684;
+  transform: scale(0.95);
 }

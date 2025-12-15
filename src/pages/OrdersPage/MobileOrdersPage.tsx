@@ -10,6 +10,7 @@ import { MobileViewBookingModal } from '@/mobile-components/Orders/MobileViewBoo
 import MobileCategoryTabs from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { CategoryType } from '@/mobile-components/MobileCategoryTabs/MobileCategoryTabs';
 import type { AdminBookingResponseDto } from '../../../services/api-client';
+import { serviceCenterGetSlots } from '../../../services/api-client';
 import { getWorkingTimeSlots, getWorkingHoursForDate } from '@/utils/scheduleHelpers';
 import './MobileOrdersPage.css';
 
@@ -68,6 +69,9 @@ export const MobileOrdersPage = observer(() => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedBookingUuid, setSelectedBookingUuid] = useState<string>('');
 
+  // Состояние для хранения доступных слотов (час -> доступен ли)
+  const [availableSlots, setAvailableSlots] = useState<Record<number, boolean>>({});
+
   // Обновление текущего времени каждую секунду
   useEffect(() => {
     const updateTime = () => {
@@ -114,6 +118,55 @@ export const MobileOrdersPage = observer(() => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, authStore.user?.service_center_uuid]);
+
+  // Загружаем доступные слоты для выбранного дня и категории
+  useEffect(() => {
+    const loadAvailableSlots = async () => {
+      const serviceCenterUuid = authStore.user?.service_center_uuid;
+      
+      // Ждем загрузки сервисов
+      if (servicesStore.services.length === 0) {
+        setAvailableSlots({});
+        return;
+      }
+      
+      // Находим первый активный сервис выбранной категории для запроса слотов
+      const activeService = servicesStore.services.find(
+        service => service.business_type === uiCategory
+      );
+      
+      if (!serviceCenterUuid || !activeService) {
+        console.log('Missing serviceCenterUuid or serviceUuid, skipping slots loading');
+        setAvailableSlots({});
+        return;
+      }
+
+      try {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const response = await serviceCenterGetSlots({
+          uuid: serviceCenterUuid,
+          serviceUuid: activeService.uuid,
+          dateFrom: dateStr,
+          dateTo: dateStr,
+        });
+
+        // Парсим слоты и создаем мап по часам
+        const slots: Record<number, boolean> = {};
+        response.forEach((timeSlot: string) => {
+          const slotDate = new Date(timeSlot);
+          const hour = slotDate.getHours();
+          slots[hour] = true;
+        });
+
+        setAvailableSlots(slots);
+      } catch (error) {
+        console.error('Failed to load available slots:', error);
+        setAvailableSlots({});
+      }
+    };
+
+    loadAvailableSlots();
+  }, [selectedDate, uiCategory, servicesStore.services.length, authStore.user?.service_center_uuid]);
 
   // Эффект для автоматического показа pending заказов в модальном окне
   useEffect(() => {
@@ -379,6 +432,9 @@ export const MobileOrdersPage = observer(() => {
                 slotDateTime.setHours(hours, 0, 0, 0);
                 const isPast = slotDateTime < new Date();
                 
+                // Проверяем, доступен ли слот для добавления новых бронирований
+                const isSlotAvailable = availableSlots[hours] === true;
+                
                 return (
                   <MobileBookingSlot
                     key={timeSlot}
@@ -387,6 +443,7 @@ export const MobileOrdersPage = observer(() => {
                     onBookingClick={handleBookingClick}
                     onSlotClick={() => handleSlotClick(timeSlot)}
                     isPast={isPast}
+                    canAddMore={isSlotAvailable && !isPast}
                   />
                 );
               })

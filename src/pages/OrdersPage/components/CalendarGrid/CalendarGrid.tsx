@@ -591,8 +591,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       onClick={() => onSlotClick(currentDate, hour)}
                     >
                       <div className="calendar-grid__placeholder">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M10 4V16M4 10H16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                     </div>

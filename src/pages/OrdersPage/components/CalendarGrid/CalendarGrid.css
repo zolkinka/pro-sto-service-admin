@@ -76,6 +76,12 @@
   transition: all 0.2s ease;
 }
 
+.calendar-grid__placeholder svg {
+  width: 34px;
+  height: 34px;
+  stroke-width: 1.5;
+}
+
 .calendar-grid__placeholder-wrapper:hover .calendar-grid__placeholder {
   background-color: #F9F8F5;
   border-color: #EFEEEB;
@@ -198,35 +204,44 @@
 
 .calendar-grid__clickable-slot {
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 16px;
   position: relative;
-  /* Добавляем рамку для пустых слотов */
-  border: 1px solid #f4f3f0;
-  /* Убираем фоновую заливку по умолчанию */
-  background-color: transparent;
+  border: 1px solid #F4F3F0;
+  background-color: #FEFDFA;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .calendar-grid__clickable-slot:hover {
-  background-color: #F4F3F0;
+  background-color: #F9F8F5;
+  border-color: #EFEEEB;
 }
 
-/* Плюсик при наведении */
+.calendar-grid__clickable-slot:active {
+  background-color: #F4F3F0;
+  transform: scale(0.98);
+}
+
+/* Плюсик */
 .calendar-grid__clickable-slot::after {
-  content: '+';
+  content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 24px;
-  font-weight: 300;
-  color: #888684;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  width: 34px;
+  height: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 4V16M4 10H16' stroke='%23DFDFDF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   pointer-events: none;
 }
 
 .calendar-grid__clickable-slot:hover::after {
-  opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 4V16M4 10H16' stroke='%23B5B4B0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .calendar-grid__booking-wrapper {

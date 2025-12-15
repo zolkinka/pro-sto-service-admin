@@ -31,6 +31,7 @@ const SLOT_VERTICAL_PADDING = 4; // вертикальный отступ меж
 const DAY_MODE_CARD_WIDTH = 120; // фиксированная ширина карточки в режиме 'day'
 const DAY_MODE_CARD_GAP = 8; // отступ между карточками в режиме 'day'
 const BOOKING_CARD_HEIGHT = 70; // фиксированная высота карточки бронирования
+const BOOKING_CARD_HEIGHT_COMPACT = 39; // фиксированная высота карточки в компактном режиме (когда есть moreCount)
 
 interface BookingWithPosition extends AdminBookingResponseDto {
   top: number;
@@ -524,6 +525,26 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       const isPast = slotDateTime < new Date();
                       const canAddMore = isSlotAvailable && !isPast && onSlotClick;
                       
+                      // Используем компактную высоту если есть дополнительные заказы
+                      const cardHeight = moreCount > 0 ? BOOKING_CARD_HEIGHT_COMPACT : BOOKING_CARD_HEIGHT;
+                      
+                      // Склонение слова "заказ"
+                      const getOrderWord = (count: number): string => {
+                        const lastDigit = count % 10;
+                        const lastTwoDigits = count % 100;
+                        
+                        if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+                          return 'заказов';
+                        }
+                        if (lastDigit === 1) {
+                          return 'заказ';
+                        }
+                        if (lastDigit >= 2 && lastDigit <= 4) {
+                          return 'заказа';
+                        }
+                        return 'заказов';
+                      };
+                      
                       return (
                         <div
                           key={`${dayIndex}-${hour}`}
@@ -533,16 +554,39 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                             top: `${firstBooking.top}px`,
                             left: `${left}px`,
                             width: `${width}px`,
+                            height: `${BOOKING_CARD_HEIGHT}px`, // фиксированная высота обертки
                           }}
                         >
                           <BookingCard
                             booking={firstBooking}
                             onClick={() => onBookingClick(firstBooking.uuid)}
-                            style={{ height: `${firstBooking.height}px` }}
-                            showPlusButton={canAddMore && moreCount === 0}
-                            onPlusClick={canAddMore ? () => onSlotClick!(slotDate, hour) : undefined}
+                            style={{ height: `${cardHeight}px` }}
                             moreCount={moreCount > 0 ? moreCount : undefined}
                           />
+                          
+                          {/* Надпись о дополнительных заказах */}
+                          {moreCount > 0 && (
+                            <div className="calendar-grid__more-count">
+                              Еще {moreCount} {getOrderWord(moreCount)}
+                            </div>
+                          )}
+                          
+                          {/* Кнопка плюса */}
+                          {canAddMore && (
+                            <button
+                              className="calendar-grid__plus-button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSlotClick!(slotDate, hour);
+                              }}
+                              aria-label="Добавить заказ"
+                              type="button"
+                            >
+                              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 4V16M4 10H16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
+                          )}
                         </div>
                       );
                     });

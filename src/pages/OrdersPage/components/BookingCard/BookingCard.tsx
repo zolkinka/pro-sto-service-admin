@@ -6,9 +6,7 @@ export interface BookingCardProps {
   booking: AdminBookingResponseDto;
   onClick: () => void;
   style?: React.CSSProperties;
-  showPlusButton?: boolean;
-  onPlusClick?: () => void;
-  moreCount?: number; // количество дополнительных заказов
+  moreCount?: number; // количество дополнительных заказов (только для определения компактного режима)
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -26,7 +24,7 @@ const formatTime = (time: string): string => {
   });
 };
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onClick, style, showPlusButton, onPlusClick, moreCount }) => {
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onClick, style, moreCount }) => {
   const startTime = formatTime(booking.start_time);
   const endTime = formatTime(booking.end_time);
   const statusLabel = STATUS_LABELS[booking.status];
@@ -36,28 +34,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onClick, style, show
     onClick();
   };
 
-  const handlePlusClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    onPlusClick?.();
-  };
-
-  // Склонение слова "заказ"
-  const getOrderWord = (count: number): string => {
-    const lastDigit = count % 10;
-    const lastTwoDigits = count % 100;
-    
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
-      return 'заказов';
-    }
-    if (lastDigit === 1) {
-      return 'заказ';
-    }
-    if (lastDigit >= 2 && lastDigit <= 4) {
-      return 'заказа';
-    }
-    return 'заказов';
-  };
-
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -65,9 +41,11 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onClick, style, show
     }
   };
 
+  const isCompact = moreCount && moreCount > 0;
+
   return (
     <div
-      className={`booking-card booking-card_status_${booking.status}`}
+      className={`booking-card booking-card_status_${booking.status} ${isCompact ? 'booking-card_compact' : ''}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="button"
@@ -78,32 +56,13 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onClick, style, show
     >
       <div className="booking-card__content">
         <p className="booking-card__service">{booking.service.name}</p>
-        <p className="booking-card__time">
-          {startTime}-{endTime}
-        </p>
+        {!isCompact && (
+          <p className="booking-card__time">
+            {startTime}-{endTime}
+          </p>
+        )}
       </div>
       <p className="booking-card__status">{statusLabel}</p>
-      
-      {/* Кнопка плюса или счётчик дополнительных заказов */}
-      {showPlusButton && !moreCount && onPlusClick && (
-        <button
-          className="booking-card__plus-button"
-          onClick={handlePlusClick}
-          aria-label="Добавить заказ"
-          type="button"
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      )}
-      
-      {/* Счётчик дополнительных заказов */}
-      {moreCount && moreCount > 0 && (
-        <div className="booking-card__more-count">
-          ещё {moreCount} {getOrderWord(moreCount)}
-        </div>
-      )}
     </div>
   );
 };

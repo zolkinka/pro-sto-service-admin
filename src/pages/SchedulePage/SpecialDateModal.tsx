@@ -76,8 +76,29 @@ const SpecialDateModal: React.FC<SpecialDateModalProps> = ({
     setSelectedDate(day);
   };
 
+  const isValidTimeSlot = (time: string): boolean => {
+    const [hours, minutes] = time.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return false;
+    
+    // Проверяем кратность 15 минутам
+    return minutes % 15 === 0;
+  };
+
   const handleSave = () => {
     if (!selectedDate) return;
+
+    // Валидация времени для сокращенного дня
+    if (dayType === 'shortened') {
+      if (!isValidTimeSlot(openTime)) {
+        alert('Время открытия должно быть кратно 15 минутам (например: 09:00, 09:15, 09:30, 09:45)');
+        return;
+      }
+
+      if (!isValidTimeSlot(closeTime)) {
+        alert('Время закрытия должно быть кратно 15 минутам (например: 18:00, 18:15, 18:30, 18:45)');
+        return;
+      }
+    }
 
     onSave({
       date: selectedDate,

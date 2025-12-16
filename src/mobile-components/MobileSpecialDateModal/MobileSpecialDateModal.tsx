@@ -94,6 +94,14 @@ const MobileSpecialDateModal: React.FC<MobileSpecialDateModalProps> = ({
     setIsTypeDropdownOpen(false);
   };
 
+  const isValidTimeSlot = (time: string): boolean => {
+    const [hours, minutes] = time.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return false;
+    
+    // Проверяем кратность 15 минутам
+    return minutes % 15 === 0;
+  };
+
   const handleSave = async () => {
     // Валидация
     if (!selectedDate) {
@@ -111,6 +119,17 @@ const MobileSpecialDateModal: React.FC<MobileSpecialDateModalProps> = ({
     if (dayType === 'shortened') {
       if (!openTime || !closeTime) {
         setError('Заполните время работы');
+        return;
+      }
+
+      // Валидация времени на кратность 15 минутам
+      if (!isValidTimeSlot(openTime)) {
+        setError('Время открытия должно быть кратно 15 минутам (например: 09:00, 09:15, 09:30, 09:45)');
+        return;
+      }
+
+      if (!isValidTimeSlot(closeTime)) {
+        setError('Время закрытия должно быть кратно 15 минутам (например: 18:00, 18:15, 18:30, 18:45)');
         return;
       }
 

@@ -1,6 +1,4 @@
 import React from 'react';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
 import type { AdminBookingResponseDto } from '../../../services/api-client';
 import './MobileBookingCard.css';
 
@@ -108,11 +106,6 @@ export const MobileBookingCard: React.FC<MobileBookingCardProps> = ({ booking, o
       onAddMore();
     }
   };
-
-  const startTime = new Date(booking.start_time);
-  const endTime = new Date(booking.end_time);
-
-  const timeRange = `${format(startTime, 'HH:mm', { locale: ru })} - ${format(endTime, 'HH:mm', { locale: ru })}`;
 
   return (
     <div 

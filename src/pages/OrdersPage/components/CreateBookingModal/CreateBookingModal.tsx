@@ -832,7 +832,7 @@ const CreateBookingModal = observer(({
         <div className="create-booking-modal__field-row">
           <div className="create-booking-modal__field">
             <AppDatePicker
-              label="Дата и время"
+              label="Дата"
               value={selectedDate}
               onChange={setSelectedDate}
               minDate={new Date(new Date().setHours(0, 0, 0, 0))}

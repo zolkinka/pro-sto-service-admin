@@ -630,7 +630,7 @@ export const MobileCreateBooking = observer(() => {
         <div className="mobile-create-booking__date-time-section">
           <div className="mobile-create-booking__date-field">
             <AppDatePicker
-              label="Дата и время"
+              label="Дата"
               value={selectedDate}
               onChange={setSelectedDate}
               minDate={new Date(new Date().setHours(0, 0, 0, 0))}

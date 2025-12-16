@@ -249,7 +249,9 @@ const OrdersPage = observer(() => {
 
   const visibleBookings = useMemo(() => {
     if (visibleServiceUuids.size === 0) return [];
-    return bookingsStore.bookings.filter((booking) => visibleServiceUuids.has(booking.service.uuid));
+    return bookingsStore.bookings.filter((booking) => 
+      visibleServiceUuids.has(booking.service.uuid) && booking.status !== 'cancelled'
+    );
   }, [bookingsStore.bookings, visibleServiceUuids]);
 
   return (

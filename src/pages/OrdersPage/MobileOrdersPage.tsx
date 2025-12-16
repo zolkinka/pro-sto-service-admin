@@ -228,6 +228,11 @@ export const MobileOrdersPage = observer(() => {
     const map = new Map<string, AdminBookingResponseDto[]>();
     
     bookingsStore.bookings.forEach((booking) => {
+      // Игнорируем отмененные бронирования
+      if (booking.status === 'cancelled') {
+        return;
+      }
+
       // Фильтруем по категории
       const businessType = serviceBusinessTypeMap.get(booking.service?.uuid || '');
       if (businessType !== uiCategory) {

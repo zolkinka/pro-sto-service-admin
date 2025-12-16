@@ -83,12 +83,26 @@ export const MobileBookingCard: React.FC<MobileBookingCardProps> = ({ booking, o
       return;
     }
 
-    // Иначе это клик
+    // Проверяем, не был ли клик на кнопке добавления
+    const target = e.target as HTMLElement;
+    if (target.closest('.mobile-booking-card__add-button')) {
+      setTouchStart(null);
+      return;
+    }
+
+    // Иначе это клик на карточке
     onClick(booking.uuid);
     setTouchStart(null);
   };
 
   const handleAddMoreClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAddMore) {
+      onAddMore();
+    }
+  };
+
+  const handleAddMoreTouch = (e: React.TouchEvent) => {
     e.stopPropagation();
     if (onAddMore) {
       onAddMore();
@@ -119,6 +133,7 @@ export const MobileBookingCard: React.FC<MobileBookingCardProps> = ({ booking, o
         <button
           className="mobile-booking-card__add-button"
           onClick={handleAddMoreClick}
+          onTouchEnd={handleAddMoreTouch}
           aria-label="Добавить еще одну запись"
           type="button"
         >

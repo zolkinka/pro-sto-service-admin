@@ -248,8 +248,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
     // Рассчитываем top позицию относительно начала рабочего дня
     const startHour = startTime.getHours();
-    const startMinute = startTime.getMinutes();
-    const minutesFromStart = (startHour - workingHours.start) * 60 + startMinute;
+    // В режиме 'week' игнорируем минуты для позиционирования,
+    // чтобы все карточки в пределах одного часа отображались на одной высоте
+    const minutesFromStart = (startHour - workingHours.start) * 60;
     // Добавляем отступ сверху (CARD_PADDING) для визуального отделения от линии
     const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
 

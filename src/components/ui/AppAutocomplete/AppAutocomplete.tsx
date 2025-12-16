@@ -140,7 +140,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   }, [debouncedInputValue, onSearch, minSearchLength, value]);
 
   // Обработчик изменения инпута
-  const handleInputChange = useCallback((newValue: string) => {
+  const handleInputChange = useCallback((newValue: string, event?: React.ChangeEvent<HTMLInputElement>) => {
     // Если используется маска, ПОЛНОСТЬЮ ИГНОРИРУЕМ это событие
     // т.к. всё будет обработано в handleMaskAccept
     if (mask) {
@@ -148,7 +148,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     }
     
     // Если есть кастомная валидация через onInputChange, применяем её
-    const validatedValue = onInputChange ? onInputChange(newValue) : newValue;
+    const validatedValue = onInputChange ? onInputChange(newValue, event) : newValue;
     
     setInputValue(validatedValue);
     setHighlightedIndex(-1);

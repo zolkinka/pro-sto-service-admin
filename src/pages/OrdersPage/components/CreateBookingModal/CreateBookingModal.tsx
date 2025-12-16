@@ -719,7 +719,12 @@ const CreateBookingModal = observer(({
               onChange={handleClientSelect}
               minSearchLength={3}
               searchDebounce={300}
-              onInputChange={(value) => {
+              onInputChange={(value, event) => {
+                // Сохраняем позицию курсора перед форматированием
+                const input = event?.target as HTMLInputElement;
+                const cursorPos = input?.selectionStart || 0;
+                const oldValue = input?.value || '';
+                
                 // Извлекаем только цифры
                 const digitsOnly = value.replace(/\D/g, '');
                 
@@ -730,7 +735,35 @@ const CreateBookingModal = observer(({
                 const limitedDigits = fullDigits.slice(0, 11);
                 
                 // Форматируем используя нашу функцию
-                return formatPhoneWithMask(limitedDigits);
+                const formatted = formatPhoneWithMask(limitedDigits);
+                
+                // Вычисляем новую позицию курсора
+                // Считаем сколько цифр было до курсора в старом значении
+                const digitsBeforeCursor = oldValue.slice(0, cursorPos).replace(/\D/g, '').length;
+                
+                // Находим позицию в новом значении, где будет столько же цифр
+                let newCursorPos = 0;
+                let digitCount = 0;
+                for (let i = 0; i < formatted.length; i++) {
+                  if (/\d/.test(formatted[i])) {
+                    digitCount++;
+                    if (digitCount >= digitsBeforeCursor) {
+                      newCursorPos = i + 1;
+                      break;
+                    }
+                  } else {
+                    newCursorPos = i + 1;
+                  }
+                }
+                
+                // Устанавливаем курсор в новую позицию после рендера
+                if (input) {
+                  setTimeout(() => {
+                    input.setSelectionRange(newCursorPos, newCursorPos);
+                  }, 0);
+                }
+                
+                return formatted;
               }}
             />
           </div>

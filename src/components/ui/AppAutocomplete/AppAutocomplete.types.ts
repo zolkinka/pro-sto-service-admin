@@ -29,6 +29,8 @@ export interface AppAutocompleteProps {
   minSearchLength?: number;
   /** Задержка debounce для асинхронного поиска в миллисекундах (по умолчанию 300) */
   searchDebounce?: number;
+  /** Функция валидации/трансформации ввода (возвращает валидное значение) */
+  onInputChange?: (value: string) => string;
   
   // UI
   /** Label над полем */

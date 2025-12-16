@@ -54,7 +54,7 @@ const CreateBookingModal = observer(({
   const { servicesStore, toastStore, authStore } = useStores();
 
   // Form state
-  const [phone, setPhone] = useState('+7'); // Храним введенный телефон
+  const [phone, setPhone] = useState('+7');
   const [licensePlate, setLicensePlate] = useState('');
   const [selectedMake, setSelectedMake] = useState<SelectOption | null>(null);
   const [selectedModel, setSelectedModel] = useState<SelectOption | null>(null);
@@ -309,6 +309,33 @@ const CreateBookingModal = observer(({
       }));
   }, [servicesStore.additionalServices]);
 
+  // Вспомогательная функция для форматирования телефона: +7 (000) 000 00 00
+  const formatPhoneWithMask = (phone: string): string => {
+    // Извлекаем только цифры
+    const digits = phone.replace(/\D/g, '');
+    
+    // Добавляем код страны если его нет
+    const fullDigits = digits.startsWith('7') ? digits : `7${digits}`;
+    
+    // Ограничиваем максимум 11 цифр
+    const limitedDigits = fullDigits.slice(0, 11);
+    
+    // Форматируем: +7 (XXX) XXX XX XX
+    if (limitedDigits.length >= 11) {
+      return `+7 (${limitedDigits.slice(1, 4)}) ${limitedDigits.slice(4, 7)} ${limitedDigits.slice(7, 9)} ${limitedDigits.slice(9, 11)}`;
+    } else if (limitedDigits.length >= 9) {
+      return `+7 (${limitedDigits.slice(1, 4)}) ${limitedDigits.slice(4, 7)} ${limitedDigits.slice(7)}`;
+    } else if (limitedDigits.length >= 7) {
+      return `+7 (${limitedDigits.slice(1, 4)}) ${limitedDigits.slice(4)}`;
+    } else if (limitedDigits.length >= 4) {
+      return `+7 (${limitedDigits.slice(1)}`;
+    } else if (limitedDigits.length >= 1) {
+      return `+7 ${limitedDigits.slice(1)}`;
+    }
+    
+    return '+7';
+  };
+
   // Функция поиска клиентов по номеру телефона
   const searchClients = useCallback(async (phoneQuery: string): Promise<AutocompleteOption[]> => {
     console.log('🔍 searchClients called:', { phoneQuery });
@@ -334,15 +361,11 @@ const CreateBookingModal = observer(({
       const results = await adminSearchClients({ phone: searchDigits, limit: 10 });
       
       return results.map((client: ClientSearchResultDto) => ({
-        // label для отображения в списке - с именем
-        label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
-        // displayLabel для инпута после выбора - только телефон
-        displayLabel: client.phone,
+        label: `${formatPhoneWithMask(client.phone)}${client.name ? ` (${client.name})` : ''}`,
         value: client.uuid,
         isCustom: false,
-        // Сохраняем оригинальные данные для последующего использования
         rawData: client,
-      } as AutocompleteOption & { rawData: ClientSearchResultDto; displayLabel?: string }));
+      } as AutocompleteOption & { rawData: ClientSearchResultDto }));
     } catch (error) {
       console.error('Failed to search clients:', error);
       toastStore.showError('Не удалось выполнить поиск клиентов');
@@ -353,10 +376,10 @@ const CreateBookingModal = observer(({
   // Обработчик выбора клиента из автокомплита
   const handleClientSelect = useCallback(async (option: AutocompleteOption) => {
     console.log('👤 handleClientSelect called:', { option });
-    setPhoneAutocompleteValue(option);
     
     if (option.isCustom || !option.value) {
       // Пользователь ввел новый номер (не из списка)
+      setPhoneAutocompleteValue(option);
       setSelectedClient(null);
       setClientName('');
       setClientCarsOptions([]); // Очищаем список автомобилей
@@ -373,7 +396,10 @@ const CreateBookingModal = observer(({
       console.log('👤 Setting client name to:', clientData.name);
       setSelectedClient(clientData);
       setClientName(clientData.name ? String(clientData.name) : '');
-      setPhone(clientData.phone);
+      
+      const formattedPhone = formatPhoneWithMask(clientData.phone);
+      setPhoneAutocompleteValue({ ...option, label: formattedPhone });
+      setPhone(formattedPhone);
       
       // Сразу загружаем автомобили выбранного клиента
       try {
@@ -687,12 +713,25 @@ const CreateBookingModal = observer(({
           <div className="create-booking-modal__field">
             <AppAutocomplete
               label="Номер телефона"
-              placeholder="+7"
+              placeholder="+7 (000) 000 00 00"
               value={phoneAutocompleteValue}
               onSearch={searchClients}
               onChange={handleClientSelect}
               minSearchLength={3}
               searchDebounce={300}
+              onInputChange={(value) => {
+                // Извлекаем только цифры
+                const digitsOnly = value.replace(/\D/g, '');
+                
+                // Добавляем код страны если его нет
+                const fullDigits = digitsOnly.startsWith('7') ? digitsOnly : `7${digitsOnly}`;
+                
+                // Ограничиваем максимум 11 цифр
+                const limitedDigits = fullDigits.slice(0, 11);
+                
+                // Форматируем используя нашу функцию
+                return formatPhoneWithMask(limitedDigits);
+              }}
             />
           </div>
 

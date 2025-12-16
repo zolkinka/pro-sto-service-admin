@@ -45,6 +45,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   onSearch,
   minSearchLength = 2,
   searchDebounce = 300,
+  onInputChange,
   label,
   placeholder = 'Введите значение...',
   error,
@@ -72,10 +73,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<AppInputRef>(null);
   const mobileInputRef = useRef<AppInputRef>(null);
-  // Флаг для предотвращения повторного вызова onChange в handleDropdownClose после выбора
-  const justSelectedRef = useRef(false);
-  // Флаг для предотвращения поиска после выбора опции
-  const isSelectingRef = useRef(false);
   // Флаг для предотвращения закрытия dropdown при клике на контейнер
   const justOpenedRef = useRef(false);
 
@@ -88,10 +85,7 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
       setInputValue('');
       return;
     }
-
-    // Используем displayLabel если он есть (для масок), иначе label
-    const valueToDisplay = (value as SelectOption & { displayLabel?: string }).displayLabel || value.label;
-    setInputValue(valueToDisplay);
+    setInputValue(value.label);
   }, [value]);
 
   // Определяем активный список опций
@@ -123,25 +117,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
   useEffect(() => {
     if (!onSearch) return;
     
-    // Если сейчас происходит выбор опции, пропускаем поиск
-    if (isSelectingRef.current) {
-      // НЕ сбрасываем флаг здесь - он будет сброшен в следующем цикле
-      return;
-    }
-    
-    // Если debouncedInputValue совпадает с displayLabel выбранного value,
-    // значит это результат синхронизации после выбора, а не пользовательский ввод
-    if (value && (value as SelectOption & { displayLabel?: string }).displayLabel) {
-      const displayLabel = (value as SelectOption & { displayLabel?: string }).displayLabel!;
-      // Убираем все символы кроме цифр и +
-      const normalizedDebounced = debouncedInputValue.replace(/[^\d+]/g, '');
-      const normalizedDisplay = displayLabel.replace(/[^\d+]/g, '');
-      
-      if (normalizedDebounced === normalizedDisplay) {
-        return;
-      }
-    }
-    
     if (debouncedInputValue.length < minSearchLength) {
       setAsyncOptions([]);
       setIsLoading(false);
@@ -172,38 +147,35 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
       return;
     }
     
-    setInputValue(newValue);
+    // Если есть кастомная валидация через onInputChange, применяем её
+    const validatedValue = onInputChange ? onInputChange(newValue) : newValue;
+    
+    setInputValue(validatedValue);
     setHighlightedIndex(-1);
     
     // Открываем dropdown при вводе ТОЛЬКО если он закрыт
     // Это предотвращает повторные setIsOpen(true) при уже открытом dropdown
-    if (newValue.length > 0 && !isOpen) {
+    if (validatedValue.length > 0 && !isOpen) {
       setIsOpen(true);
     }
 
     // Если очистили поле, вызываем onChange с пустым кастомным значением
-    if (newValue === '') {
+    if (validatedValue === '') {
       onChange?.({ label: '', value: null, isCustom: true });
     }
-  }, [isOpen, onChange, mask]);
+  }, [isOpen, onChange, mask, onInputChange]);
   
   // Обработчик onAccept для маски
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMaskAccept = useCallback((maskedValue: string, maskRef: any) => {
-    // Если сейчас происходит выбор опции, пропускаем обновление inputValue
-    // Это предотвращает открытие dropdown после программного обновления маски
-    if (isSelectingRef.current) {
-      // НЕ сбрасываем флаг здесь - он будет сброшен через setTimeout в handleSelect
-      // Вызываем оригинальный onAccept если он передан
-      onAccept?.(maskedValue, maskRef);
-      return;
-    }
-    
     // Обновляем inputValue только если значение изменилось
     if (maskedValue !== inputValue) {
       setInputValue(maskedValue);
     }
     setHighlightedIndex(-1);
+    
+    // Вызываем оригинальный onAccept если он передан
+    onAccept?.(maskedValue, maskRef);
     
     // Открываем dropdown при вводе ТОЛЬКО если он закрыт
     // Это предотвращает повторные setIsOpen(true) при уже открытом dropdown
@@ -213,40 +185,26 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     
     // Вызываем оригинальный onAccept если он передан
     onAccept?.(maskedValue, maskRef);
-  }, [inputValue, isOpen, onAccept]);
+  }, [inputValue, isOpen, onAccept, unmask]);
 
   // Обработчик выбора опции
   const handleSelect = useCallback((selectedOption: SelectOption) => {
-    // Устанавливаем флаг что сейчас происходит выбор (предотвращаем поиск)
-    isSelectingRef.current = true;
-    
-    // Используем displayLabel если он есть (для масок), иначе label
-    const valueToDisplay = (selectedOption as SelectOption & { displayLabel?: string }).displayLabel || selectedOption.label;
-    
     // Устанавливаем inputValue немедленно для отзывчивости UI
-    setInputValue(valueToDisplay);
+    setInputValue(selectedOption.label);
     
     // Вызываем onChange чтобы родитель обновил value prop
     onChange?.(selectedOption);
     setIsOpen(false);
     setHighlightedIndex(-1);
     
-    // Устанавливаем флаг что только что выбрали опцию
-    justSelectedRef.current = true;
-    
-    // Сбрасываем isSelectingRef через 500ms после того как все useEffect отработают
-    // (больше чем searchDebounce, чтобы гарантировать что debounced значение не вызовет поиск)
-    setTimeout(() => {
-      isSelectingRef.current = false;
-    }, 500);
-    
-    // Если используется маска, обновляем maskKey в AppInput
-    // после того как React обновит value prop
-    if (mask && inputRef.current) {
-      setTimeout(() => {
-        inputRef.current?.updateMaskKey();
-      }, 50); // Задержка для обновления props
-    }
+    // ВРЕМЕННО ОТКЛЮЧЕНО: Не обновляем maskKey при выборе опции
+    // Это может сбрасывать значение в инпуте, который уже был установлен выше
+    // Маска будет обновлена естественным путем через value prop
+    // if (mask && inputRef.current && !hasDisplayLabel) {
+    //   setTimeout(() => {
+    //     inputRef.current?.updateMaskKey();
+    //   }, 50);
+    // }
   }, [onChange, mask]);
 
   // Обработчик клика на контейнер - открываем dropdown
@@ -274,12 +232,6 @@ export const AppAutocomplete: React.FC<AppAutocompleteProps> = ({
     
     setIsOpen(false);
     setHighlightedIndex(-1);
-    
-    // Если только что выбрали опцию, не обрабатываем значение
-    if (justSelectedRef.current) {
-      justSelectedRef.current = false;
-      return;
-    }
     
     // Сохраняем значение инпута при закрытии
     if (inputValue !== '') {

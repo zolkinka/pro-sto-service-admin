@@ -105,6 +105,17 @@ export class ServicesStore {
   }
 
   /**
+   * Геттер для доступных категорий (на основе имеющихся услуг)
+   */
+  get availableCategories(): Array<'car_wash' | 'tire_service'> {
+    const categories = new Set<'car_wash' | 'tire_service'>();
+    this.services.forEach(service => {
+      categories.add(service.business_type);
+    });
+    return Array.from(categories);
+  }
+
+  /**
    * Геттер для основных услуг текущей категории
    */
   get mainServices(): ServiceDto[] {

@@ -14,6 +14,7 @@ interface CalendarHeaderProps {
   serviceCategory: ServiceCategory;
   onServiceCategoryChange: (category: ServiceCategory) => void;
   onAddBooking: () => void;
+  availableCategories: ServiceCategory[];
 }
 
 const ClockIcon: React.FC = () => (
@@ -81,6 +82,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   serviceCategory,
   onServiceCategoryChange,
   onAddBooking,
+  availableCategories,
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -136,23 +138,28 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               <PlusIcon />
             </span>
           </button>
-
-          <div className="calendar-header__service-tabs" aria-label="Тип сервиса">
-            <button
-              className={`calendar-header__service-tab ${serviceCategory === 'car_wash' ? 'calendar-header__service-tab_active' : ''}`}
-              onClick={() => onServiceCategoryChange('car_wash')}
-              type="button"
-            >
-              Мойка
-            </button>
-            <button
-              className={`calendar-header__service-tab ${serviceCategory === 'tire_service' ? 'calendar-header__service-tab_active' : ''}`}
-              onClick={() => onServiceCategoryChange('tire_service')}
-              type="button"
-            >
-              Шиномонтаж
-            </button>
-          </div>
+{availableCategories.length > 1 && (
+            <div className="calendar-header__service-tabs" aria-label="Тип сервиса">
+              {availableCategories.includes('car_wash') && (
+                <button
+                  className={`calendar-header__service-tab ${serviceCategory === 'car_wash' ? 'calendar-header__service-tab_active' : ''}`}
+                  onClick={() => onServiceCategoryChange('car_wash')}
+                  type="button"
+                >
+                  Мойка
+                </button>
+              )}
+              {availableCategories.includes('tire_service') && (
+                <button
+                  className={`calendar-header__service-tab ${serviceCategory === 'tire_service' ? 'calendar-header__service-tab_active' : ''}`}
+                  onClick={() => onServiceCategoryChange('tire_service')}
+                  type="button"
+                >
+                  Шиномонтаж
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="calendar-header__time">
             <ClockIcon />

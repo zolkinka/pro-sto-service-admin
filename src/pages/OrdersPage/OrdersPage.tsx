@@ -182,6 +182,14 @@ const OrdersPage = observer(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate, viewMode, authStore.user?.service_center_uuid, isInitialized]);
 
+  // Автоматический выбор категории, если доступна только одна
+  useEffect(() => {
+    const available = servicesStore.availableCategories;
+    if (available.length === 1 && available[0] !== servicesStore.activeCategory) {
+      servicesStore.setActiveCategory(available[0]);
+    }
+  }, [servicesStore]);
+
   // Обработка query параметров для открытия бронирования
   useEffect(() => {
     const bookingParam = searchParams.get('booking');
@@ -265,6 +273,7 @@ const OrdersPage = observer(() => {
           serviceCategory={servicesStore.activeCategory}
           onServiceCategoryChange={(category) => servicesStore.setActiveCategory(category)}
           onAddBooking={handleAddBookingClick}
+          availableCategories={servicesStore.availableCategories}
         />
 
         {selectedBooking && (

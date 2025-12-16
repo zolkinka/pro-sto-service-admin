@@ -97,6 +97,27 @@
   position: relative;
   flex: 1;
   isolation: isolate; /* Создаём новый контекст наложения */
+  overflow-x: auto; /* Горизонтальная прокрутка для режима day */
+  overflow-y: hidden;
+}
+
+/* Webkit scrollbar styling для горизонтального скролла */
+.calendar-grid__days-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.calendar-grid__days-container::-webkit-scrollbar-track {
+  background: #F9F8F5;
+  border-radius: 10px;
+}
+
+.calendar-grid__days-container::-webkit-scrollbar-thumb {
+  background: #EFEEEB;
+  border-radius: 10px;
+}
+
+.calendar-grid__days-container::-webkit-scrollbar-thumb:hover {
+  background: #E4E3E0;
 }
 
 /* Фоновые колонки для дней */

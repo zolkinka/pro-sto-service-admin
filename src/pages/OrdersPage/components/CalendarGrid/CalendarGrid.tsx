@@ -303,6 +303,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   // В режиме 'day' группируем бронирования по часам для добавления плейсхолдеров
   const bookingsByHour: { [hour: number]: BookingWithPosition[] } = {};
+  let maxCardsInHour = 0; // максимальное количество карточек (включая плейсхолдер) в одном часовом слоте
+  
   if (viewMode === 'day') {
     bookingsWithPositions.forEach((booking) => {
       const startTime = new Date(booking.start_time);
@@ -312,6 +314,22 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         bookingsByHour[hour] = [];
       }
       bookingsByHour[hour].push(booking);
+    });
+    
+    // Рассчитываем максимальное количество карточек в одном часовом слоте
+    // Учитываем как существующие бронирования, так и плейсхолдеры
+    hours.forEach((hour) => {
+      const isAvailable = availableSlots[0]?.[hour] === true;
+      if (!isAvailable) return;
+      
+      const slotDateTime = new Date(currentDate || new Date());
+      slotDateTime.setHours(hour, 0, 0, 0);
+      const isPast = slotDateTime < new Date();
+      if (isPast) return;
+      
+      const hourBookingsCount = bookingsByHour[hour]?.length || 0;
+      const cardsCount = hourBookingsCount + 1; // +1 для плейсхолдера
+      maxCardsInHour = Math.max(maxCardsInHour, cardsCount);
     });
   }
 
@@ -480,7 +498,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
               {/* Карточки заказов */}
               <div 
                 className="calendar-grid__bookings"
-                style={{ height: `${bookingsHeight}px` }}
+                style={{
+                  height: `${bookingsHeight}px`,
+                  // В режиме day устанавливаем минимальную ширину для горизонтальной прокрутки
+                  minWidth: viewMode === 'day' && maxCardsInHour > 0
+                    ? `${maxCardsInHour * (DAY_MODE_CARD_WIDTH + DAY_MODE_CARD_GAP)}px`
+                    : undefined,
+                }}
               >
                 {viewMode === 'day' ? (
                   // В режиме 'day' показываем все карточки горизонтально

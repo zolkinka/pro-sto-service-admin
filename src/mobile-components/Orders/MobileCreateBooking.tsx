@@ -633,7 +633,7 @@ export const MobileCreateBooking = observer(() => {
               label="Дата и время"
               value={selectedDate}
               onChange={setSelectedDate}
-              minDate={new Date()}
+              minDate={new Date(new Date().setHours(0, 0, 0, 0))}
             />
           </div>
 

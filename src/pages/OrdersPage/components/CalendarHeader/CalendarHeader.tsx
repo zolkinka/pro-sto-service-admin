@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { format, isSameDay, addDays, startOfWeek } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { NewBookingBanner } from '@/components/NewBookingBanner';
 import './CalendarHeader.css';
 
 type ServiceCategory = 'car_wash' | 'tire_service';
@@ -15,6 +16,8 @@ interface CalendarHeaderProps {
   onServiceCategoryChange: (category: ServiceCategory) => void;
   onAddBooking: () => void;
   availableCategories: ServiceCategory[];
+  pendingBookingsCount?: number;
+  onPendingBookingsClick?: () => void;
 }
 
 const ClockIcon: React.FC = () => (
@@ -82,6 +85,8 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   serviceCategory,
   onServiceCategoryChange,
   onAddBooking,
+  pendingBookingsCount = 0,
+  onPendingBookingsClick,
   availableCategories,
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -127,17 +132,24 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
     <>
       <div className="calendar-header">
         <div className="calendar-header__left">
-          <button
-            className="calendar-header__add"
-            onClick={onAddBooking}
-            type="button"
-            aria-label="Добавить запись"
-          >
-            <span className="calendar-header__add-text">Добавить запись</span>
-            <span className="calendar-header__add-icon" aria-hidden="true">
-              <PlusIcon />
-            </span>
-          </button>
+          {pendingBookingsCount > 0 && onPendingBookingsClick ? (
+            <NewBookingBanner
+              count={pendingBookingsCount}
+              onClick={onPendingBookingsClick}
+            />
+          ) : (
+            <button
+              className="calendar-header__add"
+              onClick={onAddBooking}
+              type="button"
+              aria-label="Добавить запись"
+            >
+              <span className="calendar-header__add-text">Добавить запись</span>
+              <span className="calendar-header__add-icon" aria-hidden="true">
+                <PlusIcon />
+              </span>
+            </button>
+          )}
 {availableCategories.length > 1 && (
             <div className="calendar-header__service-tabs" aria-label="Тип сервиса">
               {availableCategories.includes('car_wash') && (

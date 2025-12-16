@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { startOfWeek, format, parse } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
-import { useStores } from '@/hooks';
+import { useStores, usePendingBookings } from '@/hooks';
 import { getWorkingHoursRangeForWeek } from '@/utils/scheduleHelpers';
 import CalendarHeader from './components/CalendarHeader/CalendarHeader';
 import CalendarGrid from './components/CalendarGrid/CalendarGrid';
@@ -23,6 +23,7 @@ const parseDateFromUrl = (dateStr: string): Date | null => {
 
 const OrdersPage = observer(() => {
   const { bookingsStore, authStore, servicesStore, operatingHoursStore } = useStores();
+  const { pendingCount, openModal } = usePendingBookings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -274,6 +275,8 @@ const OrdersPage = observer(() => {
           onServiceCategoryChange={(category) => servicesStore.setActiveCategory(category)}
           onAddBooking={handleAddBookingClick}
           availableCategories={servicesStore.availableCategories}
+          pendingBookingsCount={pendingCount}
+          onPendingBookingsClick={openModal}
         />
 
         {selectedBooking && (

@@ -1,9 +1,15 @@
 import { useLocation } from 'react-router-dom';
 import { AppNavigation } from './AppNavigation';
 import type { TabId } from './AppNavigation';
+import { NewBookingBanner } from '@/components/NewBookingBanner';
 import './Header.css';
 
-const Header = () => {
+interface HeaderProps {
+  pendingBookingsCount?: number;
+  onPendingBookingsClick?: () => void;
+}
+
+const Header = ({ pendingBookingsCount = 0, onPendingBookingsClick }: HeaderProps) => {
   const location = useLocation();
 
   const getActiveTab = (): TabId => {
@@ -14,6 +20,9 @@ const Header = () => {
     return 'services';
   };
 
+  const isOrdersPage = location.pathname.includes('/orders');
+  const showBanner = !isOrdersPage && pendingBookingsCount > 0 && onPendingBookingsClick;
+
   return (
     <header className="header">
       <div className="header__content">
@@ -22,7 +31,14 @@ const Header = () => {
         <AppNavigation activeTab={getActiveTab()} />
 
         <div className="header__user-section">
-          <div className="header__user-avatar">A</div>
+          {showBanner ? (
+            <NewBookingBanner
+              count={pendingBookingsCount}
+              onClick={onPendingBookingsClick}
+            />
+          ) : (
+            <div className="header__user-avatar">A</div>
+          )}
         </div>
       </div>
     </header>

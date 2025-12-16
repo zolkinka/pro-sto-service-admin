@@ -1,0 +1,47 @@
+.new-booking-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: #0AB878;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  user-select: none;
+  min-height: 54px;
+}
+
+.new-booking-banner:hover {
+  opacity: 0.9;
+}
+
+.new-booking-banner:active {
+  opacity: 0.8;
+}
+
+.new-booking-banner__icon {
+  width: 20px;
+  height: 20px;
+  color: #FFFFFF;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-booking-banner__text {
+  font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.new-booking-banner__arrow {
+  width: 20px;
+  height: 20px;
+  color: #FFFFFF;
+  flex-shrink: 0;
+}

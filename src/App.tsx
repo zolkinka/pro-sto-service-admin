@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ToastProvider, useToast } from '@/components/ui/AppToast';
 import { toastStore } from '@/stores/ToastStore';
+import { PendingBookingsProvider } from '@/hooks/usePendingBookings';
 import { PendingBookingsChecker } from '@/components/PendingBookingsChecker';
 import AppRouter from '@/router';
 
@@ -21,8 +22,10 @@ const App = observer(() => {
   return (
     <ToastProvider position="top-right" maxToasts={3}>
       <ToastInitializer />
-      <PendingBookingsChecker />
-      <AppRouter />
+      <PendingBookingsProvider>
+        <PendingBookingsChecker />
+        <AppRouter />
+      </PendingBookingsProvider>
     </ToastProvider>
   );
 });

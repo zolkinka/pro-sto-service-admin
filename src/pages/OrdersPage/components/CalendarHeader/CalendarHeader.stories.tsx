@@ -28,8 +28,7 @@ const CalendarHeaderWithState = () => {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         serviceCategory={serviceCategory}
-        onServiceCategoryChange={setServiceCategory}
-        onAddBooking={() => console.log('Add booking')}
+        onServiceCategoryChange={setServiceCategory}        availableCategories={['car_wash', 'tire_service']}        onAddBooking={() => console.log('Add booking')}
       />
     </div>
   );

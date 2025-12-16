@@ -1,6 +1,7 @@
 import React from 'react';
 import AppHeader from '../../Layout/AppHeader';
 import { useActiveTab } from '../../../hooks';
+import { usePendingBookings } from '@/hooks/usePendingBookings';
 import './AppLayout.css';
 
 interface AppLayoutProps {
@@ -10,10 +11,15 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   // Используем хук для определения активного таба по текущему пути
   const activeTab = useActiveTab();
+  const { pendingCount, openModal } = usePendingBookings();
   
   return (
     <div className="app-layout">
-      <AppHeader activeTab={activeTab} />
+      <AppHeader 
+        activeTab={activeTab} 
+        pendingBookingsCount={pendingCount}
+        onPendingBookingsClick={openModal}
+      />
       <main className="app-layout__content">
         {children}
       </main>

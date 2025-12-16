@@ -200,11 +200,9 @@ const ViewBookingModal = observer(({
         <AppTag size="M" color={statusConfig.color}>
           {statusConfig.label}
         </AppTag>
-        {!showAsNewBooking && (
-          <button className="view-booking-modal__close" onClick={handleClose} aria-label="Закрыть">
-            ×
-          </button>
-        )}
+        <button className="view-booking-modal__close" onClick={handleClose} aria-label="Закрыть">
+          ×
+        </button>
       </div>
 
       <div className="view-booking-modal__content">

@@ -106,17 +106,12 @@ export const MobileBookingCard: React.FC<MobileBookingCardProps> = ({ booking, o
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="mobile-booking-card__header">
-        <div className="mobile-booking-card__service-name">
-          {booking.service?.name || 'Услуга'}
-        </div>
-        <div className={`mobile-booking-card__status ${getStatusTextColorClass(booking.status)}`}>
-          {getStatusText(booking.status)}
-        </div>
+      <div className="mobile-booking-card__service-name">
+        {booking.service?.name || 'Услуга'}
       </div>
       
-      <div className="mobile-booking-card__time">
-        {timeRange}
+      <div className={`mobile-booking-card__status ${getStatusTextColorClass(booking.status)}`}>
+        {getStatusText(booking.status)}
       </div>
 
       {/* Кнопка "+" для добавления дополнительной записи */}

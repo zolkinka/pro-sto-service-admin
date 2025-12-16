@@ -435,6 +435,15 @@ export const MobileOrdersPage = observer(() => {
                 // Проверяем, доступен ли слот для добавления новых бронирований
                 const isSlotAvailable = availableSlots[hours] === true;
                 
+                // Проверяем, является ли это рабочим часом (есть ли в timeSlots)
+                const isWorkingHour = timeSlots.includes(timeSlot);
+                
+                // Есть ли уже бронирования в этом слоте
+                const hasBookingsInSlot = bookings.length > 0;
+                
+                // Можно добавить бронирование, если слот доступен ИЛИ (это рабочий час И есть бронирования)
+                const canAddMore = (isSlotAvailable || (isWorkingHour && hasBookingsInSlot)) && !isPast;
+                
                 return (
                   <MobileBookingSlot
                     key={timeSlot}
@@ -443,7 +452,7 @@ export const MobileOrdersPage = observer(() => {
                     onBookingClick={handleBookingClick}
                     onSlotClick={() => handleSlotClick(timeSlot)}
                     isPast={isPast}
-                    canAddMore={isSlotAvailable && !isPast}
+                    canAddMore={canAddMore}
                   />
                 );
               })

@@ -73,16 +73,27 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   // Состояние для ширины одной колонки дня
   const [dayColumnWidth, setDayColumnWidth] = useState<number>(DAY_COLUMN_WIDTH);
 
+  // Определяем диапазон часов для отображения
+  // Учитываем как рабочие часы, так и фактические бронирования
+  let minHour = workingHours.start;
+  let maxHour = workingHours.end;
+  
+  // Расширяем диапазон, если есть бронирования вне рабочих часов
+  bookings.forEach((booking) => {
+    const startTime = new Date(booking.start_time);
+    const endTime = new Date(booking.end_time);
+    const startHour = startTime.getHours();
+    const endHour = endTime.getHours();
+    
+    minHour = Math.min(minHour, startHour);
+    maxHour = Math.max(maxHour, endHour);
+  });
+  
   // Генерируем массив часов для отображения
   const hours: number[] = [];
-  for (let hour = workingHours.start; hour <= workingHours.end; hour++) {
+  for (let hour = minHour; hour <= maxHour; hour++) {
     hours.push(hour);
   }
-  
-  // DEBUG: Логируем для отладки позиционирования
-  console.log('[CalendarGrid] workingHours:', workingHours);
-  console.log('[CalendarGrid] hours array:', hours);
-  console.log('[CalendarGrid] viewMode:', viewMode);
 
   // Функция для загрузки слотов для всей недели или одного дня
   const loadAvailableSlots = useCallback(async () => {
@@ -225,7 +236,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       // В режиме дня dayIndex будет использоваться как порядковый номер карточки в строке
       const startHour = startTime.getHours();
       const startMinute = startTime.getMinutes();
-      const minutesFromStart = (startHour - workingHours.start) * 60 + startMinute;
+      const minutesFromStart = (startHour - minHour) * 60 + startMinute;
       const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
       const height = PIXELS_PER_HOUR - (CARD_PADDING * 2);
 
@@ -251,24 +262,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       return null;
     }
 
-    // Рассчитываем top позицию относительно начала рабочего дня
+    // Рассчитываем top позицию относительно начала отображаемого диапазона
     const startHour = startTime.getHours();
     // В режиме 'week' игнорируем минуты для позиционирования,
     // чтобы все карточки в пределах одного часа отображались на одной высоте
-    const minutesFromStart = (startHour - workingHours.start) * 60;
+    const minutesFromStart = (startHour - minHour) * 60;
     // Добавляем отступ сверху (CARD_PADDING) для визуального отделения от линии
     const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
-
-    // DEBUG
-    if (booking.uuid.startsWith('1')) { // логируем только первое бронирование
-      console.log(`[CalendarGrid WEEK] Booking ${startTime.getHours()}:${startTime.getMinutes()}`,  {
-        startHour,
-        workingHoursStart: workingHours.start,
-        minutesFromStart,
-        top,
-        calculation: `(${startHour} - ${workingHours.start}) * 60 = ${minutesFromStart} -> ${minutesFromStart} * ${PIXELS_PER_MINUTE} + ${CARD_PADDING} = ${top}`
-      });
-    }
 
     // Высота карточки бронирования фиксирована - 70px согласно макету Figma
     const height = BOOKING_CARD_HEIGHT;

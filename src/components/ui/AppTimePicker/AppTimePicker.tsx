@@ -81,6 +81,54 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
     onChange?.(newValue);
   }, [onChange]);
 
+  // Валидация и корректировка времени
+  const validateAndCorrectTime = useCallback((timeValue: string): string => {
+    // Если поле пустое или некорректного формата - очищаем
+    if (!timeValue || timeValue.trim() === '' || timeValue === '00:00') {
+      return '';
+    }
+
+    // Парсим часы и минуты
+    const parts = timeValue.split(':');
+    if (parts.length !== 2) {
+      return ''; // Некорректный формат - очищаем
+    }
+
+    let hours = parseInt(parts[0], 10);
+    let minutes = parseInt(parts[1], 10);
+
+    // Проверяем на NaN
+    if (isNaN(hours) || isNaN(minutes)) {
+      return '';
+    }
+
+    // Корректируем часы (если больше 23, сбрасываем до 23)
+    if (hours > 23) {
+      hours = 23;
+    }
+
+    // Корректируем минуты (если больше 59, сбрасываем до 59)
+    if (minutes > 59) {
+      minutes = 59;
+    }
+
+    // Форматируем обратно в строку
+    const correctedHours = hours.toString().padStart(2, '0');
+    const correctedMinutes = minutes.toString().padStart(2, '0');
+    
+    return `${correctedHours}:${correctedMinutes}`;
+  }, []);
+
+  // Обработчик потери фокуса - валидируем время
+  const handleInputBlur = useCallback(() => {
+    if (value) {
+      const correctedValue = validateAndCorrectTime(value);
+      if (correctedValue !== value) {
+        onChange?.(correctedValue);
+      }
+    }
+  }, [value, onChange, validateAndCorrectTime]);
+
   // Обработчик клика по стрелке (открытие/закрытие dropdown)
   const handleArrowClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -166,6 +214,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
             disabled={disabled}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
             mask="00:00"
             lazy={false}
             placeholderChar="0"

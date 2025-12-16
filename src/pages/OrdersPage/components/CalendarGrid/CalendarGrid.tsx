@@ -562,13 +562,16 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
                       const width = dayColumnWidth;
                       
-                      // Проверяем, доступен ли слот для добавления нового заказа
+                      // Проверяем, можно ли добавить новое бронирование
+                      // Разрешаем добавление если: час в рабочем диапазоне И (есть слоты с сервера ИЛИ уже есть бронирования)
+                      const hasBookingsInSlot = slotBookings.length > 0;
                       const isSlotAvailable = availableSlots[dayIndex]?.[hour] === true;
+                      const isWorkingHour = hour >= workingHours.start && hour <= workingHours.end;
                       const slotDate = addDays(weekStart, dayIndex);
                       const slotDateTime = new Date(slotDate);
                       slotDateTime.setHours(hour, 0, 0, 0);
                       const isPast = slotDateTime < new Date();
-                      const canAddMore = isSlotAvailable && !isPast && onSlotClick;
+                      const canAddMore = (isSlotAvailable || (isWorkingHour && hasBookingsInSlot)) && !isPast && onSlotClick;
                       
                       // Используем компактную высоту если есть дополнительные заказы
                       const cardHeight = moreCount > 0 ? BOOKING_CARD_HEIGHT_COMPACT : BOOKING_CARD_HEIGHT;
@@ -648,11 +651,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
                 {/* Плейсхолдеры для добавления новых бронирований в режиме 'day' */}
                 {viewMode === 'day' && onSlotClick && currentDate && hours.map((hour, hourIndex) => {
-                  // Проверяем, доступен ли этот слот (работает ли сервис в этот час)
+                  // Проверяем, можно ли добавить бронирование в этот час
+                  // Разрешаем если: есть слоты с сервера ИЛИ (это рабочий час И уже есть бронирования)
+                  const hasBookingsInSlot = (bookingsByHour[hour]?.length || 0) > 0;
                   const isAvailable = availableSlots[0]?.[hour] === true;
+                  const isWorkingHour = hour >= workingHours.start && hour <= workingHours.end;
+                  const canShow = isAvailable || (isWorkingHour && hasBookingsInSlot);
                   
-                  // Не показываем плейсхолдер для недоступных слотов
-                  if (!isAvailable) {
+                  // Не показываем плейсхолдер если нельзя добавить
+                  if (!canShow) {
                     return null;
                   }
 

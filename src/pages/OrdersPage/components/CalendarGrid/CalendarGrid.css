@@ -312,7 +312,7 @@
   justify-content: center;
   background-color: #FEFDFA;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   color: #DFDFDF;
   cursor: pointer;
   transition: all var(--transition-fast);

@@ -78,6 +78,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   for (let hour = workingHours.start; hour <= workingHours.end; hour++) {
     hours.push(hour);
   }
+  
+  // DEBUG: Логируем для отладки позиционирования
+  console.log('[CalendarGrid] workingHours:', workingHours);
+  console.log('[CalendarGrid] hours array:', hours);
+  console.log('[CalendarGrid] viewMode:', viewMode);
 
   // Функция для загрузки слотов для всей недели или одного дня
   const loadAvailableSlots = useCallback(async () => {
@@ -253,6 +258,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     const minutesFromStart = (startHour - workingHours.start) * 60;
     // Добавляем отступ сверху (CARD_PADDING) для визуального отделения от линии
     const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
+
+    // DEBUG
+    if (booking.uuid.startsWith('1')) { // логируем только первое бронирование
+      console.log(`[CalendarGrid WEEK] Booking ${startTime.getHours()}:${startTime.getMinutes()}`,  {
+        startHour,
+        workingHoursStart: workingHours.start,
+        minutesFromStart,
+        top,
+        calculation: `(${startHour} - ${workingHours.start}) * 60 = ${minutesFromStart} -> ${minutesFromStart} * ${PIXELS_PER_MINUTE} + ${CARD_PADDING} = ${top}`
+      });
+    }
 
     // Высота карточки бронирования фиксирована - 70px согласно макету Figma
     const height = BOOKING_CARD_HEIGHT;

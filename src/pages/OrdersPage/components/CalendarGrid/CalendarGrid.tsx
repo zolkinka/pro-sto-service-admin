@@ -264,9 +264,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
     // Рассчитываем top позицию относительно начала отображаемого диапазона
     const startHour = startTime.getHours();
-    // В режиме 'week' игнорируем минуты для позиционирования,
-    // чтобы все карточки в пределах одного часа отображались на одной высоте
-    const minutesFromStart = (startHour - minHour) * 60;
+    const startMinute = startTime.getMinutes();
+    // Учитываем и часы, и минуты для точного позиционирования
+    const minutesFromStart = (startHour - minHour) * 60 + startMinute;
     // Добавляем отступ сверху (CARD_PADDING) для визуального отделения от линии
     const top = minutesFromStart * PIXELS_PER_MINUTE + CARD_PADDING;
 
@@ -287,24 +287,46 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const bookingsByDay: BookingWithPosition[][] = Array.from({ length: daysToShow }, () => []);
   
   if (viewMode === 'day') {
-    // Группируем по часам и назначаем dayIndex как порядковый номер в строке
-    const bookingsByHour: { [hour: number]: BookingWithPosition[] } = {};
-    
-    bookingsWithPositions.forEach((booking) => {
-      const startTime = new Date(booking.start_time);
-      const hour = startTime.getHours();
+    // Функция для проверки пересечения двух записей по времени
+    const bookingsOverlapInTime = (b1: BookingWithPosition, b2: BookingWithPosition): boolean => {
+      const start1 = new Date(b1.start_time).getTime();
+      const end1 = new Date(b1.end_time).getTime();
+      const start2 = new Date(b2.start_time).getTime();
+      const end2 = new Date(b2.end_time).getTime();
       
-      if (!bookingsByHour[hour]) {
-        bookingsByHour[hour] = [];
-      }
-      bookingsByHour[hour].push(booking);
-    });
+      return start1 < end2 && start2 < end1;
+    };
     
-    // Назначаем каждой карточке горизонтальную позицию
-    Object.values(bookingsByHour).forEach((hourBookings) => {
-      hourBookings.forEach((booking, index) => {
-        booking.dayIndex = index; // используем dayIndex как индекс в горизонтальном ряду
-      });
+    // Сортируем записи по времени начала
+    const sortedBookings = [...bookingsWithPositions].sort((a, b) => 
+      new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    );
+    
+    // Алгоритм назначения треков (колонок) для перекрывающихся записей
+    // Используем массив треков, где каждый трек содержит записи
+    const tracks: BookingWithPosition[][] = [];
+    
+    sortedBookings.forEach((booking) => {
+      // Находим первый трек, где текущая запись не пересекается ни с одной записью в треке
+      let assignedTrack = -1;
+      
+      for (let i = 0; i < tracks.length; i++) {
+        const hasOverlap = tracks[i].some(b => bookingsOverlapInTime(b, booking));
+        if (!hasOverlap) {
+          assignedTrack = i;
+          break;
+        }
+      }
+      
+      // Если не нашли подходящий трек, создаем новый
+      if (assignedTrack === -1) {
+        assignedTrack = tracks.length;
+        tracks.push([]);
+      }
+      
+      // Назначаем dayIndex как номер трека
+      booking.dayIndex = assignedTrack;
+      tracks[assignedTrack].push(booking);
     });
   } else {
     // В режиме week группируем по дням как раньше
@@ -350,21 +372,59 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     });
   }
 
-  // В режиме 'week' группируем бронирования по дню и часу
-  // Структура: weekBookingsByDayAndHour[dayIndex][hour] = BookingWithPosition[]
-  const weekBookingsByDayAndHour: { [dayIndex: number]: { [hour: number]: BookingWithPosition[] } } = {};
+  // В режиме 'week' группируем бронирования по дню и перекрывающимся временным интервалам
+  // Структура: weekBookingsByDayAndSlot[dayIndex] = Array<BookingWithPosition[]>
+  // где каждый элемент массива - это группа перекрывающихся записей
+  const weekBookingsByDayAndSlot: { [dayIndex: number]: BookingWithPosition[][] } = {};
+  
   if (viewMode === 'week') {
-    bookingsWithPositions.forEach((booking) => {
-      const startTime = new Date(booking.start_time);
-      const hour = startTime.getHours();
+    // Функция для проверки перекрытия двух записей
+    const bookingsOverlap = (b1: BookingWithPosition, b2: BookingWithPosition): boolean => {
+      const start1 = new Date(b1.start_time).getTime();
+      const end1 = new Date(b1.end_time).getTime();
+      const start2 = new Date(b2.start_time).getTime();
+      const end2 = new Date(b2.end_time).getTime();
       
-      if (!weekBookingsByDayAndHour[booking.dayIndex]) {
-        weekBookingsByDayAndHour[booking.dayIndex] = {};
+      return start1 < end2 && start2 < end1;
+    };
+    
+    // Группируем записи по дням
+    const bookingsByDay: { [dayIndex: number]: BookingWithPosition[] } = {};
+    bookingsWithPositions.forEach((booking) => {
+      if (!bookingsByDay[booking.dayIndex]) {
+        bookingsByDay[booking.dayIndex] = [];
       }
-      if (!weekBookingsByDayAndHour[booking.dayIndex][hour]) {
-        weekBookingsByDayAndHour[booking.dayIndex][hour] = [];
-      }
-      weekBookingsByDayAndHour[booking.dayIndex][hour].push(booking);
+      bookingsByDay[booking.dayIndex].push(booking);
+    });
+    
+    // Для каждого дня группируем перекрывающиеся записи
+    Object.entries(bookingsByDay).forEach(([dayIndexStr, dayBookings]) => {
+      const dayIndex = parseInt(dayIndexStr, 10);
+      weekBookingsByDayAndSlot[dayIndex] = [];
+      
+      // Сортируем записи по времени начала
+      const sortedBookings = [...dayBookings].sort((a, b) => 
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+      );
+      
+      // Группируем перекрывающиеся записи
+      sortedBookings.forEach((booking) => {
+        // Ищем группу, с которой эта запись перекрывается
+        let foundGroup = false;
+        for (const group of weekBookingsByDayAndSlot[dayIndex]) {
+          // Проверяем, перекрывается ли с любой записью в группе
+          if (group.some(b => bookingsOverlap(b, booking))) {
+            group.push(booking);
+            foundGroup = true;
+            break;
+          }
+        }
+        
+        // Если не нашли группу, создаем новую
+        if (!foundGroup) {
+          weekBookingsByDayAndSlot[dayIndex].push([booking]);
+        }
+      });
     });
   }
 
@@ -484,8 +544,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           return null;
                         }
 
-                        // Проверяем, есть ли уже бронирование в этом слоте
-                        const hasBooking = weekBookingsByDayAndHour[dayIndex]?.[hour]?.length > 0;
+                        // Проверяем, есть ли уже бронирование в этом часу
+                        // Проверяем все группы записей для данного дня
+                        const hasBooking = weekBookingsByDayAndSlot[dayIndex]?.some(group => 
+                          group.some(booking => {
+                            const bookingHour = new Date(booking.start_time).getHours();
+                            return bookingHour === hour;
+                          })
+                        ) ?? false;
                         
                         // Не показываем плейсхолдер, если уже есть бронирование
                         if (hasBooking) {
@@ -549,21 +615,22 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     );
                   })
                 ) : (
-                  // В режиме 'week' показываем только первую карточку для каждого слота
-                  // с кнопкой плюса или счётчиком "ещё N заказов"
-                  Object.entries(weekBookingsByDayAndHour).flatMap(([dayIndexStr, hourBookings]) => {
+                  // В режиме 'week' показываем карточки, группируя только перекрывающиеся
+                  Object.entries(weekBookingsByDayAndSlot).flatMap(([dayIndexStr, bookingGroups]) => {
                     const dayIndex = parseInt(dayIndexStr, 10);
                     
-                    return Object.entries(hourBookings).map(([hourStr, slotBookings]) => {
-                      const hour = parseInt(hourStr, 10);
+                    return bookingGroups.map((slotBookings, groupIndex) => {
                       const firstBooking = slotBookings[0];
                       const moreCount = slotBookings.length - 1;
                       
                       const left = dayIndex * (dayColumnWidth + DAY_COLUMN_GAP);
                       const width = dayColumnWidth;
                       
+                      // Для canAddMore берем час из первой записи в группе
+                      const startTime = new Date(firstBooking.start_time);
+                      const hour = startTime.getHours();
+                      
                       // Проверяем, можно ли добавить новое бронирование
-                      // Разрешаем добавление если: час в рабочем диапазоне И (есть слоты с сервера ИЛИ уже есть бронирования)
                       const hasBookingsInSlot = slotBookings.length > 0;
                       const isSlotAvailable = availableSlots[dayIndex]?.[hour] === true;
                       const isWorkingHour = hour >= workingHours.start && hour <= workingHours.end;
@@ -595,7 +662,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                       
                       return (
                         <div
-                          key={`${dayIndex}-${hour}`}
+                          key={`${dayIndex}-${groupIndex}`}
                           className={`calendar-grid__booking-wrapper ${moreCount > 0 ? 'calendar-grid__booking-wrapper--multi' : ''}`}
                           style={{
                             position: 'absolute',

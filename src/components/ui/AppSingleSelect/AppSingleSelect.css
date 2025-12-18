@@ -35,6 +35,23 @@
   cursor: pointer;
 }
 
+/* Добавляем padding-right для input, чтобы текст не наезжал на крестик и стрелку */
+.app-single-select__input-wrapper .app-input__field {
+  padding-right: 68px; /* 40px (крестик) + 8px (отступ) + 20px (стрелка) */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Если нет кнопки очистки (clearable=false), то padding меньше */
+.app-single-select__input-wrapper:has(.app-single-select__clear-button) .app-input__field {
+  padding-right: 68px;
+}
+
+.app-single-select__input-wrapper:not(:has(.app-single-select__clear-button)) .app-input__field {
+  padding-right: 40px; /* Только для стрелки */
+}
+
 .app-single-select__clear-button {
   position: absolute;
   right: 40px;

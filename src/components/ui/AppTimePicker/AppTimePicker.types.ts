@@ -10,4 +10,6 @@ export interface AppTimePickerProps {
   availableSlots?: string[];
   /** Иконка слева от инпута */
   iconLeft?: React.ReactNode;
+  /** Сообщение об ошибке */
+  error?: string;
 }

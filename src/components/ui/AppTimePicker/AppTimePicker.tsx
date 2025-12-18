@@ -29,6 +29,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
   className,
   availableSlots,
   iconLeft,
+  error,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -167,6 +168,14 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
     setIsOpen(false);
   }, []);
 
+  // Очистка searchQuery когда value сбрасывается извне
+  useEffect(() => {
+    // Если value пустое, очищаем поисковый запрос
+    if (!value || value === '') {
+      setSearchQuery('');
+    }
+  }, [value]);
+
   // Скролл к выбранному элементу при открытии
   useEffect(() => {
     if (isOpen && value) {
@@ -216,9 +225,10 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             mask="00:00"
-            lazy={false}
+            lazy={true}
             placeholderChar="0"
             iconLeft={iconLeft}
+            error={error}
           />
           <div 
             className={arrowClassName}
@@ -319,6 +329,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
 
   const wrapperClassName = classNames('app-time-picker', {
     'app-time-picker_disabled': disabled,
+    'app-time-picker_error': !!error,
   }, className);
 
   return (

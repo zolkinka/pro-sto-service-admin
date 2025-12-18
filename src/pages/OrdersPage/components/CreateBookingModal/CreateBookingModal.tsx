@@ -19,6 +19,7 @@ import {
   adminSearchClients,
   adminSearchCars,
 } from '../../../../../services/api-client';
+import { getWorkingHoursForDate } from '@/utils/scheduleHelpers';
 import type { SelectOption } from '@/components/ui/AppSingleSelect/AppSingleSelect.types';
 import type { SelectOption as MultiSelectOption } from '@/components/ui/AppMultiSelect/AppMultiSelect.types';
 import type { SelectOption as AutocompleteOption } from '@/components/ui/AppAutocomplete/AppAutocomplete.types';
@@ -51,7 +52,7 @@ const CreateBookingModal = observer(({
   initialDate,
   initialTime,
 }: CreateBookingModalProps) => {
-  const { servicesStore, toastStore, authStore } = useStores();
+  const { servicesStore, toastStore, authStore, operatingHoursStore } = useStores();
 
   // Form state
   const [phone, setPhone] = useState('+7');
@@ -63,6 +64,7 @@ const CreateBookingModal = observer(({
   const [selectedService, setSelectedService] = useState<SelectOption | null>(null);
   const [selectedAdditionalServices, setSelectedAdditionalServices] = useState<MultiSelectOption[]>([]);
   const [comment, setComment] = useState('');
+  const [timeError, setTimeError] = useState<string>('');
   
   // Client and car autocomplete state
   const [selectedClient, setSelectedClient] = useState<ClientSearchResultDto | null>(null);
@@ -486,6 +488,44 @@ const CreateBookingModal = observer(({
     }
   }, [makeOptions]);
 
+  // Обработчик изменения времени с очисткой ошибки
+  const handleTimeChange = useCallback((newTime: string) => {
+    setSelectedTime(newTime);
+    if (timeError) {
+      setTimeError('');
+    }
+  }, [timeError]);
+
+  // Обработчик изменения даты с проверкой доступности текущего времени
+  const handleDateChange = useCallback((newDate: Date | null) => {
+    setSelectedDate(newDate);
+    if (timeError) {
+      setTimeError('');
+    }
+    
+    // Если есть выбранное время, проверяем его доступность для новой даты
+    if (newDate && selectedTime) {
+      const workingHours = getWorkingHoursForDate(
+        newDate,
+        operatingHoursStore.regularSchedule,
+        operatingHoursStore.specialDates
+      );
+      
+      // Если дата - выходной или нерабочий день (workingHours === null), сбрасываем время
+      if (!workingHours) {
+        setSelectedTime('');
+        return;
+      }
+      
+      // Проверяем, доступно ли выбранное время в рабочих часах новой даты
+      if (selectedTime < workingHours.open || selectedTime >= workingHours.close) {
+        // Если время не входит в рабочие часы, сбрасываем его
+        setSelectedTime('');
+      }
+      // Иначе оставляем выбранное время как есть
+    }
+  }, [timeError, selectedTime, operatingHoursStore.regularSchedule, operatingHoursStore.specialDates]);
+
   const handleSubmit = async () => {
     // Validation
     if (!phone || phone.trim() === '') {
@@ -519,6 +559,26 @@ const CreateBookingModal = observer(({
     bookingDateTime.setHours(hours, minutes, 0, 0);
     if (bookingDateTime < new Date()) {
       toastStore.showError('Нельзя создать запись на прошедшее время');
+      return;
+    }
+
+    // Проверка доступности времени согласно режиму работы
+    const workingHours = getWorkingHoursForDate(
+      selectedDate,
+      operatingHoursStore.regularSchedule,
+      operatingHoursStore.specialDates
+    );
+
+    if (!workingHours) {
+      setTimeError('В этот день сервисный центр не работает');
+      toastStore.showError('В этот день сервисный центр не работает');
+      return;
+    }
+
+    // Проверяем, что время находится в рабочих часах
+    if (selectedTime < workingHours.open || selectedTime >= workingHours.close) {
+      setTimeError(`Доступное время: ${workingHours.open}-${workingHours.close}`);
+      toastStore.showError(`Недоступное время. Рабочие часы: ${workingHours.open}-${workingHours.close}`);
       return;
     }
 
@@ -834,7 +894,7 @@ const CreateBookingModal = observer(({
             <AppDatePicker
               label="Дата"
               value={selectedDate}
-              onChange={setSelectedDate}
+              onChange={handleDateChange}
               minDate={new Date(new Date().setHours(0, 0, 0, 0))}
             />
           </div>
@@ -843,10 +903,11 @@ const CreateBookingModal = observer(({
             <AppTimePicker
               label="Время"
               value={selectedTime}
-              onChange={setSelectedTime}
+              onChange={handleTimeChange}
               placeholder="09:00"
               availableSlots={availableTimeSlots}
               disabled={isLoadingSlots || !selectedDate || !selectedService}
+              error={timeError}
             />
           </div>
         </div>

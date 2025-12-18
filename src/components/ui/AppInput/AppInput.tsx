@@ -135,6 +135,8 @@ const AppInput = forwardRef<AppInputRef, AppInputProps>(({
     if (mask && value !== undefined && value !== lastValueRef.current) {
       isProgrammaticUpdateRef.current = true;
       lastValueRef.current = value;
+      // Обновляем maskKey чтобы пересоздать IMaskInput с новым value
+      setMaskKey(prev => prev + 1);
     }
   }, [value, mask]);
   

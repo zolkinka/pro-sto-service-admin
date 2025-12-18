@@ -157,13 +157,26 @@ const CreateBookingModal = observer(({
         date: dateStr,
       });
 
-      // Преобразуем ISO даты в формат "HH:mm" с интервалом в 1 час
-      const slots = response.map((timeSlot: string) => {
+      // Преобразуем ISO даты, округляем вверх до целого часа и убираем дубликаты
+      const slotsSet = new Set<string>();
+      response.forEach((timeSlot: string) => {
         const slotDate = new Date(timeSlot);
-        const hours = slotDate.getHours().toString().padStart(2, '0');
-        const minutes = slotDate.getMinutes().toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
+        let hours = slotDate.getHours();
+        const minutes = slotDate.getMinutes();
+        
+        // Если минуты не 0, округляем вверх до следующего часа
+        if (minutes > 0) {
+          hours += 1;
+        }
+        
+        // Добавляем только если час в пределах суток
+        if (hours < 24) {
+          const timeString = `${hours.toString().padStart(2, '0')}:00`;
+          slotsSet.add(timeString);
+        }
       });
+      
+      const slots = Array.from(slotsSet).sort();
 
       setAvailableTimeSlots(slots);
     } catch (error) {

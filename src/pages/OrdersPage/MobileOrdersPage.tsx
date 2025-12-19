@@ -38,6 +38,9 @@ export const MobileOrdersPage = observer(() => {
   const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate);
   const [currentTime, setCurrentTime] = useState<string>('');
   const [uiCategory, setUiCategory] = useState<CategoryType>('car_wash');
+  
+  // Кэш для слотов (ключ: "дата_категория", значение: слоты)
+  const [slotsCache, setSlotsCache] = useState<Record<string, Record<number, boolean>>>({});
 
   // Синхронизируем selectedDate с URL параметром date при навигации
   useEffect(() => {
@@ -141,8 +144,16 @@ export const MobileOrdersPage = observer(() => {
         return;
       }
 
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const cacheKey = `${dateStr}_${uiCategory}`;
+      
+      // Проверяем кэш
+      if (slotsCache[cacheKey]) {
+        setAvailableSlots(slotsCache[cacheKey]);
+        return;
+      }
+
       try {
-        const dateStr = format(selectedDate, 'yyyy-MM-dd');
         const response = await serviceCenterGetSlots({
           uuid: serviceCenterUuid,
           serviceUuid: activeService.uuid,
@@ -159,6 +170,9 @@ export const MobileOrdersPage = observer(() => {
         });
 
         setAvailableSlots(slots);
+        
+        // Сохраняем в кэш
+        setSlotsCache(prev => ({ ...prev, [cacheKey]: slots }));
       } catch (error) {
         console.error('Failed to load available slots:', error);
         setAvailableSlots({});
@@ -166,6 +180,7 @@ export const MobileOrdersPage = observer(() => {
     };
 
     loadAvailableSlots();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, uiCategory, servicesStore.services.length, authStore.user?.service_center_uuid]);
 
   // Эффект для автоматического показа pending заказов в модальном окне
@@ -267,8 +282,7 @@ export const MobileOrdersPage = observer(() => {
 
   const handleCloseViewModal = () => {
     setIsViewModalOpen(false);
-    // Обновляем список заказов после закрытия модалки
-    bookingsStore.fetchBookings();
+    // Не перезагружаем данные при закрытии - они уже актуальны
   };
 
   const handleCancelBookingFromView = async () => {
@@ -282,8 +296,7 @@ export const MobileOrdersPage = observer(() => {
       
       if (success) {
         setIsViewModalOpen(false);
-        // Обновляем список заказов
-        bookingsStore.fetchBookings();
+        // Данные уже обновлены через оптимистичное обновление
       }
     } catch (error) {
       console.error('Ошибка отмены заказа:', error);
@@ -337,8 +350,7 @@ export const MobileOrdersPage = observer(() => {
           setCurrentPendingIndex(nextIndex);
         } else {
           handleCloseModal();
-          // Обновляем список заказов
-          bookingsStore.fetchBookings();
+          // Данные уже обновлены через оптимистичное обновление
         }
       }
     } catch (error) {
@@ -363,8 +375,7 @@ export const MobileOrdersPage = observer(() => {
           setCurrentPendingIndex(nextIndex);
         } else {
           handleCloseModal();
-          // Обновляем список заказов
-          bookingsStore.fetchBookings();
+          // Данные уже обновлены через оптимистичное обновление
         }
       }
     } catch (error) {

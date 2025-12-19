@@ -167,8 +167,14 @@ const OrdersPage = observer(() => {
       
       bookingsStore.setDateRange(dateStart, dateEnd);
       
-      // Загружаем данные
-      bookingsStore.fetchBookings();
+      // Загружаем данные только если их нет в кэше
+      if (!bookingsStore.hasCachedData()) {
+        bookingsStore.fetchBookings();
+      } else {
+        // Если данные есть в кэше, просто триггерим обновление через fetchBookings
+        // который загрузит данные из кэша моментально
+        bookingsStore.fetchBookings();
+      }
       
       // Загружаем сервисы если их еще нет
       if (servicesStore.services.length === 0) {
@@ -217,8 +223,8 @@ const OrdersPage = observer(() => {
   };
 
   const handleUpdateBooking = () => {
-    // Перезагружаем список заказов после обновления
-    bookingsStore.fetchBookings();
+    // Данные уже обновлены в store через оптимистичное обновление
+    // Ничего не делаем - store сам обновит UI
   };
 
   const handleSlotClick = (date: Date, hour: number) => {
@@ -236,8 +242,8 @@ const OrdersPage = observer(() => {
   };
 
   const handleCreateBookingSuccess = () => {
-    // Перезагружаем список заказов после успешного создания
-    bookingsStore.fetchBookings();
+    // Тихо обновляем данные с сервера без показа скелетона
+    bookingsStore.refreshBookings();
   };
 
   const handleCloseCreateModal = () => {

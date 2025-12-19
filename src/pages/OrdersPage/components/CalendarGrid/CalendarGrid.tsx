@@ -68,6 +68,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   // Используем useRef для предотвращения дублирования запросов
   const isLoadingSlotsRef = React.useRef(false);
+  // Кэш для слотов (ключ: "dateFrom_dateTo", значение: слоты)
+  const slotsCache = React.useRef<Record<string, AvailableSlots>>({});
   // Ref для контейнера дней, чтобы получить его ширину
   const daysContainerRef = React.useRef<HTMLDivElement>(null);
   // Состояние для ширины одной колонки дня
@@ -108,26 +110,34 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       return;
     }
 
+    // Вычисляем начало и конец периода в зависимости от режима
+    let dateFrom: string;
+    let dateTo: string;
+    
+    if (viewMode === 'day' && currentDate) {
+      // В режиме 'day' загружаем только выбранный день
+      dateFrom = format(currentDate, 'yyyy-MM-dd');
+      dateTo = format(currentDate, 'yyyy-MM-dd');
+    } else {
+      // В режиме 'week' загружаем всю неделю
+      const weekEnd = addDays(weekStart, 6);
+      dateFrom = format(weekStart, 'yyyy-MM-dd');
+      dateTo = format(weekEnd, 'yyyy-MM-dd');
+    }
+
+    const cacheKey = `${dateFrom}_${dateTo}`;
+    
+    // Проверяем кэш
+    if (slotsCache.current[cacheKey]) {
+      setAvailableSlots(slotsCache.current[cacheKey]);
+      return;
+    }
+
     isLoadingSlotsRef.current = true;
     setIsLoadingSlots(true);
     const slots: AvailableSlots = {};
 
     try {
-      // Вычисляем начало и конец периода в зависимости от режима
-      let dateFrom: string;
-      let dateTo: string;
-      
-      if (viewMode === 'day' && currentDate) {
-        // В режиме 'day' загружаем только выбранный день
-        dateFrom = format(currentDate, 'yyyy-MM-dd');
-        dateTo = format(currentDate, 'yyyy-MM-dd');
-      } else {
-        // В режиме 'week' загружаем всю неделю
-        const weekEnd = addDays(weekStart, 6);
-        dateFrom = format(weekStart, 'yyyy-MM-dd');
-        dateTo = format(weekEnd, 'yyyy-MM-dd');
-      }
-
       // Делаем один запрос на период (день или неделю)
       const response = await serviceCenterGetSlots({
         uuid: serviceCenterUuid,
@@ -167,6 +177,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       });
 
       setAvailableSlots(slots);
+      
+      // Сохраняем в кэш
+      slotsCache.current[cacheKey] = slots;
     } catch (error) {
       console.error('Failed to load available slots:', error);
     } finally {

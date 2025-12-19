@@ -52,6 +52,10 @@ export class BookingsStore {
   limit = 100;
   offset = 0;
 
+  // Кэш для предотвращения ненужных загрузок и скелетонов
+  private bookingsCache = new Map<string, AdminBookingResponseDto[]>();
+  private isInitialLoad = true;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -79,15 +83,53 @@ export class BookingsStore {
   }
 
   /**
-   * Загрузка списка бронирований
+   * Генерирует ключ кэша для текущего запроса
    */
-  async fetchBookings(): Promise<void> {
+  private getCacheKey(): string {
+    const dateFrom = format(this.dateFrom, 'yyyy-MM-dd');
+    const dateTo = format(this.dateTo, 'yyyy-MM-dd');
+    const statuses = this.selectedStatuses.join(',') || 'all';
+    return `${dateFrom}_${dateTo}_${statuses}`;
+  }
+
+  /**
+   * Проверяет, есть ли данные в кэше для текущего диапазона дат
+   */
+  hasCachedData(): boolean {
+    const cacheKey = this.getCacheKey();
+    return this.bookingsCache.has(cacheKey);
+  }
+
+  /**
+   * Загрузка списка бронирований
+   * @param silent - если true, загрузка произойдет без показа скелетона (тихое обновление)
+   */
+  async fetchBookings(silent = false): Promise<void> {
     if (!this.serviceCenterUuid) {
       console.warn('ServiceCenterUuid не установлен');
       return;
     }
 
-    this.isLoading = true;
+    const cacheKey = this.getCacheKey();
+    const cachedData = this.bookingsCache.get(cacheKey);
+
+    // Если есть кэшированные данные и это не первая загрузка, используем их сразу
+    if (cachedData && !this.isInitialLoad) {
+      runInAction(() => {
+        this.bookings = cachedData;
+        this.isLoading = false;
+      });
+      
+      // Для кэшированных данных не делаем дополнительный запрос
+      // Данные будут обновлены при следующем явном вызове fetchBookings
+      return;
+    }
+
+    // Показываем скелетон только при первой загрузке или отсутствии кэша
+    if (!silent && this.isInitialLoad) {
+      this.isLoading = true;
+    }
+    
     this.error = null;
 
     try {
@@ -104,6 +146,10 @@ export class BookingsStore {
         this.bookings = response.data;
         this.total = response.total;
         this.isLoading = false;
+        this.isInitialLoad = false;
+        
+        // Сохраняем данные в кэш
+        this.bookingsCache.set(cacheKey, response.data);
       });
     } catch (error) {
       runInAction(() => {
@@ -113,6 +159,14 @@ export class BookingsStore {
       console.error('Ошибка при загрузке бронирований:', error);
       toastStore.showError('Не удалось загрузить список заказов');
     }
+  }
+
+  /**
+   * Тихое обновление данных без показа скелетона
+   * Используется после изменения статуса или данных бронирования
+   */
+  async refreshBookings(): Promise<void> {
+    await this.fetchBookings(true);
   }
 
   /**
@@ -175,45 +229,66 @@ export class BookingsStore {
 
   /**
    * Обновление статуса бронирования
+   * Использует оптимистичное обновление UI
    */
   async updateBookingStatus(uuid: string, status: BookingStatus): Promise<boolean> {
+    // Сохраняем текущее состояние для возможности отката
+    const bookingIndex = this.bookings.findIndex((b) => b.uuid === uuid);
+    const previousStatus = bookingIndex !== -1 ? this.bookings[bookingIndex].status : null;
+
+    // Оптимистичное обновление UI
+    runInAction(() => {
+      if (bookingIndex !== -1) {
+        this.bookings[bookingIndex].status = status;
+      } else {
+        // Если заказа нет в основном списке (например, был pending),
+        // добавляем его туда из списка pendingBookings
+        const pendingBooking = this.pendingBookings.find((b) => b.uuid === uuid);
+        if (pendingBooking) {
+          this.bookings.push({
+            ...pendingBooking,
+            status: status,
+          });
+        }
+      }
+
+      // Если это выбранное бронирование, обновляем и его
+      if (this.selectedBooking?.uuid === uuid) {
+        this.selectedBooking.status = status;
+      }
+
+      // Если статус изменился с pending_confirmation на другой, удаляем из pendingBookings
+      if (status !== 'pending_confirmation') {
+        this.pendingBookings = this.pendingBookings.filter((b) => b.uuid !== uuid);
+      }
+    });
+
     try {
-      const response = await adminBookingsUpdateStatus({
+      await adminBookingsUpdateStatus({
         uuid,
         requestBody: { status },
       });
 
+      // Обновляем кэш после успешного ответа
+      this.invalidateCache();
+
+      toastStore.showSuccess('Статус заказа успешно обновлен');
+      
+      // Тихо обновляем данные с сервера
+      await this.refreshBookings();
+      
+      return true;
+    } catch (error) {
+      // При ошибке откатываем изменения
       runInAction(() => {
-        // Обновляем статус в списке бронирований
-        const bookingIndex = this.bookings.findIndex((b) => b.uuid === uuid);
-        if (bookingIndex !== -1) {
-          this.bookings[bookingIndex].status = response.status;
-        } else {
-          // Если заказа нет в основном списке (например, был pending),
-          // добавляем его туда из списка pendingBookings
-          const pendingBooking = this.pendingBookings.find((b) => b.uuid === uuid);
-          if (pendingBooking) {
-            this.bookings.push({
-              ...pendingBooking,
-              status: response.status,
-            });
-          }
+        if (bookingIndex !== -1 && previousStatus !== null) {
+          this.bookings[bookingIndex].status = previousStatus;
         }
-
-        // Если это выбранное бронирование, обновляем и его
-        if (this.selectedBooking?.uuid === uuid) {
-          this.selectedBooking.status = response.status as BookingStatus;
-        }
-
-        // Если статус изменился с pending_confirmation на другой, удаляем из pendingBookings
-        if (status !== 'pending_confirmation') {
-          this.pendingBookings = this.pendingBookings.filter((b) => b.uuid !== uuid);
+        if (this.selectedBooking?.uuid === uuid && previousStatus !== null) {
+          this.selectedBooking.status = previousStatus as BookingStatus;
         }
       });
 
-      toastStore.showSuccess('Статус заказа успешно обновлен');
-      return true;
-    } catch (error) {
       console.error('Ошибка при обновлении статуса:', error);
       toastStore.showError('Не удалось обновить статус заказа');
       return false;
@@ -222,6 +297,7 @@ export class BookingsStore {
 
   /**
    * Обновление данных бронирования
+   * Использует оптимистичное обновление UI
    */
   async updateBooking(uuid: string, data: UpdateAdminBookingDto): Promise<boolean> {
     try {
@@ -251,13 +327,50 @@ export class BookingsStore {
         }
       });
 
+      // Обновляем кэш после успешного ответа
+      this.invalidateCache();
+
       toastStore.showSuccess('Заказ успешно обновлен');
+      
+      // Тихо обновляем данные с сервера
+      await this.refreshBookings();
+      
       return true;
     } catch (error) {
       console.error('Ошибка при обновлении бронирования:', error);
       toastStore.showError('Не удалось обновить заказ');
       return false;
     }
+  }
+
+  /**
+   * Инвалидация кэша
+   * Используется после изменений данных
+   */
+  private invalidateCache(): void {
+    this.bookingsCache.clear();
+  }
+
+  /**
+   * Добавление нового бронирования в список (после создания)
+   * Используется для оптимистичного обновления UI
+   */
+  addBooking(booking: AdminBookingResponseDto): void {
+    runInAction(() => {
+      // Проверяем, входит ли бронирование в текущий временной диапазон
+      const bookingDate = new Date(booking.start_time);
+      if (bookingDate >= this.dateFrom && bookingDate <= this.dateTo) {
+        // Проверяем, нет ли уже такого бронирования в списке
+        const exists = this.bookings.some(b => b.uuid === booking.uuid);
+        if (!exists) {
+          this.bookings.push(booking);
+          this.total++;
+        }
+      }
+    });
+    
+    // Инвалидируем кэш после добавления
+    this.invalidateCache();
   }
 
   /**

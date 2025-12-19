@@ -166,6 +166,8 @@
   line-height: 1.2;
   color: var(--color-gray-800);
   white-space: nowrap;
+  width: 120px;
+  text-align: center;
 }
 
 .calendar-header__nav-button {

@@ -123,9 +123,9 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   const weekRangeLabel = (() => {
     const isSameMonth = weekStart.getMonth() === weekEnd.getMonth() && weekStart.getFullYear() === weekEnd.getFullYear();
     if (isSameMonth) {
-      return `${format(weekStart, 'd', { locale: ru })}-${format(weekEnd, 'd MMMM', { locale: ru })}`;
+      return `${format(weekStart, 'dd', { locale: ru })}-${format(weekEnd, 'dd MMMM', { locale: ru })}`;
     }
-    return `${format(weekStart, 'd MMMM', { locale: ru })}-${format(weekEnd, 'd MMMM', { locale: ru })}`;
+    return `${format(weekStart, 'dd MMM', { locale: ru })} - ${format(weekEnd, 'dd MMM', { locale: ru })}`;
   })();
 
   return (

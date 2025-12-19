@@ -104,6 +104,12 @@ const CreateBookingModal = observer(({
   
   // Состояние для показа алерта о конфликте имен
   const [nameConflict, setNameConflict] = useState<{ dbName: string; enteredName: string } | null>(null);
+  
+  // Ref для хранения марки и модели, введенных пользователем вручную
+  const userEnteredCarDetails = useRef<{ make: string | null; model: string | null }>({ make: null, model: null });
+  
+  // Состояние для показа алерта о конфликте марки/модели
+  const [carConflict, setCarConflict] = useState<{ dbMake: string; dbModel: string; enteredMake: string; enteredModel: string } | null>(null);
 
   // Обновление даты и времени при открытии модального окна с новыми значениями
   useEffect(() => {
@@ -407,6 +413,30 @@ const CreateBookingModal = observer(({
     setNameConflict(null);
   }, []);
 
+  // Обработчик замены марки/модели на данные из базы
+  const handleReplaceCarWithDb = useCallback(() => {
+    if (carConflict) {
+      const dbMakeOption = makeOptions.find(opt => opt.label === carConflict.dbMake);
+      const dbModelOption = modelOptions.find(opt => opt.label === carConflict.dbModel);
+      
+      if (dbMakeOption) {
+        setSelectedMake(dbMakeOption);
+      }
+      if (dbModelOption) {
+        setSelectedModel(dbModelOption);
+      }
+      
+      setCarConflict(null);
+      setCarDetailsModified(false);
+    }
+  }, [carConflict, makeOptions, modelOptions]);
+
+  // Обработчик сохранения введенных марки/модели
+  const handleKeepEnteredCar = useCallback(() => {
+    setCarConflict(null);
+    setCarDetailsModified(true);
+  }, []);
+
   // Обработчик выбора клиента из автокомплита
   const handleClientSelect = useCallback(async (option: AutocompleteOption) => {
     console.log('👤 handleClientSelect called:', { option });
@@ -509,6 +539,28 @@ const CreateBookingModal = observer(({
     // Пользователь выбрал существующий автомобиль
     const carData = (option as AutocompleteOption & { rawData: CarSearchResultDto }).rawData;
     if (carData) {
+      const enteredMake = userEnteredCarDetails.current.make;
+      const enteredModel = userEnteredCarDetails.current.model;
+      
+      // Проверяем, если пользователь ввел марку/модель и они отличаются от данных в БД
+      if (enteredMake && enteredModel && 
+          (enteredMake.toLowerCase() !== carData.make.toLowerCase() || 
+           enteredModel.toLowerCase() !== carData.model.toLowerCase())) {
+        // Показываем алерт о конфликте марки/модели
+        setCarConflict({ 
+          dbMake: carData.make, 
+          dbModel: carData.model, 
+          enteredMake, 
+          enteredModel 
+        });
+      } else {
+        // Если пользователь не вводил марку/модель или они совпадают - используем данные из БД
+        const makeOption = makeOptions.find(m => m.label === carData.make);
+        if (makeOption) {
+          setSelectedMake(makeOption);
+        }
+      }
+      
       setSelectedCar(carData);
       setLicensePlate(carData.license_plate);
       
@@ -518,15 +570,6 @@ const CreateBookingModal = observer(({
         model: carData.model,
       };
       setCarDetailsModified(false);
-      
-      // Предзаполняем марку и модель, если они еще не выбраны или если они совпадают
-      const makeOption = makeOptions.find(m => m.label === carData.make);
-      if (makeOption) {
-        setSelectedMake(makeOption);
-        
-        // Модели будут загружены в useEffect
-        // Установим модель после загрузки моделей через useEffect
-      }
     }
   }, [makeOptions]);
 
@@ -752,6 +795,12 @@ const CreateBookingModal = observer(({
     // Очищаем состояние алерта
     setNameConflict(null);
     
+    // Очищаем введенные пользователем марку/модель
+    userEnteredCarDetails.current = { make: null, model: null };
+    
+    // Очищаем состояние алерта марки/модели
+    setCarConflict(null);
+    
     onClose();
   }, [initialDate, initialTime, onClose]);
 
@@ -946,7 +995,11 @@ const CreateBookingModal = observer(({
               placeholder="Марка"
               options={makeOptions}
               value={selectedMake}
-              onChange={setSelectedMake}
+              onChange={(value) => {
+                setSelectedMake(value);
+                // Сохраняем введенную пользователем марку
+                userEnteredCarDetails.current.make = value?.label || null;
+              }}
               clearable
             />
           </div>
@@ -957,12 +1010,27 @@ const CreateBookingModal = observer(({
               placeholder="Модель"
               options={modelOptions}
               value={selectedModel}
-              onChange={setSelectedModel}
+              onChange={(value) => {
+                setSelectedModel(value);
+                // Сохраняем введенную пользователем модель
+                userEnteredCarDetails.current.model = value?.label || null;
+              }}
               disabled={!selectedMake || isLoadingModels}
               clearable
             />
           </div>
         </div>
+
+        {/* Алерт о конфликте марки/модели */}
+        {carConflict && (
+          <AppAlert
+            message={`Мы нашли автомобиль в базе с таким номером, но с другими маркой и моделью. Заменить на "${carConflict.dbMake} ${carConflict.dbModel}"?`}
+            onConfirm={handleReplaceCarWithDb}
+            onCancel={handleKeepEnteredCar}
+            confirmText="Заменить"
+            cancelText="Оставить"
+          />
+        )}
 
         <div className="create-booking-modal__field-row">
           <div className="create-booking-modal__field">

@@ -129,6 +129,12 @@ export const MobileCreateBooking = observer(() => {
   
   // Состояние для показа алерта о конфликте имен
   const [nameConflict, setNameConflict] = useState<{ dbName: string; enteredName: string } | null>(null);
+  
+  // Ref для хранения марки и модели, введенных пользователем вручную
+  const userEnteredCarDetails = useRef<{ make: string | null; model: string | null }>({ make: null, model: null });
+  
+  // Состояние для показа алерта о конфликте марки/модели
+  const [carConflict, setCarConflict] = useState<{ dbMake: string; dbModel: string; enteredMake: string; enteredModel: string } | null>(null);
 
   // Load makes on mount
   useEffect(() => {
@@ -362,6 +368,30 @@ export const MobileCreateBooking = observer(() => {
     setNameConflict(null);
   }, []);
 
+  // Обработчик замены марки/модели на данные из базы
+  const handleReplaceCarWithDb = useCallback(() => {
+    if (carConflict) {
+      const dbMakeOption = makeOptions.find(opt => opt.label === carConflict.dbMake);
+      const dbModelOption = modelOptions.find(opt => opt.label === carConflict.dbModel);
+      
+      if (dbMakeOption) {
+        setSelectedMake(dbMakeOption);
+        userEnteredCarDetails.current.make = carConflict.dbMake;
+      }
+      if (dbModelOption) {
+        setSelectedModel(dbModelOption);
+        userEnteredCarDetails.current.model = carConflict.dbModel;
+      }
+      
+      setCarConflict(null);
+    }
+  }, [carConflict, makeOptions, modelOptions]);
+
+  // Обработчик сохранения введенных марки/модели
+  const handleKeepEnteredCar = useCallback(() => {
+    setCarConflict(null);
+  }, []);
+
   // Функция поиска автомобилей по номеру
   const searchCars = useCallback(async (plateQuery: string): Promise<AutocompleteOption[]> => {
     if (plateQuery.length < 2) {
@@ -408,6 +438,36 @@ export const MobileCreateBooking = observer(() => {
       
       if (cars.length > 0) {
         const carData = cars[0];
+        
+        // Проверяем, есть ли конфликт между введенными и найденными данными
+        const enteredMake = userEnteredCarDetails.current.make;
+        const enteredModel = userEnteredCarDetails.current.model;
+        
+        const hasMakeConflict = enteredMake && enteredMake !== carData.make;
+        const hasModelConflict = enteredModel && enteredModel !== carData.model;
+        
+        if ((hasMakeConflict || hasModelConflict) && enteredMake && enteredModel) {
+          // Показываем alert о конфликте
+          setCarConflict({
+            dbMake: carData.make,
+            dbModel: carData.model,
+            enteredMake: enteredMake,
+            enteredModel: enteredModel
+          });
+          
+          // Устанавливаем только данные машины и номер
+          setSelectedCar(carData);
+          setLicensePlate(carData.license_plate);
+          
+          // Сохраняем оригинальные данные
+          originalCarDetails.current = {
+            make: carData.make,
+            model: carData.model
+          };
+          
+          return;
+        }
+        
         setSelectedCar(carData);
         setLicensePlate(carData.license_plate);
         
@@ -420,6 +480,7 @@ export const MobileCreateBooking = observer(() => {
         const makeOption = makeOptions.find(m => m.label === carData.make);
         if (makeOption) {
           setSelectedMake(makeOption);
+          userEnteredCarDetails.current.make = carData.make;
         }
       }
     } catch (error) {
@@ -439,6 +500,7 @@ export const MobileCreateBooking = observer(() => {
         
         if (modelOption) {
           setSelectedModel(modelOption);
+          userEnteredCarDetails.current.model = modelOption.label;
         }
       }
     }
@@ -506,6 +568,12 @@ export const MobileCreateBooking = observer(() => {
   }, [timeError, selectedTime, operatingHoursStore.regularSchedule, operatingHoursStore.specialDates]);
 
   const handleBack = () => {
+    // Очищаем состояния конфликтов
+    userEnteredName.current = '';
+    setNameConflict(null);
+    userEnteredCarDetails.current = { make: null, model: null };
+    setCarConflict(null);
+    
     navigate('/orders');
   };
 
@@ -744,7 +812,12 @@ export const MobileCreateBooking = observer(() => {
             placeholder="Марка"
             options={makeOptions}
             value={selectedMake}
-            onChange={setSelectedMake}
+            onChange={(value) => {
+              setSelectedMake(value);
+              if (value) {
+                userEnteredCarDetails.current.make = value.label;
+              }
+            }}
             clearable
           />
         </div>
@@ -755,11 +828,26 @@ export const MobileCreateBooking = observer(() => {
             placeholder="Модель"
             options={modelOptions}
             value={selectedModel}
-            onChange={setSelectedModel}
+            onChange={(value) => {
+              setSelectedModel(value);
+              if (value) {
+                userEnteredCarDetails.current.model = value.label;
+              }
+            }}
             disabled={!selectedMake || isLoadingModels}
             clearable
           />
         </div>
+        
+        {carConflict && (
+          <AppAlert
+            message={`В базе найдена машина с другими данными: "${carConflict.dbMake} ${carConflict.dbModel}". Заменить на данные из базы?`}
+            onConfirm={handleReplaceCarWithDb}
+            confirmText="Заменить"
+            onCancel={handleKeepEnteredCar}
+            cancelText="Оставить введенные"
+          />
+        )}
 
         <div className="mobile-create-booking__date-time-section">
           <div className="mobile-create-booking__date-field">

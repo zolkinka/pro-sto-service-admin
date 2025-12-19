@@ -15,4 +15,5 @@ export * from './AppTimePicker';
 export * from './AppDatePicker';
 export * from './AppAutocomplete';
 export * from './AppTextarea';
+export * from './AppAlert';
 

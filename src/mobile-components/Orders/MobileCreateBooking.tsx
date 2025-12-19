@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
-import { AppInput, AppButton, AppTextarea } from '@/components/ui';
+import { AppInput, AppButton, AppTextarea, AppAlert } from '@/components/ui';
 import { AppSingleSelect } from '@/components/ui/AppSingleSelect';
 import { AppMultiSelect } from '@/components/ui/AppMultiSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
@@ -123,6 +123,12 @@ export const MobileCreateBooking = observer(() => {
   
   // Флаг для однократного автовыбора услуги
   const hasAutoSelectedService = useRef(false);
+  
+  // Ref для хранения имени, введенного пользователем вручную
+  const userEnteredName = useRef<string>('');
+  
+  // Состояние для показа алерта о конфликте имен
+  const [nameConflict, setNameConflict] = useState<{ dbName: string; enteredName: string } | null>(null);
 
   // Load makes on mount
   useEffect(() => {
@@ -274,10 +280,11 @@ export const MobileCreateBooking = observer(() => {
       const results = await adminSearchClients({ phone: searchDigits, limit: 10 });
       
       return results.map((client: ClientSearchResultDto) => ({
-        label: `${client.phone}${client.name ? ` (${client.name})` : ''}`,
+        label: client.phone,
         value: client.uuid,
         isCustom: false,
-      } as AutocompleteOption));
+        rawData: client,
+      } as AutocompleteOption & { rawData: ClientSearchResultDto }));
     } catch (error) {
       console.error('Failed to search clients:', error);
       toastStore.showError('Не удалось выполнить поиск клиентов');
@@ -291,7 +298,7 @@ export const MobileCreateBooking = observer(() => {
     
     if (option.isCustom || !option.value) {
       setSelectedClient(null);
-      setClientName('');
+      // НЕ сбрасываем clientName - сохраняем введенное пользователем имя
       setClientCarsOptions([]);
       setPhone(option.label);
       return;
@@ -305,8 +312,19 @@ export const MobileCreateBooking = observer(() => {
       
       if (clients.length > 0) {
         const clientData = clients[0];
+        const dbName = clientData.name ? String(clientData.name) : '';
+        const enteredName = userEnteredName.current.trim();
+        
+        // Проверяем, если пользователь ввел имя и оно отличается от имени в БД
+        if (enteredName && dbName && enteredName.toLowerCase() !== dbName.toLowerCase()) {
+          // Показываем алерт о конфликте имен
+          setNameConflict({ dbName, enteredName });
+        } else {
+          // Если пользователь не вводил имя или имена совпадают - используем имя из БД
+          setClientName(dbName);
+        }
+        
         setSelectedClient(clientData);
-        setClientName(clientData.name ? String(clientData.name) : '');
         setPhone(clientData.phone);
         
         // Загружаем автомобили выбранного клиента
@@ -329,6 +347,19 @@ export const MobileCreateBooking = observer(() => {
       console.error('Failed to load client data:', error);
       setClientCarsOptions([]);
     }
+  }, []);
+
+  // Обработчик замены имени на имя из базы
+  const handleReplaceNameWithDb = useCallback(() => {
+    if (nameConflict) {
+      setClientName(nameConflict.dbName);
+      setNameConflict(null);
+    }
+  }, [nameConflict]);
+
+  // Обработчик сохранения введенного имени
+  const handleKeepEnteredName = useCallback(() => {
+    setNameConflict(null);
   }, []);
 
   // Функция поиска автомобилей по номеру
@@ -641,6 +672,18 @@ export const MobileCreateBooking = observer(() => {
             onChange={handleClientSelect}
             minSearchLength={3}
             searchDebounce={300}
+            renderOption={(option) => {
+              const clientData = (option as AutocompleteOption & { rawData?: ClientSearchResultDto }).rawData;
+              if (clientData?.name) {
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', pointerEvents: 'none' }}>
+                    <div style={{ fontWeight: 500 }}>{option.label}</div>
+                    <div style={{ fontSize: '13px', color: '#666' }}>{clientData.name}</div>
+                  </div>
+                );
+              }
+              return option.label;
+            }}
           />
         </div>
 
@@ -649,9 +692,26 @@ export const MobileCreateBooking = observer(() => {
             label="Имя клиента"
             placeholder="Имя"
             value={clientName}
-            onChange={setClientName}
+            onChange={(value) => {
+              setClientName(value);
+              // Сохраняем введенное пользователем имя
+              userEnteredName.current = value;
+            }}
           />
         </div>
+
+        {/* Алерт о конфликте имен */}
+        {nameConflict && (
+          <div className="mobile-create-booking__field">
+            <AppAlert
+              message={`Мы нашли пользователя в базе с таким номером, но с другим именем. Заменить на "${nameConflict.dbName}"?`}
+              onConfirm={handleReplaceNameWithDb}
+              onCancel={handleKeepEnteredName}
+              confirmText="Заменить"
+              cancelText="Оставить"
+            />
+          </div>
+        )}
 
         <div className="mobile-create-booking__field">
           <AppAutocomplete

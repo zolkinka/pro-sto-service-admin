@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { format } from 'date-fns';
 import { useStores } from '@/hooks';
-import { AppInput, AppTextarea } from '@/components/ui';
+import { AppInput, AppTextarea, AppAlert } from '@/components/ui';
 import { AppSingleSelect } from '@/components/ui/AppSingleSelect';
 import { AppMultiSelect } from '@/components/ui/AppMultiSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
@@ -98,6 +98,12 @@ const CreateBookingModal = observer(({
   
   // Флаг для однократного автовыбора услуги
   const hasAutoSelectedService = useRef(false);
+  
+  // Ref для хранения имени, введенного пользователем вручную
+  const userEnteredName = useRef<string>('');
+  
+  // Состояние для показа алерта о конфликте имен
+  const [nameConflict, setNameConflict] = useState<{ dbName: string; enteredName: string } | null>(null);
 
   // Обновление даты и времени при открытии модального окна с новыми значениями
   useEffect(() => {
@@ -376,7 +382,7 @@ const CreateBookingModal = observer(({
       const results = await adminSearchClients({ phone: searchDigits, limit: 10 });
       
       return results.map((client: ClientSearchResultDto) => ({
-        label: `${formatPhoneWithMask(client.phone)}${client.name ? ` (${client.name})` : ''}`,
+        label: formatPhoneWithMask(client.phone),
         value: client.uuid,
         isCustom: false,
         rawData: client,
@@ -388,6 +394,19 @@ const CreateBookingModal = observer(({
     }
   }, [toastStore]);
 
+  // Обработчик замены имени на имя из базы
+  const handleReplaceNameWithDb = useCallback(() => {
+    if (nameConflict) {
+      setClientName(nameConflict.dbName);
+      setNameConflict(null);
+    }
+  }, [nameConflict]);
+
+  // Обработчик сохранения введенного имени
+  const handleKeepEnteredName = useCallback(() => {
+    setNameConflict(null);
+  }, []);
+
   // Обработчик выбора клиента из автокомплита
   const handleClientSelect = useCallback(async (option: AutocompleteOption) => {
     console.log('👤 handleClientSelect called:', { option });
@@ -396,7 +415,7 @@ const CreateBookingModal = observer(({
       // Пользователь ввел новый номер (не из списка)
       setPhoneAutocompleteValue(option);
       setSelectedClient(null);
-      setClientName('');
+      // НЕ сбрасываем clientName - сохраняем введенное пользователем имя
       setClientCarsOptions([]); // Очищаем список автомобилей
       // Сохраняем введенный телефон для последующего использования
       setPhone(option.label);
@@ -408,9 +427,19 @@ const CreateBookingModal = observer(({
     console.log('👤 handleClientSelect clientData:', { clientData, hasRawData: !!clientData });
     
     if (clientData) {
-      console.log('👤 Setting client name to:', clientData.name);
+      const dbName = clientData.name ? String(clientData.name) : '';
+      const enteredName = userEnteredName.current.trim();
+      
+      // Проверяем, если пользователь ввел имя и оно отличается от имени в БД
+      if (enteredName && dbName && enteredName.toLowerCase() !== dbName.toLowerCase()) {
+        // Показываем алерт о конфликте имен
+        setNameConflict({ dbName, enteredName });
+      } else {
+        // Если пользователь не вводил имя или имена совпадают - используем имя из БД
+        setClientName(dbName);
+      }
+      
       setSelectedClient(clientData);
-      setClientName(clientData.name ? String(clientData.name) : '');
       
       const formattedPhone = formatPhoneWithMask(clientData.phone);
       setPhoneAutocompleteValue({ ...option, label: formattedPhone });
@@ -717,6 +746,12 @@ const CreateBookingModal = observer(({
     setCarDetailsModified(false);
     originalCarDetails.current = { make: null, model: null };
     
+    // Очищаем введенное пользователем имя
+    userEnteredName.current = '';
+    
+    // Очищаем состояние алерта
+    setNameConflict(null);
+    
     onClose();
   }, [initialDate, initialTime, onClose]);
 
@@ -792,6 +827,18 @@ const CreateBookingModal = observer(({
               onChange={handleClientSelect}
               minSearchLength={3}
               searchDebounce={300}
+              renderOption={(option) => {
+                const clientData = (option as AutocompleteOption & { rawData?: ClientSearchResultDto }).rawData;
+                if (clientData?.name) {
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', pointerEvents: 'none' }}>
+                      <div style={{ fontWeight: 500 }}>{option.label}</div>
+                      <div style={{ fontSize: '13px', color: '#666' }}>{clientData.name}</div>
+                    </div>
+                  );
+                }
+                return option.label;
+              }}
               onInputChange={(value, event) => {
                 // Сохраняем позицию курсора перед форматированием
                 const input = event?.target as HTMLInputElement;
@@ -846,10 +893,25 @@ const CreateBookingModal = observer(({
               label="Имя клиента"
               placeholder="Имя клиента"
               value={clientName}
-              onChange={(value) => setClientName(value)}
+              onChange={(value) => {
+                setClientName(value);
+                // Сохраняем введенное пользователем имя
+                userEnteredName.current = value;
+              }}
             />
           </div>
         </div>
+
+        {/* Алерт о конфликте имен */}
+        {nameConflict && (
+          <AppAlert
+            message={`Мы нашли пользователя в базе с таким номером, но с другим именем. Заменить на "${nameConflict.dbName}"?`}
+            onConfirm={handleReplaceNameWithDb}
+            onCancel={handleKeepEnteredName}
+            confirmText="Заменить"
+            cancelText="Оставить"
+          />
+        )}
 
         {/* Номер автомобиля */}
         <div className="create-booking-modal__field">

@@ -101,7 +101,74 @@ export class BookingsStore {
   }
 
   /**
-   * Загрузка списка бронирований
+   * Создает ключ кэша для указанных дат
+   */
+  private getCacheKeyForDates(dateFrom: Date, dateTo: Date, statuses: BookingStatus[]): string {
+    const from = dateFrom.toISOString().split('T')[0];
+    const to = dateTo.toISOString().split('T')[0];
+    const statusesStr = statuses.sort().join(',');
+    return `${this.serviceCenterUuid}_${from}_${to}_${statusesStr}`;
+  }
+
+  /**
+   * Предзагружает данные для соседних периодов (предыдущего и следующего)
+   * Это позволяет избежать задержек при переключении между периодами
+   */
+  async prefetchAdjacentPeriods(): Promise<void> {
+    if (!this.dateFrom || !this.dateTo || !this.serviceCenterUuid) return;
+
+    const currentDateFrom = new Date(this.dateFrom);
+    const currentDateTo = new Date(this.dateTo);
+    
+    // Вычисляем длительность текущего периода в днях
+    const periodDays = Math.ceil((currentDateTo.getTime() - currentDateFrom.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    try {
+      // Предзагружаем предыдущий период (если еще не в кэше)
+      const prevDateFrom = new Date(currentDateFrom);
+      prevDateFrom.setDate(prevDateFrom.getDate() - periodDays);
+      const prevDateTo = new Date(currentDateTo);
+      prevDateTo.setDate(prevDateTo.getDate() - periodDays);
+      
+      const prevCacheKey = this.getCacheKeyForDates(prevDateFrom, prevDateTo, this.selectedStatuses);
+      if (!this.bookingsCache.has(prevCacheKey)) {
+        const prevResponse = await adminBookingsGetList({
+          serviceCenterUuid: this.serviceCenterUuid,
+          dateFrom: prevDateFrom.toISOString(),
+          dateTo: prevDateTo.toISOString(),
+          status: this.selectedStatuses.length > 0 ? (this.selectedStatuses as unknown as Array<unknown[]>) : undefined,
+        });
+        
+        if (prevResponse.data) {
+          this.bookingsCache.set(prevCacheKey, prevResponse.data);
+        }
+      }
+
+      // Предзагружаем следующий период (если еще не в кэше)
+      const nextDateFrom = new Date(currentDateFrom);
+      nextDateFrom.setDate(nextDateFrom.getDate() + periodDays);
+      const nextDateTo = new Date(currentDateTo);
+      nextDateTo.setDate(nextDateTo.getDate() + periodDays);
+      
+      const nextCacheKey = this.getCacheKeyForDates(nextDateFrom, nextDateTo, this.selectedStatuses);
+      if (!this.bookingsCache.has(nextCacheKey)) {
+        const nextResponse = await adminBookingsGetList({
+          serviceCenterUuid: this.serviceCenterUuid,
+          dateFrom: nextDateFrom.toISOString(),
+          dateTo: nextDateTo.toISOString(),
+          status: this.selectedStatuses.length > 0 ? (this.selectedStatuses as unknown as Array<unknown[]>) : undefined,
+        });
+        
+        if (nextResponse.data) {
+          this.bookingsCache.set(nextCacheKey, nextResponse.data);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to prefetch adjacent periods:', error);
+    }
+  }
+
+  /**   * Загрузка списка бронирований
    * @param silent - если true, загрузка произойдет без показа скелетона (тихое обновление)
    */
   async fetchBookings(silent = false): Promise<void> {
@@ -151,6 +218,13 @@ export class BookingsStore {
         // Сохраняем данные в кэш
         this.bookingsCache.set(cacheKey, response.data);
       });
+
+      // Предзагружаем соседние периоды (только при не-silent загрузке)
+      if (!silent) {
+        this.prefetchAdjacentPeriods().catch(err => {
+          console.warn('Failed to prefetch adjacent periods:', err);
+        });
+      }
     } catch (error) {
       runInAction(() => {
         this.error = 'Ошибка загрузки бронирований';

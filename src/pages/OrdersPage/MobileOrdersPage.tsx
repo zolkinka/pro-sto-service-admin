@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parseISO, isValid, addDays } from 'date-fns';
 import { useStores } from '@/hooks';
 import { MobileCalendarView } from '@/mobile-components/Orders/MobileCalendarView';
 import { MobileBookingSlot } from '@/mobile-components/Orders/MobileBookingSlot';
@@ -173,6 +173,11 @@ export const MobileOrdersPage = observer(() => {
         
         // Сохраняем в кэш
         setSlotsCache(prev => ({ ...prev, [cacheKey]: slots }));
+
+        // Предзагружаем слоты для соседних дней
+        prefetchAdjacentSlots(selectedDate).catch(err => {
+          console.warn('Failed to prefetch adjacent slots:', err);
+        });
       } catch (error) {
         console.error('Failed to load available slots:', error);
         setAvailableSlots({});
@@ -182,6 +187,71 @@ export const MobileOrdersPage = observer(() => {
     loadAvailableSlots();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, uiCategory, servicesStore.services.length, authStore.user?.service_center_uuid]);
+
+  // Функция предзагрузки слотов для соседних дней
+  const prefetchAdjacentSlots = useCallback(
+    async (currentDate: Date) => {
+      const serviceCenterUuid = authStore.user?.service_center_uuid;
+      
+      // Находим первый активный сервис выбранной категории для запроса слотов
+      const activeService = servicesStore.services.find(
+        service => service.business_type === uiCategory
+      );
+      
+      if (!serviceCenterUuid || !activeService) return;
+
+      try {
+        // Предзагружаем предыдущий день
+        const prevDate = addDays(currentDate, -1);
+        const prevDateStr = format(prevDate, 'yyyy-MM-dd');
+        const prevCacheKey = `${prevDateStr}_${uiCategory}`;
+
+        if (!slotsCache[prevCacheKey]) {
+          const prevResponse = await serviceCenterGetSlots({
+            uuid: serviceCenterUuid,
+            serviceUuid: activeService.uuid,
+            dateFrom: prevDateStr,
+            dateTo: prevDateStr,
+          });
+
+          const prevSlots: Record<number, boolean> = {};
+          prevResponse.forEach((timeSlot: string) => {
+            const slotDate = new Date(timeSlot);
+            const hour = slotDate.getHours();
+            prevSlots[hour] = true;
+          });
+
+          setSlotsCache(prev => ({ ...prev, [prevCacheKey]: prevSlots }));
+        }
+
+        // Предзагружаем следующий день
+        const nextDate = addDays(currentDate, 1);
+        const nextDateStr = format(nextDate, 'yyyy-MM-dd');
+        const nextCacheKey = `${nextDateStr}_${uiCategory}`;
+
+        if (!slotsCache[nextCacheKey]) {
+          const nextResponse = await serviceCenterGetSlots({
+            uuid: serviceCenterUuid,
+            serviceUuid: activeService.uuid,
+            dateFrom: nextDateStr,
+            dateTo: nextDateStr,
+          });
+
+          const nextSlots: Record<number, boolean> = {};
+          nextResponse.forEach((timeSlot: string) => {
+            const slotDate = new Date(timeSlot);
+            const hour = slotDate.getHours();
+            nextSlots[hour] = true;
+          });
+
+          setSlotsCache(prev => ({ ...prev, [nextCacheKey]: nextSlots }));
+        }
+      } catch (error) {
+        console.warn('Failed to prefetch adjacent slots:', error);
+      }
+    },
+    [authStore.user?.service_center_uuid, uiCategory, servicesStore.services, slotsCache]
+  );
 
   // Эффект для автоматического показа pending заказов в модальном окне
   useEffect(() => {

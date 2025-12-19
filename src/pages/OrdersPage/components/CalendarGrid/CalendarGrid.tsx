@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState, useCallback } from 'react';
-import { format, isSameDay, addDays } from 'date-fns';
+import { format, isSameDay, addDays, parseISO } from 'date-fns';
 import type { AdminBookingResponseDto } from '../../../../../services/api-client';
 import { serviceCenterGetSlots } from '../../../../../services/api-client';
 import BookingCard from '../BookingCard/BookingCard';
@@ -97,6 +97,104 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     hours.push(hour);
   }
 
+  // Функция предзагрузки слотов для соседних периодов
+  const prefetchAdjacentSlots = useCallback(async (currentDateFrom: string, currentDateTo: string) => {
+    if (!serviceCenterUuid || !serviceUuid) return;
+
+    try {
+      // Вычисляем длительность текущего периода
+      const from = parseISO(currentDateFrom);
+      const to = parseISO(currentDateTo);
+      const periodDays = Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+      // Предзагружаем предыдущий период
+      const prevDateFrom = format(addDays(from, -periodDays), 'yyyy-MM-dd');
+      const prevDateTo = format(addDays(to, -periodDays), 'yyyy-MM-dd');
+      const prevCacheKey = `${prevDateFrom}_${prevDateTo}`;
+
+      if (!slotsCache.current[prevCacheKey]) {
+        const prevResponse = await serviceCenterGetSlots({
+          uuid: serviceCenterUuid,
+          serviceUuid: serviceUuid,
+          dateFrom: prevDateFrom,
+          dateTo: prevDateTo,
+        });
+
+        // Преобразуем слоты в формат AvailableSlots
+        const prevSlots: AvailableSlots = {};
+        const prevPeriodStart = parseISO(prevDateFrom);
+        
+        prevResponse.forEach((slot: string) => {
+          const slotDateTime = parseISO(slot);
+          const hour = slotDateTime.getHours();
+          
+          // Определяем индекс дня относительно начала предыдущего периода
+          let dayIndex = -1;
+          for (let i = 0; i < periodDays; i++) {
+            const checkDate = addDays(prevPeriodStart, i);
+            if (isSameDay(slotDateTime, checkDate)) {
+              dayIndex = i;
+              break;
+            }
+          }
+
+          if (dayIndex !== -1 && !isNaN(hour)) {
+            if (!prevSlots[dayIndex]) {
+              prevSlots[dayIndex] = {};
+            }
+            prevSlots[dayIndex][hour] = true;
+          }
+        });
+
+        slotsCache.current[prevCacheKey] = prevSlots;
+      }
+
+      // Предзагружаем следующий период
+      const nextDateFrom = format(addDays(from, periodDays), 'yyyy-MM-dd');
+      const nextDateTo = format(addDays(to, periodDays), 'yyyy-MM-dd');
+      const nextCacheKey = `${nextDateFrom}_${nextDateTo}`;
+
+      if (!slotsCache.current[nextCacheKey]) {
+        const nextResponse = await serviceCenterGetSlots({
+          uuid: serviceCenterUuid,
+          serviceUuid: serviceUuid,
+          dateFrom: nextDateFrom,
+          dateTo: nextDateTo,
+        });
+
+        // Преобразуем слоты в формат AvailableSlots
+        const nextSlots: AvailableSlots = {};
+        const nextPeriodStart = parseISO(nextDateFrom);
+        
+        nextResponse.forEach((slot: string) => {
+          const slotDateTime = parseISO(slot);
+          const hour = slotDateTime.getHours();
+          
+          // Определяем индекс дня относительно начала следующего периода
+          let dayIndex = -1;
+          for (let i = 0; i < periodDays; i++) {
+            const checkDate = addDays(nextPeriodStart, i);
+            if (isSameDay(slotDateTime, checkDate)) {
+              dayIndex = i;
+              break;
+            }
+          }
+
+          if (dayIndex !== -1 && !isNaN(hour)) {
+            if (!nextSlots[dayIndex]) {
+              nextSlots[dayIndex] = {};
+            }
+            nextSlots[dayIndex][hour] = true;
+          }
+        });
+
+        slotsCache.current[nextCacheKey] = nextSlots;
+      }
+    } catch (error) {
+      console.warn('Failed to prefetch adjacent slots:', error);
+    }
+  }, [serviceCenterUuid, serviceUuid]);
+
   // Функция для загрузки слотов для всей недели или одного дня
   const loadAvailableSlots = useCallback(async () => {
     // Предотвращаем повторную загрузку, если уже идет загрузка
@@ -180,13 +278,22 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       
       // Сохраняем в кэш
       slotsCache.current[cacheKey] = slots;
+
+      // Предзагружаем слоты для соседних периодов (асинхронно, не блокируя основной поток)
+      (async () => {
+        try {
+          await prefetchAdjacentSlots(dateFrom, dateTo);
+        } catch (err) {
+          console.warn('Failed to prefetch adjacent slots:', err);
+        }
+      })();
     } catch (error) {
       console.error('Failed to load available slots:', error);
     } finally {
       isLoadingSlotsRef.current = false;
       setIsLoadingSlots(false);
     }
-  }, [weekStart, serviceCenterUuid, serviceUuid, viewMode, currentDate]);
+  }, [weekStart, serviceCenterUuid, serviceUuid, viewMode, currentDate, prefetchAdjacentSlots]);
 
   // Загружаем слоты при изменении недели или сервиса
   useEffect(() => {

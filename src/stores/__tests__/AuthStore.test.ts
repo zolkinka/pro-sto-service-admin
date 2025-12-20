@@ -1,8 +1,24 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import axios from 'axios';
 import { AuthStore } from '../AuthStore';
 import * as apiClient from '../../../services/api-client';
 import { toastStore } from '../ToastStore';
 import { notificationService } from '@/services/notificationService';
+
+// Mock axios
+vi.mock('axios', async () => {
+  const actual = await vi.importActual('axios');
+  return {
+    ...actual,
+    default: {
+      ...actual.default,
+      post: vi.fn(),
+      isAxiosError: vi.fn(),
+    },
+    post: vi.fn(),
+    isAxiosError: vi.fn(),
+  };
+});
 
 // Mock API client
 vi.mock('../../../services/api-client', () => ({
@@ -221,18 +237,30 @@ describe('AuthStore', () => {
       authStore.accessToken = 'old-access-token';
       authStore.refreshToken = 'old-refresh-token';
       authStore.isAuthenticated = true;
+      apiClient.OpenAPI.BASE = 'http://localhost:5201';
     });
 
     it('should successfully refresh tokens', async () => {
       const mockResponse = {
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token',
+        data: {
+          accessToken: 'new-access-token',
+          refreshToken: 'new-refresh-token',
+        },
       };
 
-      (apiClient.authRefresh as any).mockResolvedValue(mockResponse);
+      (axios.post as any).mockResolvedValue(mockResponse);
 
       await authStore.refreshTokens();
 
+      expect(axios.post).toHaveBeenCalledWith(
+        'http://localhost:5201/api/auth/refresh',
+        {},
+        {
+          headers: {
+            Authorization: 'Bearer old-refresh-token',
+          },
+        }
+      );
       expect(apiClient.OpenAPI.TOKEN).toBe('new-access-token');
       expect(authStore.accessToken).toBe('new-access-token');
       expect(authStore.refreshToken).toBe('new-refresh-token');
@@ -240,26 +268,39 @@ describe('AuthStore', () => {
       expect(localStorage.setItem).toHaveBeenCalledWith('refreshToken', 'new-refresh-token');
     });
 
-    it('should set refresh token as TOKEN before making refresh request', async () => {
+    it('should use refresh token in Authorization header', async () => {
       const mockResponse = {
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token',
+        data: {
+          accessToken: 'new-access-token',
+          refreshToken: 'new-refresh-token',
+        },
       };
 
-      (apiClient.authRefresh as any).mockImplementation(() => {
-        // Check that refresh token is set as TOKEN during the call
-        expect(apiClient.OpenAPI.TOKEN).toBe('old-refresh-token');
-        return Promise.resolve(mockResponse);
-      });
+      (axios.post as any).mockResolvedValue(mockResponse);
 
       await authStore.refreshTokens();
+
+      expect(axios.post).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.objectContaining({
+          headers: {
+            Authorization: 'Bearer old-refresh-token',
+          },
+        })
+      );
     });
 
-    it('should logout on refresh error', async () => {
-      const error = new Error('Refresh failed');
-      (apiClient.authRefresh as any).mockRejectedValue(error);
+    it('should logout on 401 error', async () => {
+      const error = {
+        response: { status: 401 },
+        isAxiosError: true,
+      };
 
-      await expect(authStore.refreshTokens()).rejects.toThrow('Refresh failed');
+      (axios.post as any).mockRejectedValue(error);
+      (axios.isAxiosError as any).mockReturnValue(true);
+
+      await expect(authStore.refreshTokens()).rejects.toEqual(error);
 
       expect(authStore.isAuthenticated).toBe(false);
       expect(authStore.accessToken).toBe(null);
@@ -269,72 +310,45 @@ describe('AuthStore', () => {
       expect(localStorage.removeItem).toHaveBeenCalledWith('user');
     });
 
+    it('should NOT logout on network error', async () => {
+      const error = new Error('Network error');
+
+      (axios.post as any).mockRejectedValue(error);
+      (axios.isAxiosError as any).mockReturnValue(false);
+
+      await expect(authStore.refreshTokens()).rejects.toThrow('Network error');
+
+      // Should NOT logout - keep authentication state
+      expect(authStore.isAuthenticated).toBe(true);
+      expect(authStore.accessToken).toBe('old-access-token');
+      expect(authStore.refreshToken).toBe('old-refresh-token');
+      expect(localStorage.removeItem).not.toHaveBeenCalled();
+    });
+
+    it('should NOT logout on 500 error', async () => {
+      const error = {
+        response: { status: 500 },
+        isAxiosError: true,
+      };
+
+      (axios.post as any).mockRejectedValue(error);
+      (axios.isAxiosError as any).mockReturnValue(true);
+
+      await expect(authStore.refreshTokens()).rejects.toEqual(error);
+
+      // Should NOT logout on server error
+      expect(authStore.isAuthenticated).toBe(true);
+      expect(authStore.accessToken).toBe('old-access-token');
+      expect(localStorage.removeItem).not.toHaveBeenCalled();
+    });
+
     it('should logout if refresh token is missing', async () => {
       authStore.refreshToken = null;
 
       await authStore.refreshTokens();
 
       expect(authStore.isAuthenticated).toBe(false);
-      expect(apiClient.authRefresh).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Automatic token refresh', () => {
-    it('should setup automatic token refresh after login', async () => {
-      const mockResponse = {
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token',
-        user: {
-          id: '123',
-          phone: '+79991234567',
-          role: 'admin',
-        },
-      };
-
-      (apiClient.adminAuthLogin as any).mockResolvedValue(mockResponse);
-      (apiClient.authRefresh as any).mockResolvedValue({
-        accessToken: 'refreshed-token',
-        refreshToken: 'refreshed-refresh-token',
-      });
-
-      await authStore.verifyCode('+79991234567', '123456');
-
-      // Verify authRefresh was not called yet
-      expect(apiClient.authRefresh).not.toHaveBeenCalled();
-
-      // Fast-forward time by 10 minutes
-      await vi.advanceTimersByTimeAsync(10 * 60 * 1000);
-
-      // Now authRefresh should have been called
-      expect(apiClient.authRefresh).toHaveBeenCalledTimes(1);
-    });
-
-    it('should clear refresh timer on logout', async () => {
-      const mockResponse = {
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token',
-        user: {
-          id: '123',
-          phone: '+79991234567',
-          role: 'admin',
-        },
-      };
-
-      (apiClient.adminAuthLogin as any).mockResolvedValue(mockResponse);
-      (apiClient.authRefresh as any).mockResolvedValue({
-        accessToken: 'refreshed-token',
-        refreshToken: 'refreshed-refresh-token',
-      });
-
-      await authStore.verifyCode('+79991234567', '123456');
-
-      authStore.logout();
-
-      // Fast-forward time by 10 minutes
-      await vi.advanceTimersByTimeAsync(10 * 60 * 1000);
-
-      // Should not refresh after logout
-      expect(apiClient.authRefresh).not.toHaveBeenCalled();
+      expect(axios.post).not.toHaveBeenCalled();
     });
   });
 
@@ -362,36 +376,6 @@ describe('AuthStore', () => {
       expect(localStorage.removeItem).toHaveBeenCalledWith('accessToken');
       expect(localStorage.removeItem).toHaveBeenCalledWith('refreshToken');
       expect(localStorage.removeItem).toHaveBeenCalledWith('user');
-    });
-
-    it('should stop automatic refresh timer', async () => {
-      const mockResponse = {
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token',
-        user: {
-          id: '123',
-          phone: '+79991234567',
-          role: 'admin',
-        },
-      };
-
-      (apiClient.adminAuthLogin as any).mockResolvedValue(mockResponse);
-      (apiClient.authRefresh as any).mockResolvedValue({
-        accessToken: 'refreshed-token',
-        refreshToken: 'refreshed-refresh-token',
-      });
-
-      const newAuthStore = new AuthStore();
-      await newAuthStore.verifyCode('+79991234567', '123456');
-
-      vi.clearAllMocks();
-
-      newAuthStore.logout();
-
-      // Fast-forward time - timer should not trigger
-      await vi.advanceTimersByTimeAsync(10 * 60 * 1000);
-
-      expect(apiClient.authRefresh).not.toHaveBeenCalled();
     });
   });
 

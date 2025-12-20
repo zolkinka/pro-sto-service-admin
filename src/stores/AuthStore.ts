@@ -1,11 +1,11 @@
 import { makeAutoObservable, runInAction } from 'mobx';
+import axios from 'axios';
 import {
   adminAuthSendCode,
   adminAuthLogin,
-  authRefresh,
   OpenAPI,
 } from '../../services/api-client';
-import type { AdminUserDto } from '../../services/api-client';
+import type { AdminUserDto, AuthRefreshResponse } from '../../services/api-client';
 import { toastStore } from './ToastStore';
 import { notificationService } from '@/services/notificationService';
 
@@ -19,9 +19,6 @@ export class AuthStore {
   refreshToken: string | null = null;
   user: AdminUserDto | null = null;
   isLoading = false;
-
-  // Таймер для автоматического обновления токенов
-  private refreshTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -50,8 +47,6 @@ export class AuthStore {
 
         // Устанавливаем токен в OpenAPI для всех запросов
         OpenAPI.TOKEN = accessToken;
-        
-        this.setupTokenRefresh();
 
         // Инициализируем уведомления после восстановления сессии
         notificationService.initialize().catch((error) => {
@@ -116,8 +111,6 @@ export class AuthStore {
       // Устанавливаем токен в OpenAPI для всех запросов
       OpenAPI.TOKEN = response.accessToken;
 
-      this.setupTokenRefresh();
-
       // Инициализируем уведомления после успешной авторизации
       notificationService.initialize().catch((error) => {
         console.error('Failed to initialize notifications after login:', error);
@@ -134,6 +127,7 @@ export class AuthStore {
 
   /**
    * Обновление токенов
+   * Используется interceptor'ом при получении 401 ошибки
    */
   refreshTokens = async (): Promise<void> => {
     if (!this.refreshToken) {
@@ -143,60 +137,45 @@ export class AuthStore {
     }
 
     try {
-      // Устанавливаем refresh token как TOKEN для запроса refresh
-      // Это позволит передать refresh token в Authorization header
-      OpenAPI.TOKEN = this.refreshToken;
-      
-      const response = await authRefresh();
+      // Используем прямой axios запрос с явной передачей refresh token
+      // Это избегает race condition с глобальным OpenAPI.TOKEN
+      const response = await axios.post<AuthRefreshResponse>(
+        `${OpenAPI.BASE}/api/auth/refresh`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${this.refreshToken}`,
+          },
+        }
+      );
 
       runInAction(() => {
-        // authRefresh возвращает только новый accessToken
-        this.accessToken = response.accessToken;
-        localStorage.setItem('accessToken', response.accessToken);
-        this.refreshToken = response.refreshToken;
-        localStorage.setItem('refreshToken', response.refreshToken);
+        this.accessToken = response.data.accessToken;
+        localStorage.setItem('accessToken', response.data.accessToken);
+        this.refreshToken = response.data.refreshToken;
+        localStorage.setItem('refreshToken', response.data.refreshToken);
       });
 
       // Обновляем токен в OpenAPI на новый access token
-      OpenAPI.TOKEN = response.accessToken;
-
-      this.setupTokenRefresh();
+      OpenAPI.TOKEN = response.data.accessToken;
     } catch (error) {
       console.error('Ошибка при обновлении токенов:', error);
-      // Если не удалось обновить токены - разлогиниваем
-      this.logout();
+      
+      // Разлогиниваем только при 401 ошибке (невалидный/истекший refresh token)
+      // При network ошибках не разлогиниваем пользователя
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        this.logout();
+      }
+      
       throw error; // Пробрасываем ошибку для interceptor
     }
   };
 
   /**
-   * Настройка автоматического обновления токенов
-   * Обновляет токен за 10 минут до истечения
-   */
-  private setupTokenRefresh = () => {
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-    }
-
-    // JWT обычно живет 15-60 минут
-    // Обновляем токен через 10 минут
-    const refreshTime = 10 * 60 * 1000; // 10 минут
-
-    this.refreshTimer = setTimeout(() => {
-      this.refreshTokens();
-    }, refreshTime);
-  };
-
-  /**
    * Выход из системы
-   * Очищает все данные и останавливает таймеры
+   * Очищает все данные аутентификации
    */
   logout = () => {
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-      this.refreshTimer = null;
-    }
-
     runInAction(() => {
       this.isAuthenticated = false;
       this.accessToken = null;

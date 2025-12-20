@@ -12,6 +12,9 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "generate:api-client": "npx @hey-api/openapi-ts -i http://localhost:5201/docs-json -o ./services/api-client  -c legacy/axios"
@@ -49,6 +52,7 @@
     "eslint-plugin-react-refresh": "^0.4.22",
     "eslint-plugin-storybook": "^9.1.15",
     "globals": "^16.4.0",
+    "jsdom": "^27.3.0",
     "playwright": "^1.56.1",
     "storybook": "^8.6.14",
     "typescript": "~5.9.3",

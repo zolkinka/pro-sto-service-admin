@@ -51,6 +51,7 @@ class NotificationService {
   private currentToken: string | null = null;
   private settings: NotificationSettings = DEFAULT_NOTIFICATION_SETTINGS;
   private messageHandlers: Array<(payload: MessagePayload) => void> = [];
+  private serviceWorkerRegistered: boolean = false;
 
   /**
    * Проверка поддержки уведомлений в браузере
@@ -131,17 +132,16 @@ class NotificationService {
         return null;
       }
 
-      // Получаем существующую регистрацию Service Worker или создаем новую
-      let registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      // Получаем существующую регистрацию Service Worker
+      // НЕ создаем новую, чтобы избежать множественных регистраций
+      const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
       
       if (!registration) {
-        // Если регистрации нет, создаем ее
-        console.log('📝 Registering Service Worker...');
-        registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        console.log('✅ Service Worker registered in getToken:', registration);
-      } else {
-        console.log('✅ Service Worker already registered');
+        console.error('❌ Service Worker not registered. Call registerServiceWorker() first.');
+        return null;
       }
+      
+      console.log('✅ Using existing Service Worker registration');
 
       console.log('🔑 Requesting FCM token with VAPID key...');
       
@@ -282,16 +282,96 @@ class NotificationService {
         return false;
       }
 
+      // Проверяем, не зарегистрирован ли уже Service Worker
+      if (this.serviceWorkerRegistered) {
+        console.log('✅ Service Worker already registered (cached)');
+        return true;
+      }
+
       const supported = await this.isSupported();
       if (!supported) {
         return false;
+      }
+
+      // Проверяем, есть ли уже регистрация
+      const existingRegistration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      
+      if (existingRegistration) {
+        console.log('✅ Service Worker already registered:', existingRegistration);
+        
+        // Проверяем состояние Service Worker
+        if (existingRegistration.installing) {
+          console.log('⏳ Service Worker is installing, waiting for activation...');
+          await new Promise<void>((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              reject(new Error('Service Worker activation timeout'));
+            }, 30000); // 30 секунд timeout
+            
+            if (existingRegistration.installing) {
+              const handler = (e: Event) => {
+                const sw = e.target as ServiceWorker;
+                if (sw.state === 'activated') {
+                  console.log('✅ Service Worker activated');
+                  clearTimeout(timeoutId);
+                  sw.removeEventListener('statechange', handler);
+                  resolve();
+                } else if (sw.state === 'redundant') {
+                  clearTimeout(timeoutId);
+                  sw.removeEventListener('statechange', handler);
+                  reject(new Error('Service Worker became redundant'));
+                }
+              };
+              existingRegistration.installing.addEventListener('statechange', handler);
+            } else {
+              clearTimeout(timeoutId);
+              resolve();
+            }
+          });
+        } else if (existingRegistration.waiting) {
+          console.log('⏳ Service Worker is waiting...');
+        }
+        
+        this.serviceWorkerRegistered = true;
+        return true;
       }
 
       // Регистрируем Service Worker
       const registration = await navigator.serviceWorker.register(
         '/firebase-messaging-sw.js'
       );
-      console.log('Service Worker registered successfully:', registration);
+      console.log('✅ Service Worker registered successfully:', registration);
+      
+      // Ждем активации
+      if (registration.installing) {
+        console.log('⏳ Waiting for Service Worker to activate...');
+        await new Promise<void>((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Service Worker activation timeout'));
+          }, 30000); // 30 секунд timeout
+          
+          if (registration.installing) {
+            const handler = (e: Event) => {
+              const sw = e.target as ServiceWorker;
+              if (sw.state === 'activated') {
+                console.log('✅ Service Worker activated');
+                clearTimeout(timeoutId);
+                sw.removeEventListener('statechange', handler);
+                resolve();
+              } else if (sw.state === 'redundant') {
+                clearTimeout(timeoutId);
+                sw.removeEventListener('statechange', handler);
+                reject(new Error('Service Worker became redundant'));
+              }
+            };
+            registration.installing.addEventListener('statechange', handler);
+          } else {
+            clearTimeout(timeoutId);
+            resolve();
+          }
+        });
+      }
+      
+      this.serviceWorkerRegistered = true;
 
       return true;
     } catch (error) {

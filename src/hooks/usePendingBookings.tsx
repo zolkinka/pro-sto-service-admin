@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { observer } from 'mobx-react-lite';
 import type { MessagePayload } from 'firebase/messaging';
 import { useStores } from '@/hooks';
 import { notificationService } from '@/services/notificationService';
 
-// Интервал polling в миллисекундах (30 секунд)
-const POLLING_INTERVAL_MS = 30 * 1000;
+// Интервал polling в миллисекундах (1 минута)
+const POLLING_INTERVAL_MS = 60 * 1000;
+// Debounce задержка для предотвращения параллельных запросов
+const DEBOUNCE_DELAY_MS = 300;
 
 interface PendingBookingsContextValue {
   pendingBookings: string[];
@@ -23,7 +24,8 @@ interface PendingBookingsContextValue {
 
 const PendingBookingsContext = createContext<PendingBookingsContextValue | null>(null);
 
-export const usePendingBookings = () => {
+// Экспорт хука отдельно для Fast Refresh
+const usePendingBookingsHook = () => {
   const context = useContext(PendingBookingsContext);
   if (!context) {
     throw new Error('usePendingBookings must be used within PendingBookingsProvider');
@@ -31,11 +33,13 @@ export const usePendingBookings = () => {
   return context;
 };
 
+export { usePendingBookingsHook as usePendingBookings };
+
 interface PendingBookingsProviderProps {
   children: ReactNode;
 }
 
-export const PendingBookingsProvider = observer(({ children }: PendingBookingsProviderProps) => {
+export const PendingBookingsProvider = ({ children }: PendingBookingsProviderProps) => {
   const { bookingsStore, authStore } = useStores();
   
   const [pendingBookings, setPendingBookings] = useState<string[]>([]);
@@ -44,31 +48,51 @@ export const PendingBookingsProvider = observer(({ children }: PendingBookingsPr
   const [hasCheckedOnStartup, setHasCheckedOnStartup] = useState(false);
   
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const serviceCenterUuidRef = useRef<string | null>(null);
+  
+  // Обновляем ref при изменении serviceCenterUuid
+  useEffect(() => {
+    serviceCenterUuidRef.current = authStore.user?.service_center_uuid || null;
+  }, [authStore.user?.service_center_uuid]);
 
-  // Функция для загрузки pending заказов
+  // Функция для загрузки pending заказов с debounce
   const loadPendingBookings = useCallback(() => {
-    const serviceCenterUuid = authStore.user?.service_center_uuid;
-    
-    if (serviceCenterUuid) {
-      bookingsStore.setServiceCenterUuid(serviceCenterUuid);
-      bookingsStore.fetchPendingBookings();
+    // Отменяем предыдущий таймер если есть
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
-  }, [authStore.user?.service_center_uuid, bookingsStore]);
+    
+    debounceTimerRef.current = setTimeout(() => {
+      const serviceCenterUuid = serviceCenterUuidRef.current;
+      
+      if (serviceCenterUuid) {
+        try {
+          bookingsStore.setServiceCenterUuid(serviceCenterUuid);
+          bookingsStore.fetchPendingBookings();
+        } catch (error) {
+          console.error('PendingBookingsProvider: Ошибка загрузки pending заказов:', error);
+        }
+      } else {
+        console.warn('PendingBookingsProvider: Missing serviceCenterUuid');
+      }
+    }, DEBOUNCE_DELAY_MS);
+  }, [bookingsStore]);
 
   // Первоначальная загрузка pending заказов
   useEffect(() => {
-    const serviceCenterUuid = authStore.user?.service_center_uuid;
+    const serviceCenterUuid = serviceCenterUuidRef.current;
     
     if (serviceCenterUuid && !hasCheckedOnStartup) {
       bookingsStore.setServiceCenterUuid(serviceCenterUuid);
       bookingsStore.fetchPendingBookings();
       setHasCheckedOnStartup(true);
     }
-  }, [authStore.user, bookingsStore, hasCheckedOnStartup]);
+  }, [bookingsStore, hasCheckedOnStartup]);
 
   // Polling для периодической проверки
   useEffect(() => {
-    const serviceCenterUuid = authStore.user?.service_center_uuid;
+    const serviceCenterUuid = serviceCenterUuidRef.current;
     
     if (!serviceCenterUuid) {
       return;
@@ -79,7 +103,7 @@ export const PendingBookingsProvider = observer(({ children }: PendingBookingsPr
       loadPendingBookings();
     }, POLLING_INTERVAL_MS);
     
-    console.log('PendingBookingsProvider: Polling запущен');
+    console.log('PendingBookingsProvider: Polling запущен (интервал: 60 сек)');
     
     return () => {
       if (pollingIntervalRef.current) {
@@ -87,37 +111,76 @@ export const PendingBookingsProvider = observer(({ children }: PendingBookingsPr
         pollingIntervalRef.current = null;
         console.log('PendingBookingsProvider: Polling остановлен');
       }
+      // Очищаем debounce таймер при размонтировании
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
     };
-  }, [authStore.user?.service_center_uuid, loadPendingBookings]);
+  }, [loadPendingBookings]);
 
-  // Обработчик push-уведомлений
+  // Ref для стабильного обработчика push-уведомлений
+  const handlePushMessageRef = useRef<(payload: MessagePayload) => void>();
+  
+  // Обновляем обработчик при изменении bookingsStore
   useEffect(() => {
-    const handlePushMessage = (payload: MessagePayload) => {
+    handlePushMessageRef.current = (payload: MessagePayload) => {
       console.log('PendingBookingsProvider: Push notification received:', payload);
       
       const notificationType = payload.data?.type;
       
       if (notificationType === 'newBooking' || notificationType === 'new_booking') {
         console.log('PendingBookingsProvider: Новое бронирование - загружаем pending заказы');
-        loadPendingBookings();
+        
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+        
+        debounceTimerRef.current = setTimeout(() => {
+          const serviceCenterUuid = serviceCenterUuidRef.current;
+          
+          if (serviceCenterUuid) {
+            try {
+              bookingsStore.setServiceCenterUuid(serviceCenterUuid);
+              bookingsStore.fetchPendingBookings();
+            } catch (error) {
+              console.error('PendingBookingsProvider: Ошибка загрузки pending заказов:', error);
+            }
+          } else {
+            console.warn('PendingBookingsProvider: Missing serviceCenterUuid');
+          }
+        }, DEBOUNCE_DELAY_MS);
+      }
+    };
+  }, [bookingsStore]);
+
+  // Подписка на push-уведомления (выполняется только один раз)
+  useEffect(() => {
+    const stableHandler = (payload: MessagePayload) => {
+      if (handlePushMessageRef.current) {
+        handlePushMessageRef.current(payload);
       }
     };
 
-    notificationService.addMessageHandler(handlePushMessage);
+    notificationService.addMessageHandler(stableHandler);
     console.log('PendingBookingsProvider: Подписка на push-уведомления активирована');
 
     return () => {
-      notificationService.removeMessageHandler(handlePushMessage);
+      notificationService.removeMessageHandler(stableHandler);
       console.log('PendingBookingsProvider: Отписка от push-уведомлений');
     };
-  }, [loadPendingBookings]);
+  }, []); // Пустой массив - подписка выполняется один раз
 
   // Обновление локального списка pending заказов
   useEffect(() => {
     if (!bookingsStore.isLoadingPending && bookingsStore.pendingBookings.length > 0) {
       const pendingUuids = bookingsStore.pendingBookings.map(b => b.uuid);
       
-      if (JSON.stringify(pendingUuids) !== JSON.stringify(pendingBookings)) {
+      // Сравниваем массивы эффективно без JSON.stringify
+      const arraysAreDifferent = 
+        pendingUuids.length !== pendingBookings.length ||
+        pendingUuids.some((uuid, index) => uuid !== pendingBookings[index]);
+      
+      if (arraysAreDifferent) {
         setPendingBookings(pendingUuids);
       }
     } else if (!bookingsStore.isLoadingPending && bookingsStore.pendingBookings.length === 0 && pendingBookings.length > 0) {
@@ -213,4 +276,4 @@ export const PendingBookingsProvider = observer(({ children }: PendingBookingsPr
       {children}
     </PendingBookingsContext.Provider>
   );
-});
+};

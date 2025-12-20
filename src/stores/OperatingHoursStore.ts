@@ -32,6 +32,15 @@ const getErrorMessage = (error: unknown): string => {
 interface OperationOptions {
   showSuccessToast?: boolean;
   showErrorToast?: boolean;
+  silent?: boolean;
+  forceRefresh?: boolean;
+}
+
+interface CacheEntry {
+  regular: OperatingHoursResponseDto[];
+  special: OperatingHoursResponseDto[];
+  timezone: string;
+  timestamp: number;
 }
 
 export class OperatingHoursStore {
@@ -41,6 +50,12 @@ export class OperatingHoursStore {
   loading = false;
   error: string | null = null;
   private rootStore?: RootStore;
+  // Защита от race condition - отслеживаем последний запрос
+  private fetchRequestId = 0;
+  // LRU кеш для минимизации запросов к API
+  // Размер: 1 элемент (обычно работаем с одним serviceCenterUuid)
+  private readonly MAX_CACHE_SIZE = 1;
+  private cache = new Map<string, CacheEntry>();
 
   constructor(rootStore?: RootStore) {
     this.rootStore = rootStore;
@@ -51,12 +66,58 @@ export class OperatingHoursStore {
     this.rootStore = rootStore;
   }
 
-  async loadOperatingHours(serviceCenterUuid: string) {
-    this.loading = true;
-    this.error = null;
+  /**
+   * Очищает кеш расписания
+   */
+  clearCache() {
+    this.cache.clear();
+  }
+
+  /**
+   * Загружает расписание работы из API или кеша
+   * @param serviceCenterUuid - UUID сервисного центра
+   * @param options - опции загрузки
+   */
+  async loadOperatingHours(
+    serviceCenterUuid: string,
+    options: Pick<OperationOptions, 'silent' | 'forceRefresh'> = {}
+  ) {
+    const { silent = false, forceRefresh = false } = options;
+
+    // Проверяем кеш, если не требуется принудительное обновление
+    if (!forceRefresh) {
+      const cached = this.cache.get(serviceCenterUuid);
+      if (cached) {
+        runInAction(() => {
+          this.regularSchedule = cached.regular;
+          this.specialDates = cached.special;
+          this.timezone = cached.timezone;
+          if (!silent) {
+            this.loading = false;
+            this.error = null;
+          }
+        });
+        return;
+      }
+    }
+
+    if (!silent) {
+      runInAction(() => {
+        this.loading = true;
+        this.error = null;
+      });
+    }
+
+    // Race condition protection: генерируем уникальный ID запроса
+    const currentRequestId = ++this.fetchRequestId;
     
     try {
       const data = await operatingHoursGetAll({ serviceCenterUuid });
+
+      // Проверяем, что это последний запрос
+      if (currentRequestId !== this.fetchRequestId) {
+        return; // Более новый запрос уже выполняется
+      }
       
       runInAction(() => {
         this.regularSchedule = data.regular;
@@ -65,14 +126,41 @@ export class OperatingHoursStore {
         if (data.regular.length > 0) {
           this.timezone = data.regular[0].timezone;
         }
-        this.loading = false;
+        
+        // Сохраняем в кеш с LRU логикой
+        if (this.cache.size >= this.MAX_CACHE_SIZE) {
+          // Удаляем самый старый элемент (первый в Map)
+          const firstKey = this.cache.keys().next().value;
+          if (firstKey) {
+            this.cache.delete(firstKey);
+          }
+        }
+        
+        this.cache.set(serviceCenterUuid, {
+          regular: data.regular,
+          special: data.special,
+          timezone: data.regular.length > 0 ? data.regular[0].timezone : this.timezone,
+          timestamp: Date.now()
+        });
+        
+        if (!silent) {
+          this.loading = false;
+        }
       });
     } catch (error) {
+      // Проверяем, что это последний запрос
+      if (currentRequestId !== this.fetchRequestId) {
+        return;
+      }
+
       runInAction(() => {
         this.error = 'Ошибка загрузки расписания';
-        this.loading = false;
+        if (!silent) {
+          this.loading = false;
+        }
       });
       console.error('Error loading operating hours:', error);
+      throw error;
     }
   }
 
@@ -91,14 +179,17 @@ export class OperatingHoursStore {
         requestBody: data 
       });
       
+      // Инвалидируем кеш перед перезагрузкой
+      this.cache.delete(serviceCenterUuid);
+      
       // Показываем toast с успехом только если указано
       if (showSuccessToast) {
         this.rootStore?.toastStore.showSuccess('Расписание успешно обновлено');
       }
       
-      // Перезагружаем данные после обновления
+      // Перезагружаем данные после обновления с forceRefresh
       try {
-        await this.loadOperatingHours(serviceCenterUuid);
+        await this.loadOperatingHours(serviceCenterUuid, { forceRefresh: true });
       } catch (reloadError) {
         // Не бросаем ошибку, если перезагрузка не удалась - данные уже сохранены
         console.error('Error reloading operating hours after update:', reloadError);
@@ -139,12 +230,20 @@ export class OperatingHoursStore {
         requestBody: data 
       });
       
+      // Инвалидируем кеш перед перезагрузкой
+      this.cache.delete(serviceCenterUuid);
+      
       if (showSuccessToast) {
         this.rootStore?.toastStore.showSuccess('Выходной день добавлен');
       }
       
-      // Перезагружаем данные после добавления
-      await this.loadOperatingHours(serviceCenterUuid);
+      // Перезагружаем данные после добавления с обработкой ошибки
+      try {
+        await this.loadOperatingHours(serviceCenterUuid, { forceRefresh: true });
+      } catch (reloadError) {
+        // Не бросаем ошибку, если перезагрузка не удалась - данные уже сохранены
+        console.error('Error reloading operating hours after create:', reloadError);
+      }
       
       runInAction(() => {
         this.loading = false;
@@ -181,12 +280,20 @@ export class OperatingHoursStore {
         uuid 
       });
       
+      // Инвалидируем кеш перед перезагрузкой
+      this.cache.delete(serviceCenterUuid);
+      
       if (showSuccessToast) {
         this.rootStore?.toastStore.showSuccess('Выходной день удален');
       }
       
-      // Перезагружаем данные после удаления
-      await this.loadOperatingHours(serviceCenterUuid);
+      // Перезагружаем данные после удаления с обработкой ошибки
+      try {
+        await this.loadOperatingHours(serviceCenterUuid, { forceRefresh: true });
+      } catch (reloadError) {
+        // Не бросаем ошибку, если перезагрузка не удалась - данные уже сохранены
+        console.error('Error reloading operating hours after delete:', reloadError);
+      }
       
       runInAction(() => {
         this.loading = false;
@@ -214,6 +321,8 @@ export class OperatingHoursStore {
     this.timezone = 'Europe/Moscow';
     this.loading = false;
     this.error = null;
+    this.fetchRequestId = 0;
+    this.cache.clear();
   }
 }
 

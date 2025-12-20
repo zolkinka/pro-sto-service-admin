@@ -54,7 +54,9 @@ export class BookingsStore {
 
   // Кэш для предотвращения ненужных загрузок и скелетонов
   private bookingsCache = new Map<string, AdminBookingResponseDto[]>();
+  private readonly MAX_CACHE_SIZE = 10; // Максимум 10 периодов в кэше
   private isInitialLoad = true;
+  private fetchRequestId = 0; // Счетчик для предотвращения race condition
 
   constructor() {
     makeAutoObservable(this);
@@ -64,7 +66,12 @@ export class BookingsStore {
    * Установка UUID сервисного центра
    */
   setServiceCenterUuid(uuid: string) {
-    this.serviceCenterUuid = uuid;
+    if (this.serviceCenterUuid !== uuid) {
+      this.serviceCenterUuid = uuid;
+      this.bookingsCache.clear(); // Очищаем кэш при смене центра
+      this.bookings = [];
+      this.pendingBookings = [];
+    }
   }
 
   /**
@@ -88,8 +95,8 @@ export class BookingsStore {
   private getCacheKey(): string {
     const dateFrom = format(this.dateFrom, 'yyyy-MM-dd');
     const dateTo = format(this.dateTo, 'yyyy-MM-dd');
-    const statuses = this.selectedStatuses.join(',') || 'all';
-    return `${dateFrom}_${dateTo}_${statuses}`;
+    const statuses = this.selectedStatuses.length > 0 ? this.selectedStatuses.slice().sort().join(',') : 'all';
+    return `${this.serviceCenterUuid}_${dateFrom}_${dateTo}_${statuses}`;
   }
 
   /**
@@ -98,6 +105,20 @@ export class BookingsStore {
   hasCachedData(): boolean {
     const cacheKey = this.getCacheKey();
     return this.bookingsCache.has(cacheKey);
+  }
+
+  /**
+   * Устанавливает значение в кэш с учетом лимита размера (LRU)
+   */
+  private setCacheValue(key: string, value: AdminBookingResponseDto[]): void {
+    // Если кэш переполнен, удаляем самую старую запись (первую)
+    if (this.bookingsCache.size >= this.MAX_CACHE_SIZE) {
+      const firstKey = this.bookingsCache.keys().next().value;
+      if (firstKey) {
+        this.bookingsCache.delete(firstKey);
+      }
+    }
+    this.bookingsCache.set(key, value);
   }
 
   /**
@@ -136,11 +157,11 @@ export class BookingsStore {
           serviceCenterUuid: this.serviceCenterUuid,
           dateFrom: prevDateFrom.toISOString(),
           dateTo: prevDateTo.toISOString(),
-          status: this.selectedStatuses.length > 0 ? (this.selectedStatuses as unknown as Array<unknown[]>) : undefined,
+          status: this.selectedStatuses.length > 0 ? this.selectedStatuses : undefined,
         });
         
         if (prevResponse.data) {
-          this.bookingsCache.set(prevCacheKey, prevResponse.data);
+          this.setCacheValue(prevCacheKey, prevResponse.data);
         }
       }
 
@@ -156,11 +177,11 @@ export class BookingsStore {
           serviceCenterUuid: this.serviceCenterUuid,
           dateFrom: nextDateFrom.toISOString(),
           dateTo: nextDateTo.toISOString(),
-          status: this.selectedStatuses.length > 0 ? (this.selectedStatuses as unknown as Array<unknown[]>) : undefined,
+          status: this.selectedStatuses.length > 0 ? this.selectedStatuses : undefined,
         });
         
         if (nextResponse.data) {
-          this.bookingsCache.set(nextCacheKey, nextResponse.data);
+          this.setCacheValue(nextCacheKey, nextResponse.data);
         }
       }
     } catch (error) {
@@ -199,15 +220,23 @@ export class BookingsStore {
     
     this.error = null;
 
+    // Увеличиваем счетчик запросов для предотвращения race condition
+    const currentRequestId = ++this.fetchRequestId;
+
     try {
       const response = await adminBookingsGetList({
         serviceCenterUuid: this.serviceCenterUuid,
         dateFrom: this.dateFrom.toISOString(),
         dateTo: this.dateTo.toISOString(),
-        status: this.selectedStatuses.length > 0 ? (this.selectedStatuses as unknown as Array<unknown[]>) : undefined,
+        status: this.selectedStatuses.length > 0 ? this.selectedStatuses : undefined,
         limit: this.limit,
         offset: this.offset,
       });
+
+      // Игнорируем устаревший ответ
+      if (currentRequestId !== this.fetchRequestId) {
+        return;
+      }
 
       runInAction(() => {
         this.bookings = response.data;
@@ -215,8 +244,8 @@ export class BookingsStore {
         this.isLoading = false;
         this.isInitialLoad = false;
         
-        // Сохраняем данные в кэш
-        this.bookingsCache.set(cacheKey, response.data);
+        // Сохраняем данные в кэш с учетом лимита
+        this.setCacheValue(cacheKey, response.data);
       });
 
       // Предзагружаем соседние периоды (только при не-silent загрузке)
@@ -240,6 +269,9 @@ export class BookingsStore {
    * Используется после изменения статуса или данных бронирования
    */
   async refreshBookings(): Promise<void> {
+    // Инвалидируем текущий кэш, чтобы загрузить свежие данные
+    const cacheKey = this.getCacheKey();
+    this.bookingsCache.delete(cacheKey);
     await this.fetchBookings(true);
   }
 
@@ -543,6 +575,25 @@ export class BookingsStore {
     return this.bookings
       .filter((b) => b.status === 'completed' || b.status === 'confirmed')
       .reduce((sum, booking) => sum + booking.total_cost, 0);
+  }
+
+  /**
+   * Полная очистка store
+   * Используется при logout или смене пользователя
+   */
+  reset(): void {
+    this.bookings = [];
+    this.pendingBookings = [];
+    this.selectedBooking = null;
+    this.bookingsCache.clear();
+    this.isLoading = false;
+    this.isLoadingDetails = false;
+    this.isLoadingPending = false;
+    this.error = null;
+    this.isInitialLoad = true;
+    this.fetchRequestId = 0;
+    this.total = 0;
+    this.offset = 0;
   }
 }
 

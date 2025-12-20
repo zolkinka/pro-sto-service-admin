@@ -85,7 +85,7 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
   // Валидация и корректировка времени
   const validateAndCorrectTime = useCallback((timeValue: string): string => {
     // Если поле пустое или некорректного формата - очищаем
-    if (!timeValue || timeValue.trim() === '' || timeValue === '00:00') {
+    if (!timeValue || timeValue.trim() === '') {
       return '';
     }
 
@@ -212,6 +212,9 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
       'app-time-picker__arrow_open': isOpen,
     });
 
+    const hasError = Boolean(error);
+    const errorMessage = error;
+
     return (
       <div className="app-time-picker__input-container" onClick={handleContainerClick} ref={containerRef}>
         <div className="app-time-picker__input-wrapper">
@@ -228,8 +231,16 @@ const AppTimePicker: React.FC<AppTimePickerProps> = ({
             lazy={true}
             placeholderChar="0"
             iconLeft={iconLeft}
-            error={error}
+            error={hasError}
           />
+          {errorMessage && (
+            <span
+              className="app-time-picker__error-icon"
+              role="img"
+              aria-label={errorMessage}
+              title={errorMessage}
+            />
+          )}
           <div 
             className={arrowClassName}
             onMouseDown={handleArrowClick}

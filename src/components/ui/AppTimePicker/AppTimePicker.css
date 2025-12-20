@@ -17,10 +17,38 @@
   width: 100%;
 }
 
+.app-time-picker__error-icon {
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--color-red-400, #E53E3E);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: help;
+  z-index: 1;
+  background: #fff;
+}
+
+.app-time-picker__error-icon::before {
+  content: '!';
+  font-family: 'Onest', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-red-400, #E53E3E);
+}
+
 .app-time-picker__arrow {
   position: absolute;
   right: 12px;
-  bottom: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,7 +58,7 @@
 }
 
 .app-time-picker__arrow_open {
-  transform: rotate(180deg);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .app-time-picker__dropdown {

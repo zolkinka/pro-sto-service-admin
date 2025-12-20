@@ -7,20 +7,16 @@ import AppTimePicker from '@/components/ui/AppTimePicker/AppTimePicker';
 import DayScheduleRow from './DayScheduleRow';
 import type { OperatingHoursResponseDto } from '../../../services/api-client/types.gen';
 import { DAY_NAMES, DAYS_ORDER, formatTime } from './utils';
+import type { DayScheduleFormData, ValidationErrors, SchedulePayload, ScheduleDayPayload } from './types';
 import './SchedulePage.css';
 
 interface OperatingHoursFormProps {
   schedule: OperatingHoursResponseDto[];
   specialDates: OperatingHoursResponseDto[];
-  onScheduleChange?: (data: Record<string, unknown>) => void;
+  onScheduleChange?: (data: SchedulePayload) => void;
   onOpenHolidayModal: () => void;
   onDeleteSpecialDate: (specificDate: string) => void;
-}
-
-interface DayScheduleFormData {
-  open: string;
-  close: string;
-  isClosed: boolean;
+  validationErrors?: ValidationErrors;
 }
 
 interface FormData {
@@ -34,7 +30,8 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
   specialDates,
   onScheduleChange,
   onOpenHolidayModal,
-  onDeleteSpecialDate
+  onDeleteSpecialDate,
+  validationErrors = {}
 }) => {
   // Форматируем специальные даты для отображения
   const formatSpecialDates = () => {
@@ -138,7 +135,7 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
 
     // Формируем данные для сохранения
     const timezone = schedule[0]?.timezone || 'Europe/Moscow';
-    const updateData: Record<string, { open_time?: string; close_time?: string; is_closed: boolean }> = {};
+    const updateData: Record<string, ScheduleDayPayload> = {};
 
     if (formData.uniformSchedule) {
       DAYS_ORDER.forEach(day => {
@@ -167,9 +164,9 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
     }
 
     const payload = {
-      ...updateData,
+      ...(updateData as Partial<SchedulePayload>),
       timezone,
-    };
+    } as SchedulePayload;
 
     // Сравниваем с предыдущим payload, чтобы избежать бесконечного цикла
     const payloadStr = JSON.stringify(payload);
@@ -206,6 +203,9 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
     }));
   };
 
+  const baseDayKey = DAYS_ORDER[0];
+  const uniformErrors = (validationErrors as ValidationErrors | undefined)?.[baseDayKey];
+
   return (
     <div className="schedule-page__form">
       {/* Основное расписание */}
@@ -227,12 +227,14 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
                 value={formData.uniformTime.open}
                 onChange={(value) => handleUniformTimeChange('open', value)}
                 placeholder="09:00"
+                error={uniformErrors?.open}
               />
               <div className="schedule-page__time-separator" />
               <AppTimePicker
                 value={formData.uniformTime.close}
                 onChange={(value) => handleUniformTimeChange('close', value)}
                 placeholder="21:00"
+                error={uniformErrors?.close}
               />
             </div>
           </div>
@@ -246,6 +248,8 @@ const OperatingHoursForm: React.FC<OperatingHoursFormProps> = ({
                 dayName={DAY_NAMES[day] || day}
                 value={formData.weekSchedule[day]}
                 onChange={(value) => handleDayScheduleChange(day, value)}
+                errorOpen={validationErrors[day]?.open}
+                errorClose={validationErrors[day]?.close}
               />
             ))}
           </div>

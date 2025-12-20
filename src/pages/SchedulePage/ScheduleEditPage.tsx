@@ -8,6 +8,8 @@ import type { SpecialDateData } from './SpecialDateModal';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
 import type { OperatingHoursResponseDto } from '../../../services/api-client/types.gen';
+import type { ValidationErrors, SchedulePayload } from './types';
+import { validateSchedulePayload } from './validation';
 
 export const ScheduleEditPage: React.FC = observer(() => {
   const { operatingHoursStore, authStore, toastStore } = useStores();
@@ -17,7 +19,8 @@ export const ScheduleEditPage: React.FC = observer(() => {
   const [localSpecialDates, setLocalSpecialDates] = useState<OperatingHoursResponseDto[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [hasScheduleChanges, setHasScheduleChanges] = useState(false);
-  const [pendingScheduleData, setPendingScheduleData] = useState<any>(null);
+  const [pendingScheduleData, setPendingScheduleData] = useState<SchedulePayload | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
   useEffect(() => {
     if (!serviceCenterUuid) return;
@@ -66,6 +69,14 @@ export const ScheduleEditPage: React.FC = observer(() => {
   if (!serviceCenterUuid) return null;
 
   const handleSaveChanges = async () => {
+    // Валидация перед сохранением
+    const errors = validateSchedulePayload(pendingScheduleData);
+    setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toastStore.showError('Исправьте ошибки в расписании');
+      return;
+    }
+
     setIsSaving(true);
     
     // Отключаем промежуточные уведомления для batch-операций
@@ -142,9 +153,11 @@ export const ScheduleEditPage: React.FC = observer(() => {
     }
   };
 
-  const handleScheduleChange = useCallback((data: any) => {
+  const handleScheduleChange = useCallback((data: SchedulePayload) => {
     setPendingScheduleData(data);
     setHasScheduleChanges(true);
+    // Очищаем ошибки валидации при изменении
+    setValidationErrors({});
   }, []);
 
   const handleOpenSpecialDateModal = () => {
@@ -210,6 +223,7 @@ export const ScheduleEditPage: React.FC = observer(() => {
           onScheduleChange={handleScheduleChange}
           onOpenHolidayModal={handleOpenSpecialDateModal}
           onDeleteSpecialDate={handleDeleteSpecialDate}
+          validationErrors={validationErrors}
         />
       </div>
       

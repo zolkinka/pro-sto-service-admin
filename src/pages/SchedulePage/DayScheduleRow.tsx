@@ -1,15 +1,18 @@
 import React from 'react';
 import AppTimePicker from '@/components/ui/AppTimePicker/AppTimePicker';
 import AppSwitch from '@/components/ui/AppSwitch/AppSwitch';
+import type { DayScheduleFormData } from './types';
 import './SchedulePage.css';
 
 interface DayScheduleRowProps {
   dayName: string;
-  value: { open: string; close: string; isClosed: boolean };
-  onChange: (value: { open: string; close: string; isClosed: boolean }) => void;
+  value: DayScheduleFormData;
+  onChange: (value: DayScheduleFormData) => void;
+  errorOpen?: string;
+  errorClose?: string;
 }
 
-const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChange }) => {
+const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChange, errorOpen, errorClose }) => {
   const handleOpenTimeChange = (time: string) => {
     onChange({ ...value, open: time });
   };
@@ -34,18 +37,22 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({ dayName, value, onChang
         {value.isClosed ? (
           <span className="schedule-page__day-closed-label">Выходной</span>
         ) : (
-          <div className="schedule-page__time-range-container">
-            <AppTimePicker
-              value={value.open}
-              onChange={handleOpenTimeChange}
-              placeholder="Открытие"
-            />
-            <div className="schedule-page__time-separator" />
-            <AppTimePicker
-              value={value.close}
-              onChange={handleCloseTimeChange}
-              placeholder="Закрытие"
-            />
+          <div className="schedule-page__day-controls-wrapper">
+            <div className="schedule-page__time-range-container">
+              <AppTimePicker
+                value={value.open}
+                onChange={handleOpenTimeChange}
+                placeholder="Открытие"
+                error={errorOpen}
+              />
+              <div className="schedule-page__time-separator" />
+              <AppTimePicker
+                value={value.close}
+                onChange={handleCloseTimeChange}
+                placeholder="Закрытие"
+                error={errorClose}
+              />
+            </div>
           </div>
         )}
       </div>

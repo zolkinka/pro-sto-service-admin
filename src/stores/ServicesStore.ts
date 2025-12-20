@@ -31,6 +31,14 @@ export class ServicesStore {
   isLoading = false;
   error: string | null = null;
   
+  // Race condition protection
+  private fetchRequestId = 0;
+  
+  // LRU кеш для услуг по категориям
+  private cache = new Map<string, ServiceDto[]>();
+  // Максимальный размер LRU кеша (храним 5 последних посещенных категорий)
+  private readonly MAX_CACHE_SIZE = 5;
+  
   // Состояние формы создания/редактирования
   formData: ServiceFormData = {
     name: '',
@@ -51,9 +59,25 @@ export class ServicesStore {
 
   /**
    * Загрузка услуг с API
+   * @param options - опции загрузки
    */
-  async fetchServices() {
-    this.isLoading = true;
+  async fetchServices(options?: { silent?: boolean; forceRefresh?: boolean }) {
+    const cacheKey = this.activeCategory;
+    const silent = options?.silent ?? false;
+    const forceRefresh = options?.forceRefresh ?? false;
+    
+    // Используем кеш если он есть, кроме случая принудительного обновления
+    if (this.cache.has(cacheKey) && !forceRefresh) {
+      this.services = this.cache.get(cacheKey)!;
+      return;
+    }
+    
+    // Race condition защита
+    const currentRequestId = ++this.fetchRequestId;
+    
+    if (!silent) {
+      this.isLoading = true;
+    }
     this.error = null;
 
     try {
@@ -61,12 +85,29 @@ export class ServicesStore {
         businessType: this.activeCategory,
       });
 
+      // Проверяем, не устарел ли запрос
+      if (currentRequestId !== this.fetchRequestId) {
+        return; // Игнорируем устаревший ответ
+      }
+
       runInAction(() => {
-        // Приводим тип Service к ServiceDto
-        this.services = response as unknown as ServiceDto[];
+        // Убрано двойное приведение типов
+        this.services = response as ServiceDto[];
         this.isLoading = false;
+        
+        // LRU кеш: удаляем самый старый элемент если превышен лимит
+        if (this.cache.size >= this.MAX_CACHE_SIZE) {
+          const firstKey = this.cache.keys().next().value;
+          this.cache.delete(firstKey!);
+        }
+        this.cache.set(cacheKey, this.services);
       });
     } catch (error) {
+      // Проверяем, не устарел ли запрос
+      if (currentRequestId !== this.fetchRequestId) {
+        return;
+      }
+      
       runInAction(() => {
         this.error = 'Ошибка загрузки услуг';
         this.isLoading = false;
@@ -92,6 +133,8 @@ export class ServicesStore {
       await adminServicesDelete({ uuid });
 
       runInAction(() => {
+        // Инвалидируем кеш перед обновлением данных
+        this.cache.delete(this.activeCategory);
         this.services = this.services.filter((s) => s.uuid !== uuid);
       });
 
@@ -143,8 +186,10 @@ export class ServicesStore {
       });
 
       runInAction(() => {
+        // Инвалидируем кеш перед обновлением данных
+        this.cache.delete(this.activeCategory);
         // Добавляем новую услугу в список
-        this.services.push(response as unknown as ServiceDto);
+        this.services.push(response as ServiceDto);
       });
 
       toastStore.showSuccess('Услуга успешно создана');
@@ -167,10 +212,12 @@ export class ServicesStore {
       });
 
       runInAction(() => {
+        // Инвалидируем кеш перед обновлением данных
+        this.cache.delete(this.activeCategory);
         // Обновляем услугу в списке
         const index = this.services.findIndex((s) => s.uuid === uuid);
         if (index !== -1) {
-          this.services[index] = response as unknown as ServiceDto;
+          this.services[index] = response as ServiceDto;
         }
       });
 
@@ -327,9 +374,11 @@ export class ServicesStore {
   updateFormField(field: keyof ServiceFormData, value: string) {
     this.formData[field] = value;
     
-    // Очищаем ошибку при вводе
+    // Очищаем ошибку при вводе (без прямой мутации)
     if (this.formErrors[field]) {
-      delete this.formErrors[field];
+      const newErrors = { ...this.formErrors };
+      delete newErrors[field];
+      this.formErrors = newErrors;
     }
   }
 
@@ -405,6 +454,26 @@ export class ServicesStore {
         this.isSubmitting = false;
       });
     }
+  }
+
+  /**
+   * Очистка кеша услуг
+   */
+  clearCache() {
+    this.cache.clear();
+  }
+
+  /**
+   * Полный сброс store (для тестов и выхода)
+   */
+  reset() {
+    this.services = [];
+    this.activeCategory = 'car_wash';
+    this.isLoading = false;
+    this.error = null;
+    this.fetchRequestId = 0;
+    this.cache.clear();
+    this.resetForm();
   }
 }
 

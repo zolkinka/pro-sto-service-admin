@@ -157,7 +157,7 @@ export class BookingsStore {
           serviceCenterUuid: this.serviceCenterUuid,
           dateFrom: prevDateFrom.toISOString(),
           dateTo: prevDateTo.toISOString(),
-          status: this.selectedStatuses.length > 0 ? this.selectedStatuses : undefined,
+          status: this.selectedStatuses.length > 0 ? this.selectedStatuses as any : undefined,
         });
         
         if (prevResponse.data) {
@@ -177,7 +177,7 @@ export class BookingsStore {
           serviceCenterUuid: this.serviceCenterUuid,
           dateFrom: nextDateFrom.toISOString(),
           dateTo: nextDateTo.toISOString(),
-          status: this.selectedStatuses.length > 0 ? this.selectedStatuses : undefined,
+          status: this.selectedStatuses.length > 0 ? this.selectedStatuses as any : undefined,
         });
         
         if (nextResponse.data) {
@@ -228,7 +228,7 @@ export class BookingsStore {
         serviceCenterUuid: this.serviceCenterUuid,
         dateFrom: this.dateFrom.toISOString(),
         dateTo: this.dateTo.toISOString(),
-        status: this.selectedStatuses.length > 0 ? this.selectedStatuses : undefined,
+        status: this.selectedStatuses.length > 0 ? this.selectedStatuses as any : undefined,
         limit: this.limit,
         offset: this.offset,
       });

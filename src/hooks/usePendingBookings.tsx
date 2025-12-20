@@ -119,7 +119,7 @@ export const PendingBookingsProvider = ({ children }: PendingBookingsProviderPro
   }, [loadPendingBookings]);
 
   // Ref для стабильного обработчика push-уведомлений
-  const handlePushMessageRef = useRef<(payload: MessagePayload) => void>();
+  const handlePushMessageRef = useRef<((payload: MessagePayload) => void) | undefined>(undefined);
   
   // Обновляем обработчик при изменении bookingsStore
   useEffect(() => {

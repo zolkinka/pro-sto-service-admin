@@ -125,10 +125,10 @@ describe('ServicesStore', () => {
     });
 
     it('should set isLoading to true during fetch', async () => {
-      vi.mocked(apiClient.adminServicesGetAll).mockImplementation(() => {
+      vi.mocked(apiClient.adminServicesGetAll).mockImplementation((() => {
         expect(servicesStore.isLoading).toBe(true);
-        return Promise.resolve([mockService] as any);
-      });
+        return Promise.resolve([mockService]) as any;
+      }) as any);
 
       await servicesStore.fetchServices();
     });
@@ -355,8 +355,8 @@ describe('ServicesStore', () => {
     it('should handle missing description', () => {
       const serviceWithoutDescription: ServiceDto = {
         ...mockService,
-        description: undefined,
-      } as ServiceDto;
+        description: null,
+      };
 
       const formData = servicesStore.serviceToFormData(serviceWithoutDescription);
 
@@ -756,10 +756,10 @@ describe('ServicesStore', () => {
     });
 
     it('should set isSubmitting flag during submission', async () => {
-      vi.mocked(apiClient.adminServicesCreate).mockImplementation(async () => {
+      vi.mocked(apiClient.adminServicesCreate).mockImplementation((async () => {
         expect(servicesStore.isSubmitting).toBe(true);
-        return mockService as any;
-      });
+        return mockService;
+      }) as any);
 
       await servicesStore.submitServiceForm('create', 'center-1', 'main');
 

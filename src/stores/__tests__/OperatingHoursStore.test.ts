@@ -33,12 +33,12 @@ const createMockOperatingHoursData = () => ({
     {
       uuid: 'reg-1',
       service_center_uuid: TEST_SERVICE_CENTER_UUID,
-      day_of_week: 'monday',
-      is_working: true,
-      open_time: '06:00',
-      close_time: '18:00',
+      day_of_week: 'monday' as const,
+      specific_date: null,
+      open_time: { hour: 6, minute: 0 },
+      close_time: { hour: 18, minute: 0 },
+      is_closed: false,
       timezone: 'Europe/Moscow',
-      date: null,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z'
     }
@@ -48,11 +48,11 @@ const createMockOperatingHoursData = () => ({
       uuid: 'spec-1',
       service_center_uuid: TEST_SERVICE_CENTER_UUID,
       day_of_week: null,
-      is_working: false,
+      specific_date: '2024-12-31',
       open_time: null,
       close_time: null,
+      is_closed: true,
       timezone: 'Europe/Moscow',
-      date: '2024-12-31',
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z'
     }
@@ -114,7 +114,7 @@ describe('OperatingHoursStore', () => {
       const mockData2 = {
         ...createMockOperatingHoursData(),
         regular: [
-          { ...mockData1.regular[0], day_of_week: 'tuesday' }
+          { ...mockData1.regular[0], day_of_week: 'tuesday' as const }
         ]
       };
       
@@ -148,7 +148,7 @@ describe('OperatingHoursStore', () => {
       const mockData2 = {
         ...createMockOperatingHoursData(),
         regular: [
-          { ...mockData1.regular[0], day_of_week: 'tuesday' }
+          { ...mockData1.regular[0], day_of_week: 'tuesday' as const }
         ]
       };
       
@@ -243,9 +243,14 @@ describe('OperatingHoursStore', () => {
 
   describe('updateRegularSchedule', () => {
     const updateData: UpdateRegularScheduleDto = {
-      schedule: [
-        { day_of_week: 'monday', is_working: true, open_time: '09:00', close_time: '18:00' }
-      ]
+      monday: { is_closed: false, open_time: '09:00', close_time: '18:00' },
+      tuesday: { is_closed: false, open_time: '09:00', close_time: '18:00' },
+      wednesday: { is_closed: false, open_time: '09:00', close_time: '18:00' },
+      thursday: { is_closed: false, open_time: '09:00', close_time: '18:00' },
+      friday: { is_closed: false, open_time: '09:00', close_time: '18:00' },
+      saturday: { is_closed: true },
+      sunday: { is_closed: true },
+      timezone: 'Europe/Moscow'
     };
 
     it('обновляет расписание успешно', async () => {
@@ -376,8 +381,8 @@ describe('OperatingHoursStore', () => {
 
   describe('createSpecialDate', () => {
     const createData: CreateSpecialDateDto = {
-      date: '2024-12-31',
-      is_working: false
+      specific_date: '2024-12-31',
+      is_closed: true
     };
 
     it('создает специальную дату успешно', async () => {

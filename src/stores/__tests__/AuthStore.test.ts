@@ -7,11 +7,11 @@ import { notificationService } from '@/services/notificationService';
 
 // Mock axios
 vi.mock('axios', async () => {
-  const actual = await vi.importActual('axios');
+  const actual = await vi.importActual('axios') as any;
   return {
     ...actual,
     default: {
-      ...actual.default,
+      ...(actual.default || {}),
       post: vi.fn(),
       isAxiosError: vi.fn(),
     },

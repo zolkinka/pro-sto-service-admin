@@ -27,27 +27,87 @@ describe('BookingsStore', () => {
 
   const mockBooking: AdminBookingResponseDto = {
     uuid: 'booking-1',
+    client_uuid: 'client-1',
+    car_uuid: 'car-1',
+    service_center_uuid: 'center-1',
+    service_uuid: 'service-1',
     start_time: '2025-12-20T10:00:00Z',
     end_time: '2025-12-20T11:00:00Z',
     status: 'confirmed',
     total_cost: 5000,
+    payment_status: 'pending',
+    payment_method: null,
     service: {
       uuid: 'service-1',
       name: 'Замена масла',
+      duration_minutes: 60,
+      description: null,
       price: 5000,
+      category: 'test-category',
     },
     additionalServices: [],
     client: {
+      uuid: 'client-1',
       name: 'Иван Иванов',
       phone: '+79991234567',
+    },
+    car: {
+      uuid: 'car-1',
+      make: 'Toyota',
+      model: 'Camry',
+      license_plate: 'А123БВ',
+      class: 'sedan',
+      generated_image: null,
     },
   } as AdminBookingResponseDto;
 
   const mockDetailedBooking: DetailedBookingResponseDto = {
-    ...mockBooking,
+    uuid: 'booking-1',
+    client_uuid: 'client-1',
+    car_uuid: 'car-1',
     service_center_uuid: 'center-1',
+    service_uuid: 'service-1',
+    serviceCenterName: 'Test Center',
+    serviceCenterAddress: 'Test Address',
+    serviceBusinessType: 'tire_service' as const,
+    start_time: '2025-12-20T10:00:00Z',
+    end_time: '2025-12-20T11:00:00Z',
+    status: 'confirmed' as const,
+    total_cost: 5000,
+    payment_status: 'pending' as const,
+    payment_method: null,
+    client_comment: null,
     created_at: '2025-12-19T10:00:00Z',
     updated_at: '2025-12-20T09:00:00Z',
+    client: {
+      uuid: 'client-1',
+      name: { first: 'Иван', last: 'Иванов' },
+      phone: '+79991234567',
+      email: null,
+    },
+    car: {
+      uuid: 'car-1',
+      make: 'Toyota',
+      model: 'Camry',
+      license_plate: { number: 'А123БВ' },
+      class: 'sedan',
+    },
+    service_center: {
+      uuid: 'center-1',
+      name: 'Test Center',
+      address: 'Test Address',
+      business_type: 'tire_service' as const,
+      logo_url: null,
+    },
+    service: {
+      uuid: 'service-1',
+      name: 'Замена масла',
+      description: null,
+      price: 5000,
+      duration_minutes: 60,
+      category: 'test-category',
+    },
+    additionalServices: [],
   } as DetailedBookingResponseDto;
 
   beforeEach(() => {
@@ -425,19 +485,20 @@ describe('BookingsStore', () => {
     });
 
     it('should successfully update booking data', async () => {
+      const newStartTime = '2025-12-20T11:00:00Z';
       const updatedBooking = {
         ...mockDetailedBooking,
-        total_cost: 6000,
+        start_time: newStartTime,
       };
 
       (apiClient.adminBookingsUpdate as any).mockResolvedValue(updatedBooking);
       // Mock fetchBookings для refreshBookings
       (apiClient.adminBookingsGetList as any).mockResolvedValue({ 
-        data: [{ ...mockBooking, total_cost: 6000 }], 
+        data: [{ ...mockBooking, start_time: newStartTime }], 
         total: 1 
       });
 
-      const updateData = { total_cost: 6000 };
+      const updateData = { start_time: newStartTime };
       const result = await bookingsStore.updateBooking('booking-1', updateData);
 
       expect(result).toBe(true);
@@ -445,27 +506,28 @@ describe('BookingsStore', () => {
         uuid: 'booking-1',
         requestBody: updateData,
       });
-      expect(bookingsStore.bookings[0].total_cost).toBe(6000);
+      expect(bookingsStore.bookings[0].start_time).toBe(newStartTime);
       expect(toastStore.showSuccess).toHaveBeenCalledWith('Заказ успешно обновлен');
     });
 
     it('should update selectedBooking if it matches', async () => {
       bookingsStore.selectedBooking = mockDetailedBooking;
-      const updatedBooking = { ...mockDetailedBooking, total_cost: 6000 };
+      const newStartTime = '2025-12-20T11:00:00Z';
+      const updatedBooking = { ...mockDetailedBooking, start_time: newStartTime };
 
       (apiClient.adminBookingsUpdate as any).mockResolvedValue(updatedBooking);
       (apiClient.adminBookingsGetList as any).mockResolvedValue({ data: [], total: 0 });
 
-      await bookingsStore.updateBooking('booking-1', { total_cost: 6000 });
+      await bookingsStore.updateBooking('booking-1', { start_time: newStartTime });
 
-      expect(bookingsStore.selectedBooking?.total_cost).toBe(6000);
+      expect(bookingsStore.selectedBooking?.start_time).toBe(newStartTime);
     });
 
     it('should handle update error', async () => {
       const error = new Error('Update failed');
       (apiClient.adminBookingsUpdate as any).mockRejectedValue(error);
 
-      const result = await bookingsStore.updateBooking('booking-1', { total_cost: 6000 });
+      const result = await bookingsStore.updateBooking('booking-1', { start_time: '2025-12-20T11:00:00Z' });
 
       expect(result).toBe(false);
       expect(toastStore.showError).toHaveBeenCalledWith('Не удалось обновить заказ');

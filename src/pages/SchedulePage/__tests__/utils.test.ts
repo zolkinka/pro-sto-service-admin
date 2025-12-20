@@ -24,6 +24,8 @@ const createDay = (
   open_time: open,
   close_time: close,
   is_closed: isClosed,
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
 });
 
 describe('SchedulePage utils', () => {

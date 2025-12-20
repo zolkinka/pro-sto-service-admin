@@ -23,13 +23,15 @@ const createRegularDay = (
   open_time: open,
   close_time: close,
   is_closed: isClosed,
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
 });
 
 const createSpecialDate = (
   date: string,
   isClosed: boolean,
-  open?: { hour: number; minute: number } | string | null,
-  close?: { hour: number; minute: number } | string | null
+  open?: { hour: number; minute: number } | null,
+  close?: { hour: number; minute: number } | null
 ): OperatingHoursResponseDto => ({
   uuid: `${date}-uuid`,
   service_center_uuid: 'sc-1',
@@ -39,6 +41,8 @@ const createSpecialDate = (
   open_time: open ?? null,
   close_time: close ?? null,
   is_closed: isClosed,
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
 });
 
 const monday = new Date(Date.UTC(2023, 0, 2, 12, 0, 0));
@@ -53,7 +57,7 @@ describe('scheduleHelpers', () => {
 
   it('prioritizes special dates over regular schedule', () => {
     const regular = [createRegularDay('monday', { hour: 9, minute: 0 }, { hour: 18, minute: 0 })];
-    const special = [createSpecialDate('2023-01-02', false, '11:00:00', '16:00:00')];
+    const special = [createSpecialDate('2023-01-02', false, { hour: 11, minute: 0 }, { hour: 16, minute: 0 })];
 
     expect(getWorkingHoursForDate(monday, regular, special)).toEqual({ open: '11:00', close: '16:00' });
   });

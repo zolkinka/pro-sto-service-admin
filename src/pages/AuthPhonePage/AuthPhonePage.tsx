@@ -49,7 +49,7 @@ const AuthPhonePage: React.FC = observer(() => {
   };
 
   return (
-    <div className="auth-phone">
+    <div className="auth-phone" data-testid="auth-phone-page">
       <div className="auth-phone__logo">
         <AppLogo />
       </div>
@@ -66,6 +66,7 @@ const AuthPhonePage: React.FC = observer(() => {
             onValidate={handlePhoneValidate}
             disabled={authStore.isLoading}
             autoFocus
+            data-testid="phone-input"
           />
         </div>
 
@@ -76,6 +77,7 @@ const AuthPhonePage: React.FC = observer(() => {
             onClick={handleSubmit}
             disabled={!isValid || authStore.isLoading}
             loading={authStore.isLoading}
+            data-testid="submit-phone-button"
           >
             Далее
           </AppButton>

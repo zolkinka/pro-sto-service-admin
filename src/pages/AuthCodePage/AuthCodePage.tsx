@@ -85,7 +85,7 @@ const AuthCodePage: React.FC = observer(() => {
   const canResendActive = canResend && !authStore.isLoading;
 
   return (
-    <div className="auth-code">
+    <div className="auth-code" data-testid="auth-code-page">
       <div className="auth-code__logo">
         <AppLogo />
       </div>
@@ -100,12 +100,14 @@ const AuthCodePage: React.FC = observer(() => {
           onComplete={handleCodeComplete}
           disabled={authStore.isLoading}
           autoFocus
+          data-testid="code-input"
         />
 
         <button
           className={`auth-code__resend ${canResendActive ? 'auth-code__resend_active' : 'auth-code__resend_disabled'}`}
           onClick={handleResend}
           disabled={!canResend || authStore.isLoading}
+          data-testid="resend-code-button"
         >
           {canResend 
             ? 'Отправить повторно' 
@@ -120,6 +122,7 @@ const AuthCodePage: React.FC = observer(() => {
             onClick={handleSubmit}
             disabled={code.length !== 4 || authStore.isLoading}
             loading={authStore.isLoading}
+            data-testid="submit-code-button"
           >
             Далее
           </AppButton>

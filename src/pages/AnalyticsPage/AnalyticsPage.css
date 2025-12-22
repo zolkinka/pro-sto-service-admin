@@ -7,10 +7,11 @@
 }
 
 .analytics-page__wrapper {
-  max-width: 1282px;
+  max-width: 1064px;
   width: 100%;
   margin: 0 auto;
-  padding: 28px 28px 0;
+  padding: 28px 0 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   flex: 1;

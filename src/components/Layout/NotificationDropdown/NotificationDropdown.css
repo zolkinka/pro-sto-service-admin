@@ -59,6 +59,28 @@
   overflow-x: hidden;
 }
 
+.notification-dropdown__date-divider {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 12px 0 4px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, #ffffff 65%, rgba(255, 255, 255, 0));
+}
+
+.notification-dropdown__date-divider span {
+  font-family: 'Onest', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.2;
+  color: #888684;
+  background: #F4F3F0;
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
 /* Стилизация скроллбара */
 .notification-dropdown__list::-webkit-scrollbar {
   width: 6px;

@@ -1,13 +1,17 @@
 import { observer } from 'mobx-react-lite';
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfWeek } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import { useClickOutside } from '../../../hooks';
 import { useStores } from '../../../hooks/useStores';
 import AppButton from '../../ui/AppButton/AppButton';
 import NotificationItem from './NotificationItem';
 import type { NotificationDropdownProps } from './NotificationDropdown.types';
 import './NotificationDropdown.css';
+
+const formatDividerDate = (dateString: string): string =>
+  format(new Date(dateString), 'd MMMM yyyy', { locale: ru });
 
 const NotificationDropdown = observer(({ isOpen, onClose }: NotificationDropdownProps) => {
   const { notificationStore, bookingsStore } = useStores();
@@ -115,20 +119,38 @@ const NotificationDropdown = observer(({ isOpen, onClose }: NotificationDropdown
             <p>Нет уведомлений</p>
           </div>
         ) : (
-          <>
-            {notificationStore.notifications.map((notification) => (
-              <NotificationItem
-                key={notification.uuid}
-                notification={notification}
-                onClick={handleNotificationClick}
-              />
-            ))}
-            {notificationStore.isLoading && (
-              <div className="notification-dropdown__loading-more">
-                <p>Загрузка...</p>
-              </div>
-            )}
-          </>
+          (() => {
+            let lastDateLabel: string | null = null;
+
+            return (
+              <>
+                {notificationStore.notifications.map((notification) => {
+                  const currentDateLabel = formatDividerDate(notification.createdAt);
+                  const shouldShowDivider = currentDateLabel !== lastDateLabel;
+
+                  if (shouldShowDivider) {
+                    lastDateLabel = currentDateLabel;
+                  }
+
+                  return (
+                    <Fragment key={notification.uuid}>
+                      {shouldShowDivider && (
+                        <div className="notification-dropdown__date-divider">
+                          <span>{currentDateLabel}</span>
+                        </div>
+                      )}
+                      <NotificationItem notification={notification} onClick={handleNotificationClick} />
+                    </Fragment>
+                  );
+                })}
+                {notificationStore.isLoading && (
+                  <div className="notification-dropdown__loading-more">
+                    <p>Загрузка...</p>
+                  </div>
+                )}
+              </>
+            );
+          })()
         )}
       </div>
     </div>

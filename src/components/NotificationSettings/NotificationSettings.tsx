@@ -5,6 +5,7 @@ import AppSwitch from '@/components/ui/AppSwitch/AppSwitch';
 import AppButton from '@/components/ui/AppButton/AppButton';
 import { notificationService, NotificationType } from '@/services/notificationService';
 import { toastStore } from '@/stores/ToastStore';
+import { useDebugMode } from '@/hooks';
 import type { NotificationSettingsProps } from './NotificationSettings.types';
 import './NotificationSettings.css';
 
@@ -20,6 +21,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = observer(({
   const [isSupported, setIsSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [settings, setSettings] = useState(notificationService.getSettings());
+  const { isDebugMode } = useDebugMode();
 
   // Проверяем поддержку уведомлений при монтировании
   useEffect(() => {
@@ -45,6 +47,20 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = observer(({
     const interval = setInterval(updateSettings, 1000);
     
     return () => clearInterval(interval);
+  }, []);
+
+  // Подписываемся на изменения дебаг-режима
+  useEffect(() => {
+    const handleDebugModeChange = () => {
+      // Форсируем ре-рендер компонента
+      setSettings({ ...notificationService.getSettings() });
+    };
+
+    window.addEventListener('debugModeChanged', handleDebugModeChange);
+    
+    return () => {
+      window.removeEventListener('debugModeChanged', handleDebugModeChange);
+    };
   }, []);
 
   /**
@@ -226,8 +242,8 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = observer(({
         </div>
       )}
 
-      {/* Тестовая кнопка */}
-      {settings.enabled && permission === 'granted' && (
+      {/* Тестовая кнопка (только в дебаг-режиме) */}
+      {isDebugMode && settings.enabled && permission === 'granted' && (
         <div className="notification-settings__actions">
           <AppButton
             variant="secondary"
@@ -241,7 +257,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = observer(({
       )}
 
       {/* Информация о токене (только для разработки) */}
-      {import.meta.env.DEV && settings.enabled && (
+      {isDebugMode && settings.enabled && (
         <div className="notification-settings__debug">
           <details>
             <summary className="notification-settings__debug-summary">

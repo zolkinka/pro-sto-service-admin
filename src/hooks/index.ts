@@ -5,5 +5,6 @@ export { useActiveTab } from './useActiveTab';
 export { useDebounce } from './useDebounce';
 export { usePlatform } from './usePlatform';
 export { usePendingBookings, PendingBookingsProvider } from './usePendingBookings';
+export { useDebugMode, isDebugModeEnabled, setDebugMode } from './useDebugMode';
 export type { Tab } from './useActiveTab';
 export type { Platform } from './usePlatform';

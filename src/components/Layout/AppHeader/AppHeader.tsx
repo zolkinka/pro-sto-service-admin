@@ -18,7 +18,7 @@ interface AppHeaderProps {
 }
 
 const AppHeader = observer(({ 
-  activeTab = 'services', 
+  activeTab, 
   pendingBookingsCount = 0, 
   onPendingBookingsClick 
 }: AppHeaderProps) => {

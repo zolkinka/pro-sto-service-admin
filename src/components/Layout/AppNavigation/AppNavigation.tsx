@@ -11,7 +11,7 @@ interface Tab {
 }
 
 interface AppNavigationProps {
-  activeTab: TabId;
+  activeTab?: TabId;
   onTabChange?: (tab: TabId) => void;
 }
 

@@ -41,17 +41,34 @@ export async function clearAuthData(page: Page): Promise<void> {
  * Авторизоваться в системе (для тестов, где авторизация не является основным сценарием)
  */
 export async function authenticateUser(page: Page, phone: string = TEST_USERS.admin.phone, code: string = TEST_USERS.admin.code): Promise<void> {
+  // Переходим на главную страницу для проверки авторизации
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  
+  // Ждем редиректа (либо на auth, либо останемся на защищенной странице)
+  await page.waitForTimeout(1000);
+  
+  // Проверяем, может пользователь уже авторизован
+  const currentUrl = page.url();
+  if (!currentUrl.includes('/auth')) {
+    // Уже авторизован, выходим
+    return;
+  }
+  
+  // Переходим на страницу авторизации
   await page.goto(TEST_ROUTES.authPhone);
+  await page.waitForLoadState('networkidle');
   
   // Ввод телефона
   const phoneInput = page.getByTestId('phone-input').locator('input');
+  await phoneInput.waitFor({ state: 'visible', timeout: 5000 });
   await phoneInput.fill(phone);
   
   const submitButton = page.getByTestId('submit-phone-button');
   await submitButton.click();
   
   // Ввод кода
-  await page.waitForURL(TEST_ROUTES.authCode);
+  await page.waitForURL(TEST_ROUTES.authCode, { timeout: 10000 });
   const codeInput = page.getByTestId('code-input');
   const codeInputs = codeInput.locator('input');
   
@@ -63,7 +80,7 @@ export async function authenticateUser(page: Page, phone: string = TEST_USERS.ad
   await page.waitForURL(url => 
     url.pathname === TEST_ROUTES.dashboard || 
     url.pathname === TEST_ROUTES.orders, 
-    { timeout: 10000 }
+    { timeout: 15000 }
   );
 }
 

@@ -850,6 +850,7 @@ const CreateBookingModal = observer(({
       className="create-booking-modal__overlay" 
       onMouseDown={handleOverlayMouseDown}
       onMouseUp={handleOverlayMouseUp}
+      data-testid="create-booking-modal"
     >
       <div className="create-booking-modal" onClick={(e) => e.stopPropagation()}>
         <div className="create-booking-modal__header">
@@ -1096,6 +1097,7 @@ const CreateBookingModal = observer(({
           onClick={handleSubmit}
           disabled={isSubmitting}
           loading={isSubmitting}
+          data-testid="submit-booking-button"
         >
           Добавить
         </AppButton>

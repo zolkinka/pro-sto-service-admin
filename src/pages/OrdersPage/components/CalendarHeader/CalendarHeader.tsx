@@ -143,6 +143,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               onClick={onAddBooking}
               type="button"
               aria-label="Добавить запись"
+              data-testid="add-booking-button"
             >
               <span className="calendar-header__add-text">Добавить запись</span>
               <span className="calendar-header__add-icon" aria-hidden="true">

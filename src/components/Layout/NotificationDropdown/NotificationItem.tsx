@@ -23,10 +23,10 @@ const NotificationItem = observer(({ notification, onClick }: NotificationItemPr
           <span className="notification-item__time">{time}</span>
         </div>
         <div className="notification-item__row notification-item__row--bottom">
-          <p className="notification-item__body">{notification.body}</p>
           {notification.subtitle && (
             <span className="notification-item__subtitle">{notification.subtitle}</span>
           )}
+          <p className="notification-item__body">{notification.body}</p>
         </div>
       </div>
     </div>

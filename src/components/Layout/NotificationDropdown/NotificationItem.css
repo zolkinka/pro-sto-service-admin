@@ -46,7 +46,14 @@
 }
 
 .notification-item__row--bottom {
-  align-items: baseline;
+  display: block;
+  position: relative;
+}
+
+.notification-item__row--bottom::after {
+  content: '';
+  display: block;
+  clear: both;
 }
 
 .notification-item__title,
@@ -70,8 +77,10 @@
 .notification-item__body {
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.2;
+  line-height: 1.4;
   color: #73716F;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .notification-item__time,
@@ -90,4 +99,8 @@
 
 .notification-item__subtitle {
   color: #302F2D;
+  float: right;
+  margin-left: 12px;
+  max-width: 45%;
+  text-align: right;
 }

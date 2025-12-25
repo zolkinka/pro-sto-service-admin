@@ -277,8 +277,9 @@ const CreateBookingModal = observer(({
   // Load available slots when date or service changes
   useEffect(() => {
     loadAvailableSlots();
-    // Очищаем выбранное время когда меняется дата или сервис
+    // Очищаем выбранное время только когда меняется дата ИЛИ когда есть выбранный сервис И он меняется
     // НО не очищаем при первой загрузке (чтобы сохранить initialTime)
+    // И не очищаем, когда selectedService становится null (удаление услуги)
     if (selectedDate && selectedService) {
       if (!isFirstLoad.current) {
         setSelectedTime('');
@@ -1050,7 +1051,7 @@ const CreateBookingModal = observer(({
               onChange={handleTimeChange}
               placeholder="09:00"
               availableSlots={availableTimeSlots}
-              disabled={isLoadingSlots || !selectedDate || !selectedService}
+              disabled={isLoadingSlots || !selectedDate}
               error={timeError}
             />
           </div>

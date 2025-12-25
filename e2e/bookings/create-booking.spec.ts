@@ -96,7 +96,9 @@ test.describe('Create Booking Flow', () => {
     // Выбираем первую доступную марку из списка
     const makeOption = page.locator('.app-single-select__option').first();
     if (await makeOption.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await makeOption.click();
+      // Прокручиваем элемент в область видимости перед кликом
+      await makeOption.scrollIntoViewIfNeeded();
+      await makeOption.click({ force: true });
     } else {
       await page.keyboard.press('Escape');
     }
@@ -113,7 +115,9 @@ test.describe('Create Booking Flow', () => {
       
       const modelOption = page.locator('.app-single-select__option').first();
       if (await modelOption.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await modelOption.click();
+        // Прокручиваем элемент в область видимости перед кликом
+        await modelOption.scrollIntoViewIfNeeded();
+        await modelOption.click({ force: true });
       } else {
         await page.keyboard.press('Escape');
       }
@@ -131,7 +135,9 @@ test.describe('Create Booking Flow', () => {
     // Выбираем первый доступный слот
     const timeSlot = page.locator('.app-time-picker__slot:not(.app-time-picker__slot_disabled)').first();
     if (await timeSlot.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await timeSlot.click();
+      // Прокручиваем элемент в область видимости перед кликом
+      await timeSlot.scrollIntoViewIfNeeded();
+      await timeSlot.click({ force: true });
     } else {
       await page.keyboard.press('Escape');
     }
@@ -143,7 +149,9 @@ test.describe('Create Booking Flow', () => {
     
     const serviceOption = page.locator('.app-single-select__option').first();
     if (await serviceOption.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await serviceOption.click();
+      // Прокручиваем элемент в область видимости перед кликом
+      await serviceOption.scrollIntoViewIfNeeded();
+      await serviceOption.click({ force: true });
     } else {
       await page.keyboard.press('Escape');
     }

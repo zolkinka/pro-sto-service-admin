@@ -664,16 +664,28 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                           return null;
                         }
 
-                        // Проверяем, есть ли уже бронирование в этом часу
-                        // Проверяем все группы записей для данного дня
-                        const hasBooking = weekBookingsByDayAndSlot[dayIndex]?.some(group => 
-                          group.some(booking => {
-                            const bookingHour = new Date(booking.start_time).getHours();
-                            return bookingHour === hour;
-                          })
-                        ) ?? false;
+                        // Создаем временные метки для начала и конца текущего часа (слота)
+                        const slotStart = new Date(slotDate);
+                        slotStart.setHours(hour, 0, 0, 0);
+                        const slotEnd = new Date(slotDate);
+                        slotEnd.setHours(hour + 1, 0, 0, 0);
                         
-                        // Не показываем плейсхолдер, если уже есть бронирование
+                        // Проверяем, есть ли хотя бы одно бронирование, которое перекрывается с этим часовым слотом
+                        // Проверяем все записи для данного дня (не только в группах)
+                        const hasBooking = bookingsWithPositions.some(booking => {
+                          // Проверяем только записи для текущего дня
+                          if (booking.dayIndex !== dayIndex) {
+                            return false;
+                          }
+                          
+                          const bookingStart = new Date(booking.start_time);
+                          const bookingEnd = new Date(booking.end_time);
+                          
+                          // Проверяем, перекрывается ли бронирование с текущим часовым слотом
+                          return bookingStart < slotEnd && bookingEnd > slotStart;
+                        });
+                        
+                        // Не показываем плейсхолдер "+", если слот хотя бы частично занят бронированием
                         if (hasBooking) {
                           return null;
                         }

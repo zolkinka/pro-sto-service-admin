@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { MessagePayload } from 'firebase/messaging';
+import { observer } from 'mobx-react-lite';
 import { useStores } from '@/hooks';
 import { notificationService } from '@/services/notificationService';
 
@@ -39,7 +40,7 @@ interface PendingBookingsProviderProps {
   children: ReactNode;
 }
 
-export const PendingBookingsProvider = ({ children }: PendingBookingsProviderProps) => {
+export const PendingBookingsProvider = observer(({ children }: PendingBookingsProviderProps) => {
   const { bookingsStore, authStore } = useStores();
   
   const [pendingBookings, setPendingBookings] = useState<string[]>([]);
@@ -81,14 +82,14 @@ export const PendingBookingsProvider = ({ children }: PendingBookingsProviderPro
 
   // Первоначальная загрузка pending заказов
   useEffect(() => {
-    const serviceCenterUuid = serviceCenterUuidRef.current;
+    const serviceCenterUuid = authStore.user?.service_center_uuid;
     
     if (serviceCenterUuid && !hasCheckedOnStartup) {
       bookingsStore.setServiceCenterUuid(serviceCenterUuid);
       bookingsStore.fetchPendingBookings();
       setHasCheckedOnStartup(true);
     }
-  }, [bookingsStore, hasCheckedOnStartup]);
+  }, [bookingsStore, hasCheckedOnStartup, authStore.user?.service_center_uuid]);
 
   // Polling для периодической проверки
   useEffect(() => {
@@ -127,8 +128,18 @@ export const PendingBookingsProvider = ({ children }: PendingBookingsProviderPro
       console.log('PendingBookingsProvider: Push notification received:', payload);
       
       const notificationType = payload.data?.type;
+      const hasBookingUuid = !!payload.data?.booking_uuid;
+      const isNewBookingTitle = payload.notification?.title?.includes('Новая запись');
       
-      if (notificationType === 'newBooking' || notificationType === 'new_booking') {
+      // Определяем новое бронирование по типу, наличию booking_uuid или заголовку уведомления
+      const isNewBooking = 
+        notificationType === 'newBooking' || 
+        notificationType === 'new_booking' ||
+        notificationType === 'NEW_BOOKING' ||
+        hasBookingUuid ||
+        isNewBookingTitle;
+      
+      if (isNewBooking) {
         console.log('PendingBookingsProvider: Новое бронирование - загружаем pending заказы');
         
         if (debounceTimerRef.current) {
@@ -276,4 +287,4 @@ export const PendingBookingsProvider = ({ children }: PendingBookingsProviderPro
       {children}
     </PendingBookingsContext.Provider>
   );
-};
+});

@@ -1,12 +1,38 @@
 import { observer } from 'mobx-react-lite';
 import { format } from 'date-fns';
+import { useEffect, useRef } from 'react';
 import type { NotificationItemProps } from './NotificationDropdown.types';
 import './NotificationItem.css';
 
 const formatTime = (dateString: string): string => format(new Date(dateString), 'HH:mm');
 
-const NotificationItem = observer(({ notification, onClick }: NotificationItemProps) => {
+const NotificationItem = observer(({ notification, onClick, onVisible }: NotificationItemProps) => {
   const time = formatTime(notification.createdAt);
+  const itemRef = useRef<HTMLDivElement>(null);
+
+  // IntersectionObserver для автоматической пометки как прочитанного
+  useEffect(() => {
+    if (!onVisible || notification.isRead) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            onVisible(notification.uuid);
+          }
+        });
+      },
+      { threshold: 0.5 } // 50% элемента видимо
+    );
+
+    if (itemRef.current) {
+      observer.observe(itemRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [notification.uuid, notification.isRead, onVisible]);
 
   const handleClick = () => {
     onClick(notification.uuid);
@@ -14,6 +40,7 @@ const NotificationItem = observer(({ notification, onClick }: NotificationItemPr
 
   return (
     <div
+      ref={itemRef}
       className={`notification-item ${notification.isRead ? 'notification-item--read' : 'notification-item--unread'}`}
       onClick={handleClick}
     >

@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { Fragment, useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfWeek } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -31,6 +31,14 @@ const NotificationDropdown = observer(({ isOpen, onClose }: NotificationDropdown
       notificationStore.fetchNotifications(true);
     }
   }, [isOpen, notificationStore]);
+
+  // Функция для автоматической пометки уведомления как прочитанного при просмотре
+  const handleNotificationVisible = useCallback(async (uuid: string) => {
+    const notification = notificationStore.notifications.find((n) => n.uuid === uuid);
+    if (notification && !notification.isRead) {
+      await notificationStore.markAsRead(uuid);
+    }
+  }, [notificationStore]);
 
   // Обработка клика по уведомлению
   const handleNotificationClick = async (uuid: string) => {
@@ -139,7 +147,11 @@ const NotificationDropdown = observer(({ isOpen, onClose }: NotificationDropdown
                           <span>{currentDateLabel}</span>
                         </div>
                       )}
-                      <NotificationItem notification={notification} onClick={handleNotificationClick} />
+                      <NotificationItem 
+                        notification={notification} 
+                        onClick={handleNotificationClick}
+                        onVisible={handleNotificationVisible}
+                      />
                     </Fragment>
                   );
                 })}

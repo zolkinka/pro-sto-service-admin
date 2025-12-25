@@ -57,6 +57,7 @@
   max-height: 500px;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-right: 8px;
 }
 
 .notification-dropdown__date-divider {

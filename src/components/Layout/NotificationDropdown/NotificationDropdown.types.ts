@@ -8,6 +8,7 @@ export interface NotificationDropdownProps {
 export interface NotificationItemProps {
   notification: NotificationResponseDto;
   onClick: (uuid: string) => void;
+  onVisible?: (uuid: string) => void;
 }
 
 export interface NotificationData {

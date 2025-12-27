@@ -7,6 +7,8 @@ import {
 } from '../../services/api-client';
 import type { NotificationResponseDto } from '../../services/api-client';
 import { toastStore } from './ToastStore';
+import { bookingsStore } from './BookingsStore';
+import { authStore } from './AuthStore';
 
 /**
  * Store для управления уведомлениями в админ-панели
@@ -69,16 +71,23 @@ export class NotificationStore {
 
   /**
    * Получение количества непрочитанных уведомлений
+   * @returns true если количество увеличилось (есть новые уведомления)
    */
-  getUnreadCount = async (): Promise<void> => {
+  getUnreadCount = async (): Promise<boolean> => {
     try {
       const response = await getUnreadNotificationsCount();
+      const newCount = response.count || 0;
+      const previousCount = this.unreadCount;
       
       runInAction(() => {
-        this.unreadCount = response.count || 0;
+        this.unreadCount = newCount;
       });
+      
+      // Возвращаем true если количество увеличилось
+      return newCount > previousCount;
     } catch (error) {
       console.error('Ошибка при получении количества непрочитанных:', error);
+      return false;
     }
   };
 
@@ -104,6 +113,24 @@ export class NotificationStore {
     } catch (error) {
       console.error('Ошибка при пометке уведомления как прочитанного:', error);
       toastStore.showError('Не удалось обновить статус уведомления');
+    }
+  };
+
+  /**
+   * Пометить уведомление как прочитанное по booking_uuid
+   * Используется при просмотре заказа из баннера pending bookings
+   */
+  markAsReadByBookingUuid = async (bookingUuid: string): Promise<void> => {
+    // Сначала ищем в уже загруженных уведомлениях
+    const notification = this.notifications.find((n) => {
+      if (n.data && typeof n.data === 'object') {
+        return (n.data as Record<string, unknown>).booking_uuid === bookingUuid;
+      }
+      return false;
+    });
+
+    if (notification && !notification.isRead) {
+      await this.markAsRead(notification.uuid);
     }
   };
 
@@ -153,17 +180,39 @@ export class NotificationStore {
 
   /**
    * Запустить автоматическое обновление (polling)
+   * Оптимизировано: загружает уведомления только если unreadCount увеличился
+   * и загружает pending bookings если есть новые уведомления о заказах
    */
   startPolling = (): void => {
     // Останавливаем предыдущий таймер, если он был
     this.stopPolling();
 
     // Запускаем polling
-    this.pollingTimer = setInterval(() => {
-      this.getUnreadCount();
-      // Обновляем список только если показываем непрочитанные или все
-      if (this.filterIsRead === undefined || this.filterIsRead === false) {
-        this.fetchNotifications(true);
+    this.pollingTimer = setInterval(async () => {
+      // Проверяем, изменилось ли количество непрочитанных
+      const hasNewNotifications = await this.getUnreadCount();
+      
+      if (hasNewNotifications) {
+        console.log('NotificationStore: Обнаружены новые уведомления, загружаем...');
+        
+        // Загружаем уведомления только если количество увеличилось
+        await this.fetchNotifications(true);
+        
+        // Проверяем, есть ли среди новых уведомлений уведомления о новых заказах
+        const hasNewBookingNotifications = this.notifications.some(
+          (n) => !n.isRead && n.type === 'new_booking'
+        );
+        
+        if (hasNewBookingNotifications) {
+          console.log('NotificationStore: Есть новые уведомления о заказах, загружаем pending bookings...');
+          
+          // Загружаем pending bookings для отображения баннера
+          const serviceCenterUuid = authStore.user?.service_center_uuid;
+          if (serviceCenterUuid) {
+            bookingsStore.setServiceCenterUuid(serviceCenterUuid);
+            bookingsStore.fetchPendingBookings();
+          }
+        }
       }
     }, this.POLLING_INTERVAL);
   };

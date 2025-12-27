@@ -41,7 +41,7 @@ interface PendingBookingsProviderProps {
 }
 
 export const PendingBookingsProvider = observer(({ children }: PendingBookingsProviderProps) => {
-  const { bookingsStore, authStore } = useStores();
+  const { bookingsStore, authStore, notificationStore } = useStores();
   
   const [pendingBookings, setPendingBookings] = useState<string[]>([]);
   const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
@@ -203,19 +203,31 @@ export const PendingBookingsProvider = observer(({ children }: PendingBookingsPr
     if (pendingBookings.length > 0) {
       setCurrentPendingIndex(0);
       setIsModalOpen(true);
+      
+      // Помечаем связанное уведомление как прочитанное
+      const firstBookingUuid = pendingBookings[0];
+      if (firstBookingUuid) {
+        notificationStore.markAsReadByBookingUuid(firstBookingUuid);
+      }
     }
-  }, [pendingBookings]);
+  }, [pendingBookings, notificationStore]);
 
   const closeModal = useCallback(() => {
     if (currentPendingIndex < pendingBookings.length - 1) {
       const nextIndex = currentPendingIndex + 1;
       setCurrentPendingIndex(nextIndex);
+      
+      // Помечаем уведомление следующего заказа как прочитанное
+      const nextBookingUuid = pendingBookings[nextIndex];
+      if (nextBookingUuid) {
+        notificationStore.markAsReadByBookingUuid(nextBookingUuid);
+      }
     } else {
       setIsModalOpen(false);
       setPendingBookings([]);
       setCurrentPendingIndex(0);
     }
-  }, [currentPendingIndex, pendingBookings.length]);
+  }, [currentPendingIndex, pendingBookings, notificationStore]);
 
   const handleUpdateBooking = useCallback(() => {
     bookingsStore.fetchPendingBookings();
